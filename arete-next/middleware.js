@@ -2,6 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
 export async function middleware(request) {
+  // Catch auth code on ANY page and redirect to callback
+  const code = request.nextUrl.searchParams.get('code')
+  if (code && !request.nextUrl.pathname.startsWith('/auth/callback')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/callback'
+    url.searchParams.set('code', code)
+    return NextResponse.redirect(url)
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -54,5 +63,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/client/:path*', '/login'],
+  matcher: ['/', '/dashboard/:path*', '/client/:path*', '/login'],
 }
