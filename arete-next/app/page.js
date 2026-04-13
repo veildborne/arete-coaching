@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 // ===== TRANSLATIONS =====
 const t = {
@@ -12,7 +12,12 @@ const t = {
       title2: 'Rośnij z nauką',
       desc: 'Periodyzowane programy treningowe oparte na badaniach naukowych. Hipertrofia, siła, rekompozycja ciała — bez bro-science, bez motywacyjnego bełkotu.',
       cta: 'Rozpocznij',
-      scroll: 'PRZEWIŃ',
+      secondary: 'Zobacz pakiety',
+      features: [
+        { sym: '⚗', label: 'Evidence-based', sub: 'Peer-reviewed' },
+        { sym: '◈', label: 'Spersonalizowane', sub: 'Pod Ciebie' },
+        { sym: '△', label: 'Mierzalne', sub: 'Dane, nie słowa' },
+      ],
     },
     about: {
       tagline: 'TRENER',
@@ -36,52 +41,30 @@ const t = {
       title: 'Dla kogo jest Areté?',
       yes: 'Dla Ciebie, jeśli:',
       no: 'Nie dla Ciebie, jeśli:',
-      yesItems: [
-        'Chcesz trenować mądrze, nie tylko ciężko',
-        'Interesujesz się nauką za treningiem',
-        'Szukasz trenera który tłumaczy DLACZEGO',
-        'Jesteś gotowy/a na 6-miesięczny proces',
-        'Cenisz dane i systematyczność',
-      ],
-      noItems: [
-        'Szukasz magicznej diety na 2 tygodnie',
-        'Chcesz motywacyjne hasła zamiast wiedzy',
-        'Potrzebujesz kogoś kto krzyczy na Ciebie',
-        'Nie jesteś gotowy/a na feedback',
-        'Interesuje Cię tylko waga na wadze',
-      ],
+      yesItems: ['Chcesz trenować mądrze, nie tylko ciężko', 'Interesujesz się nauką za treningiem', 'Szukasz trenera który tłumaczy DLACZEGO', 'Jesteś gotowy/a na 6-miesięczny proces', 'Cenisz dane i systematyczność'],
+      noItems: ['Szukasz magicznej diety na 2 tygodnie', 'Chcesz motywacyjne hasła zamiast wiedzy', 'Potrzebujesz kogoś kto krzyczy na Ciebie', 'Nie jesteś gotowy/a na feedback', 'Interesuje Cię tylko waga na wadze'],
     },
     packages: {
-      tagline: 'PAKIETY',
-      title: 'Wybierz swój tier',
+      tagline: 'PAKIETY', title: 'Wybierz swój tier',
       subtitle: 'Od samodzielnego planu po pełny coaching z trenerem',
-      paideia: {
-        name: 'PAIDEIA', greek: 'παιδεία — edukacja',
-        price: '199', suffix: 'PLN · jednorazowo',
-        features: ['Plan treningowy PDF', 'Arkusz logowania postępów', 'Dobór ćwiczeń + alternatywy', 'Periodyzacja na 24 tygodnie', 'Bez kontaktu z trenerem'],
-      },
-      askesis: {
-        name: 'ASKESIS', greek: 'ἄσκησις — dyscyplina',
-        price: '279', suffix: 'PLN / miesiąc', discount: '249 PLN/mies. przy 3-mies. zobowiązaniu',
-        features: ['Wszystko z Paideia', 'Cele kaloryczne + białko', 'Check-in co 2 tygodnie', 'Feedback i korekty planu', 'Piramida żywieniowa Helmsa'],
-      },
-      arete: {
-        name: 'ARETÉ', greek: 'ἀρετή — doskonałość', badge: 'POLECANY',
-        price: '449', suffix: 'PLN / miesiąc', discount: '399 PLN/mies. przy 3-mies. zobowiązaniu',
-        features: ['Wszystko z Askesis', 'Indywidualny plan żywieniowy', 'Cotygodniowy check-in', 'Dashboard trenera (9 zakładek)', 'Priorytetowy kontakt', 'Pełna analiza postępów'],
-      },
+      paideia: { name: 'PAIDEIA', greek: 'παιδεία — edukacja', price: 199, currency: 'PLN', suffix: 'jednorazowo',
+        features: ['Plan treningowy PDF', 'Arkusz logowania postępów', 'Dobór ćwiczeń + alternatywy', 'Periodyzacja na 24 tygodnie', 'Bez kontaktu z trenerem'] },
+      askesis: { name: 'ASKESIS', greek: 'ἄσκησις — dyscyplina', price: 279, currency: 'PLN', suffix: '/ miesiąc', discount: '249 PLN/mies. przy 3-mies. zobowiązaniu',
+        features: ['Wszystko z Paideia', 'Cele kaloryczne + białko', 'Check-in co 2 tygodnie', 'Feedback i korekty planu', 'Piramida żywieniowa Helmsa'] },
+      arete: { name: 'ARETÉ', greek: 'ἀρετή — doskonałość', badge: 'POLECANY', price: 449, currency: 'PLN', suffix: '/ miesiąc', discount: '399 PLN/mies. przy 3-mies. zobowiązaniu',
+        features: ['Wszystko z Askesis', 'Indywidualny plan żywieniowy', 'Cotygodniowy check-in', 'Dashboard trenera (9 zakładek)', 'Priorytetowy kontakt', 'Pełna analiza postępów'] },
       inperson: {
         title: 'Trening stacjonarny',
         subtitle: 'JustGYM · ul. 1 Maja 21 · Częstochowa',
-        single: { label: 'POJEDYNCZA SESJA', price: '150', detail: '60 minut' },
-        pack8: { label: 'PAKIET 8 SESJI', price: '130', detail: '/sesja · 1040 PLN' },
-        pack12: { label: 'PAKIET 12 SESJI', price: '120', detail: '/sesja · 1440 PLN' },
+        currency: 'PLN',
+        single: { label: 'POJEDYNCZA SESJA', price: 150, detail: '60 minut' },
+        pack8: { label: 'PAKIET 8 SESJI', price: 130, detail: '/sesja · 1040 PLN' },
+        pack12: { label: 'PAKIET 12 SESJI', price: 120, detail: '/sesja · 1440 PLN' },
       },
       cta: 'Wybierz ten pakiet',
     },
     process: {
-      tagline: 'PROCES',
-      title: 'Jak to działa?',
+      tagline: 'PROCES', title: 'Jak to działa?',
       steps: [
         { num: '01', title: 'Zgłoszenie', text: 'Wypełniasz formularz na stronie. Dostaję email z Twoimi podstawowymi danymi.' },
         { num: '02', title: 'Rozmowa', text: 'Kontaktuję się z Tobą, potwierdzamy pakiet i cele. Ustalamy szczegóły współpracy.' },
@@ -92,8 +75,7 @@ const t = {
       ],
     },
     testimonials: {
-      tagline: 'OPINIE',
-      title: 'Co mówią klienci',
+      tagline: 'OPINIE', title: 'Co mówią klienci',
       items: [
         { text: 'Pierwszy trener który mi wytłumaczył DLACZEGO robię dane ćwiczenie, a nie tylko co robić. Po 3 miesiącach widzę różnicę nie tylko w sylwetce, ale w podejściu do treningu.', name: 'Klientka · Askesis', initials: 'A.K.' },
         { text: 'Miałem za sobą 3 lata bro-splitu z internetu. Alex rozłożył to na czynniki pierwsze i zbudował program oparty na nauce. Progresja siły jak nigdy wcześniej.', name: 'Klient · Areté', initials: 'M.W.' },
@@ -102,28 +84,19 @@ const t = {
       note: '* Opinie od pierwszych klientów. Sekcja będzie rozbudowywana.',
     },
     contact: {
-      tagline: 'KONTAKT',
-      title: 'Zacznij swoją drogę',
+      tagline: 'KONTAKT', title: 'Zacznij swoją drogę',
       desc: 'Wypełnij formularz, a skontaktuję się z Tobą w ciągu 24 godzin.',
-      name: 'Imię',
-      email: 'Email',
-      goal: 'Cel treningowy',
+      name: 'Imię', email: 'Email', goal: 'Cel treningowy',
       goals: ['Hipertrofia', 'Siła', 'Redukcja', 'Rekompozycja', 'Inne'],
       exp: 'Doświadczenie',
       exps: ['Początkujący (0-1 rok)', 'Średniozaawansowany (1-3 lata)', 'Zaawansowany (3+ lat)'],
       pkg: 'Interesujący pakiet',
       pkgs: ['Paideia (199 PLN)', 'Askesis (279 PLN/mies.)', 'Areté (449 PLN/mies.)', 'Stacjonarnie', 'Jeszcze nie wiem'],
-      more: 'Powiedz mi więcej',
-      submit: 'Wyślij zgłoszenie',
+      more: 'Powiedz mi więcej', submit: 'Wyślij zgłoszenie',
     },
-    footer: {
-      tagline: 'Coaching oparty na nauce',
-      terms: 'Regulamin',
-      privacy: 'Prywatność',
-      rights: 'Wszelkie prawa zastrzeżone.',
-      ip: 'Niniejsza strona stanowi własność intelektualną autora.',
-    },
+    footer: { tagline: 'Coaching oparty na nauce', terms: 'Regulamin', privacy: 'Prywatność', rights: 'Wszelkie prawa zastrzeżone.', ip: 'Niniejsza strona stanowi własność intelektualną autora.' },
   },
+
   en: {
     nav: { about: 'About', approach: 'Approach', packages: 'Packages', process: 'Process', contact: 'Contact', login: 'Log in' },
     hero: {
@@ -133,7 +106,12 @@ const t = {
       title2: 'Grow with science',
       desc: 'Periodized training programs built on peer-reviewed research. Hypertrophy, strength, body recomposition — no bro-science, no motivational fluff.',
       cta: 'Get started',
-      scroll: 'SCROLL',
+      secondary: 'See packages',
+      features: [
+        { sym: '⚗', label: 'Evidence-based', sub: 'Peer-reviewed' },
+        { sym: '◈', label: 'Individualized', sub: 'Built for you' },
+        { sym: '△', label: 'Measurable', sub: 'Data, not words' },
+      ],
     },
     about: {
       tagline: 'COACH',
@@ -144,8 +122,7 @@ const t = {
       bio3: 'Areté (ἀρετή) is the ancient Greek ideal of excellence — not perfection, but the pursuit of becoming your best self. That\'s my coaching philosophy.',
     },
     pillars: {
-      tagline: 'PHILOSOPHY',
-      title: 'Three pillars',
+      tagline: 'PHILOSOPHY', title: 'Three pillars',
       items: [
         { icon: '⚗️', title: 'Science, not faith', text: 'Every training decision backed by peer-reviewed research. Schoenfeld on volume, Helms on priorities, Israetel on periodization.' },
         { icon: '🎯', title: 'Individualization', text: 'No universal plan exists. Your anatomy, goals, equipment, injuries and time — everything shapes the program.' },
@@ -153,56 +130,32 @@ const t = {
       ],
     },
     forWho: {
-      tagline: 'FOR WHOM',
-      title: 'Who is Areté for?',
-      yes: 'For you if:',
-      no: 'Not for you if:',
-      yesItems: [
-        'You want to train smart, not just hard',
-        'You\'re interested in the science behind training',
-        'You want a coach who explains WHY',
-        'You\'re ready for a 6-month process',
-        'You value data and consistency',
-      ],
-      noItems: [
-        'You want a magic 2-week diet',
-        'You want motivational quotes instead of knowledge',
-        'You need someone screaming at you',
-        'You\'re not ready for honest feedback',
-        'You only care about the number on the scale',
-      ],
+      tagline: 'FOR WHOM', title: 'Who is Areté for?',
+      yes: 'For you if:', no: 'Not for you if:',
+      yesItems: ['You want to train smart, not just hard', 'You\'re interested in the science behind training', 'You want a coach who explains WHY', 'You\'re ready for a 6-month process', 'You value data and consistency'],
+      noItems: ['You want a magic 2-week diet', 'You want motivational quotes instead of knowledge', 'You need someone screaming at you', 'You\'re not ready for honest feedback', 'You only care about the number on the scale'],
     },
     packages: {
-      tagline: 'PACKAGES',
-      title: 'Choose your tier',
+      tagline: 'PACKAGES', title: 'Choose your tier',
       subtitle: 'From self-guided plan to full coaching with a trainer',
-      paideia: {
-        name: 'PAIDEIA', greek: 'παιδεία — education',
-        price: '199', suffix: 'PLN · one-time',
-        features: ['Training plan PDF', 'Progress tracking sheet', 'Exercise selection + alternatives', '24-week periodization', 'No trainer contact'],
-      },
-      askesis: {
-        name: 'ASKESIS', greek: 'ἄσκησις — discipline',
-        price: '279', suffix: 'PLN / month', discount: '249 PLN/mo with 3-month commitment',
-        features: ['Everything from Paideia', 'Calorie + protein targets', 'Check-in every 2 weeks', 'Feedback and plan adjustments', 'Helms nutrition pyramid'],
-      },
-      arete: {
-        name: 'ARETÉ', greek: 'ἀρετή — excellence', badge: 'RECOMMENDED',
-        price: '449', suffix: 'PLN / month', discount: '399 PLN/mo with 3-month commitment',
-        features: ['Everything from Askesis', 'Individual nutrition plan', 'Weekly check-in', 'Trainer dashboard (9 tabs)', 'Priority contact', 'Full progress analysis'],
-      },
+      paideia: { name: 'PAIDEIA', greek: 'παιδεία — education', price: 47, currency: 'EUR', suffix: 'one-time',
+        features: ['Training plan PDF', 'Progress tracking sheet', 'Exercise selection + alternatives', '24-week periodization', 'No trainer contact'] },
+      askesis: { name: 'ASKESIS', greek: 'ἄσκησις — discipline', price: 65, currency: 'EUR', suffix: '/ month', discount: '€58/mo with 3-month commitment',
+        features: ['Everything from Paideia', 'Calorie + protein targets', 'Check-in every 2 weeks', 'Feedback and plan adjustments', 'Helms nutrition pyramid'] },
+      arete: { name: 'ARETÉ', greek: 'ἀρετή — excellence', badge: 'RECOMMENDED', price: 105, currency: 'EUR', suffix: '/ month', discount: '€94/mo with 3-month commitment',
+        features: ['Everything from Askesis', 'Individual nutrition plan', 'Weekly check-in', 'Trainer dashboard (9 tabs)', 'Priority contact', 'Full progress analysis'] },
       inperson: {
         title: 'In-person training',
         subtitle: 'JustGYM · ul. 1 Maja 21 · Częstochowa',
-        single: { label: 'SINGLE SESSION', price: '150', detail: '60 minutes' },
-        pack8: { label: '8-SESSION PACK', price: '130', detail: '/session · 1040 PLN' },
-        pack12: { label: '12-SESSION PACK', price: '120', detail: '/session · 1440 PLN' },
+        currency: 'EUR',
+        single: { label: 'SINGLE SESSION', price: 35, detail: '60 minutes' },
+        pack8: { label: '8-SESSION PACK', price: 30, detail: '/session · €245' },
+        pack12: { label: '12-SESSION PACK', price: 28, detail: '/session · €340' },
       },
       cta: 'Choose this package',
     },
     process: {
-      tagline: 'PROCESS',
-      title: 'How does it work?',
+      tagline: 'PROCESS', title: 'How does it work?',
       steps: [
         { num: '01', title: 'Application', text: 'Fill out the form on this page. I receive an email with your basic info.' },
         { num: '02', title: 'Conversation', text: 'I reach out to you, we confirm the package and goals. We work out the details.' },
@@ -213,8 +166,7 @@ const t = {
       ],
     },
     testimonials: {
-      tagline: 'TESTIMONIALS',
-      title: 'What clients say',
+      tagline: 'TESTIMONIALS', title: 'What clients say',
       items: [
         { text: 'First trainer who explained WHY I\'m doing each exercise, not just what to do. After 3 months I see a difference not only in my physique, but in how I approach training.', name: 'Client · Askesis', initials: 'A.K.' },
         { text: 'I had 3 years of bro-split from the internet. Alex broke it down and built a science-based program. Strength progression like never before.', name: 'Client · Areté', initials: 'M.W.' },
@@ -223,27 +175,108 @@ const t = {
       note: '* Reviews from first clients. This section will grow.',
     },
     contact: {
-      tagline: 'CONTACT',
-      title: 'Start your journey',
+      tagline: 'CONTACT', title: 'Start your journey',
       desc: 'Fill out the form and I\'ll get back to you within 24 hours.',
-      name: 'Name',
-      email: 'Email',
-      goal: 'Training goal',
+      name: 'Name', email: 'Email', goal: 'Training goal',
       goals: ['Hypertrophy', 'Strength', 'Fat loss', 'Recomposition', 'Other'],
       exp: 'Experience',
       exps: ['Beginner (0-1 year)', 'Intermediate (1-3 years)', 'Advanced (3+ years)'],
       pkg: 'Package of interest',
-      pkgs: ['Paideia (199 PLN)', 'Askesis (279 PLN/mo)', 'Areté (449 PLN/mo)', 'In-person', 'Not sure yet'],
-      more: 'Tell me more',
-      submit: 'Send application',
+      pkgs: ['Paideia (€47)', 'Askesis (€65/mo)', 'Areté (€105/mo)', 'In-person', 'Not sure yet'],
+      more: 'Tell me more', submit: 'Send application',
     },
-    footer: {
-      tagline: 'Evidence-based coaching',
-      terms: 'Terms',
-      privacy: 'Privacy',
-      rights: 'All rights reserved.',
-      ip: 'This website is the intellectual property of the author.',
+    footer: { tagline: 'Evidence-based coaching', terms: 'Terms', privacy: 'Privacy', rights: 'All rights reserved.', ip: 'This website is the intellectual property of the author.' },
+  },
+
+  el: {
+    nav: { about: 'Σχετικά', approach: 'Προσέγγιση', packages: 'Πακέτα', process: 'Διαδικασία', contact: 'Επικοινωνία', login: 'Σύνδεση' },
+    hero: {
+      tagline: 'ΕΠΙΣΤΗΜΟΝΙΚΉ ΠΡΟΠΌΝΗΣΗ',
+      title1: 'Προπονήσου με ',
+      titleAccent: 'σκοπό',
+      title2: 'Ανάπτυξη με επιστήμη',
+      desc: 'Περιοδικοποιημένα προγράμματα προπόνησης βασισμένα σε επιστημονικές έρευνες. Υπερτροφία, δύναμη, ανασύνθεση σώματος — χωρίς bro-science, χωρίς κενά λόγια.',
+      cta: 'Ξεκίνα',
+      secondary: 'Δες τα πακέτα',
+      features: [
+        { sym: '⚗', label: 'Επιστημονικό', sub: 'Τεκμηριωμένο' },
+        { sym: '◈', label: 'Εξατομικευμένο', sub: 'Για εσένα' },
+        { sym: '△', label: 'Μετρήσιμο', sub: 'Δεδομένα' },
+      ],
     },
+    about: {
+      tagline: 'ΠΡΟΠΟΝΗΤΉΣ',
+      name: 'Αλέξανδρος Πανώριος',
+      role: 'ΠΡΟΣΩΠΙΚΌΣ ΠΡΟΠΟΝΗΤΉΣ · ONLINE COACH',
+      bio1: 'Μισός Έλληνας, μισός Πολωνός. Διευθυντής του γυμναστηρίου JustGYM στην Τσενστοχόβα και έμπειρος προσωπικός προπονητής — όχι influencer που είδε μερικά βίντεο στο YouTube.',
+      bio2: 'Σχεδιάζω προγράμματα προπόνησης βασισμένα στις έρευνες των Helms, Israetel, Schoenfeld και Nuckols. Περιοδικοποίηση όγκου, αυτορρύθμιση RIR, υπερτροφία μέσω διάτασης — δεν είναι buzzwords, είναι εργαλεία που χρησιμοποιώ με κάθε πελάτη.',
+      bio3: 'Αρετή (ἀρετή) είναι το αρχαιοελληνικό ιδανικό της τελειότητας — όχι της απόλυτης μορφής, αλλά της προσπάθειας να γίνεις η καλύτερη εκδοχή του εαυτού σου. Αυτή είναι η φιλοσοφία μου στο coaching.',
+    },
+    pillars: {
+      tagline: 'ΦΙΛΟΣΟΦΊΑ', title: 'Τρεις πυλώνες',
+      items: [
+        { icon: '⚗️', title: 'Επιστήμη, όχι πίστη', text: 'Κάθε προπονητική απόφαση στηρίζεται σε επιστημονικές έρευνες. Schoenfeld για τον όγκο, Helms για τις προτεραιότητες, Israetel για την περιοδικοποίηση.' },
+        { icon: '🎯', title: 'Εξατομίκευση', text: 'Δεν υπάρχει καθολικό πρόγραμμα. Η ανατομία σου, οι στόχοι, ο εξοπλισμός, οι τραυματισμοί και ο χρόνος — όλα διαμορφώνουν το πρόγραμμα.' },
+        { icon: '📊', title: 'Δεδομένα, όχι συναισθήματα', text: 'Παρακολούθηση όγκου, RIR, πρόοδος βαρών, check-ins — μετράμε τα πάντα. Γιατί ό,τι δεν μετριέται, δεν διαχειρίζεται.' },
+      ],
+    },
+    forWho: {
+      tagline: 'ΓΙΑ ΠΟΙΟΝ', title: 'Για ποιον είναι η Αρετή;',
+      yes: 'Για εσένα, αν:', no: 'Όχι για εσένα, αν:',
+      yesItems: ['Θέλεις να προπονείσαι έξυπνα, όχι μόνο σκληρά', 'Σε ενδιαφέρει η επιστήμη πίσω από την προπόνηση', 'Ψάχνεις προπονητή που εξηγεί ΓΙΑΤΊ', 'Είσαι έτοιμος/η για μια διαδικασία 6 μηνών', 'Εκτιμάς τα δεδομένα και τη συστηματικότητα'],
+      noItems: ['Ψάχνεις μαγική δίαιτα δύο εβδομάδων', 'Θέλεις συνθήματα αντί για γνώση', 'Χρειάζεσαι κάποιον να σου φωνάζει', 'Δεν είσαι έτοιμος/η για ειλικρινές feedback', 'Σε ενδιαφέρει μόνο το νούμερο στη ζυγαριά'],
+    },
+    packages: {
+      tagline: 'ΠΑΚΈΤΑ', title: 'Διάλεξε το επίπεδό σου',
+      subtitle: 'Από αυτόνομο πρόγραμμα μέχρι πλήρες coaching με προπονητή',
+      paideia: { name: 'PAIDEIA', greek: 'παιδεία — εκπαίδευση', price: 47, currency: 'EUR', suffix: 'εφάπαξ',
+        features: ['Πρόγραμμα προπόνησης PDF', 'Φύλλο καταγραφής προόδου', 'Επιλογή ασκήσεων + εναλλακτικές', 'Περιοδικοποίηση 24 εβδομάδων', 'Χωρίς επαφή με προπονητή'] },
+      askesis: { name: 'ASKESIS', greek: 'ἄσκησις — πειθαρχία', price: 65, currency: 'EUR', suffix: '/ μήνα', discount: '€58/μήνα με δέσμευση 3 μηνών',
+        features: ['Όλα από το Paideia', 'Στόχοι θερμίδων + πρωτεΐνης', 'Check-in κάθε 2 εβδομάδες', 'Feedback και διορθώσεις πλάνου', 'Διατροφική πυραμίδα Helms'] },
+      arete: { name: 'ARETÉ', greek: 'ἀρετή — τελειότητα', badge: 'ΠΡΟΤΕΙΝΌΜΕΝΟ', price: 105, currency: 'EUR', suffix: '/ μήνα', discount: '€94/μήνα με δέσμευση 3 μηνών',
+        features: ['Όλα από το Askesis', 'Εξατομικευμένο διατροφικό πλάνο', 'Εβδομαδιαίο check-in', 'Dashboard προπονητή (9 καρτέλες)', 'Προτεραιότητα επικοινωνίας', 'Πλήρης ανάλυση προόδου'] },
+      inperson: {
+        title: 'Προπόνηση από κοντά',
+        subtitle: 'JustGYM · ul. 1 Maja 21 · Częstochowa',
+        currency: 'EUR',
+        single: { label: 'ΜΙΑ ΣΥΝΕΔΡΊΑ', price: 35, detail: '60 λεπτά' },
+        pack8: { label: 'ΠΑΚΈΤΟ 8 ΣΥΝΕΔΡΙΏΝ', price: 30, detail: '/συνεδρία · €245' },
+        pack12: { label: 'ΠΑΚΈΤΟ 12 ΣΥΝΕΔΡΙΏΝ', price: 28, detail: '/συνεδρία · €340' },
+      },
+      cta: 'Διάλεξε αυτό το πακέτο',
+    },
+    process: {
+      tagline: 'ΔΙΑΔΙΚΑΣΊΑ', title: 'Πώς λειτουργεί;',
+      steps: [
+        { num: '01', title: 'Αίτηση', text: 'Συμπληρώνεις τη φόρμα στη σελίδα. Λαμβάνω email με τα βασικά σου στοιχεία.' },
+        { num: '02', title: 'Συζήτηση', text: 'Επικοινωνώ μαζί σου, επιβεβαιώνουμε το πακέτο και τους στόχους. Συμφωνούμε τις λεπτομέρειες.' },
+        { num: '03', title: 'Πληρωμή', text: 'Μεταφορά ή BLIK μέσω Revolut. Γρήγορα, ασφαλή, χωρίς μεσάζοντες.' },
+        { num: '04', title: 'Ερωτηματολόγιο', text: 'Συμπληρώνεις λεπτομερές onboarding ερωτηματολόγιο — στόχοι, ιστορικό, τραυματισμοί, εξοπλισμός, προτιμήσεις.' },
+        { num: '05', title: 'Πρόγραμμα', text: 'Βάσει του ερωτηματολογίου φτιάχνω το εξατομικευμένο σου πρόγραμμα. Περιοδικοποίηση, όγκος, RIR — όλα προσαρμοσμένα.' },
+        { num: '06', title: 'Προπόνηση', text: 'Λαμβάνεις το πλάνο σου και ξεκινάς. Check-ins, feedback, διορθώσεις — ανάλογα με το πακέτο.' },
+      ],
+    },
+    testimonials: {
+      tagline: 'ΜΑΡΤΥΡΊΕΣ', title: 'Τι λένε οι πελάτες',
+      items: [
+        { text: 'Ο πρώτος προπονητής που μου εξήγησε ΓΙΑΤΊ κάνω κάθε άσκηση, όχι απλώς τι να κάνω. Μετά από 3 μήνες βλέπω διαφορά όχι μόνο στη φυσική κατάσταση, αλλά και στην προσέγγισή μου στην προπόνηση.', name: 'Πελάτισσα · Askesis', initials: 'Α.Κ.' },
+        { text: 'Είχα 3 χρόνια bro-split από το internet. Ο Αλέξ το ανέλυσε από την αρχή και έφτιαξε ένα πρόγραμμα βασισμένο σε επιστήμη. Πρόοδος δύναμης όπως ποτέ.', name: 'Πελάτης · Areté', initials: 'Μ.Β.' },
+        { text: 'Έψαχνα προπονητή που καταλαβαίνει ότι η γυναίκα δεν χρειάζεται να φοβάται τα βάρη. Επιστημονική προσέγγιση, πλήρης περιοδικοποίηση, εστίαση σε γλουτούς και ώμους. Ακριβώς αυτό που χρειαζόμουν.', name: 'Πελάτισσα · Areté', initials: 'Γ.Σ.' },
+      ],
+      note: '* Μαρτυρίες από τους πρώτους πελάτες. Η ενότητα θα εμπλουτίζεται.',
+    },
+    contact: {
+      tagline: 'ΕΠΙΚΟΙΝΩΝΊΑ', title: 'Ξεκίνα το ταξίδι σου',
+      desc: 'Συμπλήρωσε τη φόρμα και θα επικοινωνήσω μαζί σου εντός 24 ωρών.',
+      name: 'Όνομα', email: 'Email', goal: 'Στόχος προπόνησης',
+      goals: ['Υπερτροφία', 'Δύναμη', 'Απώλεια λίπους', 'Ανασύνθεση', 'Άλλο'],
+      exp: 'Εμπειρία',
+      exps: ['Αρχάριος (0-1 έτος)', 'Μέσου επιπέδου (1-3 έτη)', 'Προχωρημένος (3+ έτη)'],
+      pkg: 'Πακέτο ενδιαφέροντος',
+      pkgs: ['Paideia (€47)', 'Askesis (€65/μήνα)', 'Areté (€105/μήνα)', 'Από κοντά', 'Δεν είμαι σίγουρος/η ακόμα'],
+      more: 'Πες μου περισσότερα', submit: 'Αποστολή αίτησης',
+    },
+    footer: { tagline: 'Προπόνηση βασισμένη στην επιστήμη', terms: 'Όροι', privacy: 'Απόρρητο', rights: 'Όλα τα δικαιώματα διατηρούνται.', ip: 'Η ιστοσελίδα αποτελεί πνευματική ιδιοκτησία του δημιουργού.' },
   },
 }
 
@@ -262,10 +295,9 @@ function MeanderSVG({ animated = false }) {
   )
 }
 
-// ===== PARTICLES =====
+// ===== PARTICLES — 52 fireflies, bigger, glowier =====
 function ParticlesCanvas() {
   const canvasRef = useRef(null)
-
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -280,16 +312,17 @@ function ParticlesCanvas() {
     resize()
     window.addEventListener('resize', resize)
 
-    // Create particles — gold sparks
-    for (let i = 0; i < 40; i++) {
+    // 52 fireflies (+30% from 40)
+    for (let i = 0; i < 52; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 2 + 0.5,
-        speedX: (Math.random() - 0.5) * 0.3,
-        speedY: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.4 + 0.1,
+        size: Math.random() * 3 + 1.2,          // 1.2 - 4.2 px (was 0.5-2.5)
+        speedX: (Math.random() - 0.5) * 0.22,   // slower drift
+        speedY: (Math.random() - 0.5) * 0.22,
+        opacity: Math.random() * 0.5 + 0.25,    // 0.25 - 0.75 (brighter)
         pulse: Math.random() * Math.PI * 2,
+        pulseSpeed: Math.random() * 0.015 + 0.01,
       })
     }
 
@@ -298,24 +331,29 @@ function ParticlesCanvas() {
       particles.forEach(p => {
         p.x += p.speedX
         p.y += p.speedY
-        p.pulse += 0.02
-        const currentOpacity = p.opacity * (0.5 + 0.5 * Math.sin(p.pulse))
+        p.pulse += p.pulseSpeed
+        const pulseFactor = 0.4 + 0.6 * Math.abs(Math.sin(p.pulse))
+        const currentOpacity = p.opacity * pulseFactor
 
-        // Wrap around
-        if (p.x < 0) p.x = canvas.width
-        if (p.x > canvas.width) p.x = 0
-        if (p.y < 0) p.y = canvas.height
-        if (p.y > canvas.height) p.y = 0
+        if (p.x < -10) p.x = canvas.width + 10
+        if (p.x > canvas.width + 10) p.x = -10
+        if (p.y < -10) p.y = canvas.height + 10
+        if (p.y > canvas.height + 10) p.y = -10
 
+        // Outer glow (firefly halo)
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 6)
+        grad.addColorStop(0, `rgba(232, 200, 74, ${currentOpacity * 0.4})`)
+        grad.addColorStop(0.4, `rgba(212, 175, 55, ${currentOpacity * 0.15})`)
+        grad.addColorStop(1, 'rgba(212, 175, 55, 0)')
+        ctx.fillStyle = grad
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(212, 175, 55, ${currentOpacity})`
+        ctx.arc(p.x, p.y, p.size * 6, 0, Math.PI * 2)
         ctx.fill()
 
-        // Glow
+        // Inner bright core
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(212, 175, 55, ${currentOpacity * 0.15})`
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(232, 200, 74, ${currentOpacity})`
         ctx.fill()
       })
       animId = requestAnimationFrame(animate)
@@ -331,11 +369,16 @@ function ParticlesCanvas() {
   return <canvas ref={canvasRef} className="particles-canvas" />
 }
 
-// ===== COUNTER COMPONENT =====
-function Counter({ end, duration = 1500, suffix = '' }) {
+// ===== COUNTER =====
+function Counter({ end, duration = 1500 }) {
   const [count, setCount] = useState(0)
   const [started, setStarted] = useState(false)
   const ref = useRef(null)
+
+  useEffect(() => {
+    setStarted(false)
+    setCount(0)
+  }, [end])
 
   useEffect(() => {
     const obs = new IntersectionObserver(([entry]) => {
@@ -345,7 +388,6 @@ function Counter({ end, duration = 1500, suffix = '' }) {
         const animate = (now) => {
           const elapsed = now - startTime
           const progress = Math.min(elapsed / duration, 1)
-          // Ease out
           const eased = 1 - Math.pow(1 - progress, 3)
           setCount(Math.floor(eased * end))
           if (progress < 1) requestAnimationFrame(animate)
@@ -357,10 +399,35 @@ function Counter({ end, duration = 1500, suffix = '' }) {
     return () => obs.disconnect()
   }, [end, duration, started])
 
-  return <span ref={ref} className="counter-value">{count}{suffix}</span>
+  return <span ref={ref} className="counter-value">{count}</span>
 }
 
-// ===== MAIN PAGE =====
+// ===== SIDE QUOTE (decorative Greek text along edges) =====
+function SideQuote({ text, source, position = 'left', top = '20%' }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) entry.target.classList.add('visible')
+    }, { threshold: 0.1 })
+    if (ref.current) obs.observe(ref.current)
+    return () => obs.disconnect()
+  }, [])
+  return (
+    <div
+      ref={ref}
+      className={`side-quote side-quote-${position}`}
+      style={{ top }}
+    >
+      {text}
+      {source && <span className="side-quote-source">— {source}</span>}
+    </div>
+  )
+}
+
+// ===== CURRENCY SYMBOL =====
+const currencySymbol = (c) => c === 'EUR' ? '€' : c === 'PLN' ? 'zł' : c
+
+// ===== MAIN =====
 export default function Home() {
   const [lang, setLang] = useState('pl')
   const [menuOpen, setMenuOpen] = useState(false)
@@ -371,14 +438,12 @@ export default function Home() {
   const heroDecoRef = useRef(null)
   const l = t[lang]
 
-  // Scroll effects: nav shrink, progress bar, parallax
+  // Scroll
   useEffect(() => {
     function onScroll() {
       setScrolled(window.scrollY > 60)
-      // Scroll progress
       const h = document.documentElement.scrollHeight - window.innerHeight
       setScrollProgress(h > 0 ? (window.scrollY / h) * 100 : 0)
-      // Parallax on hero deco
       if (heroDecoRef.current) {
         heroDecoRef.current.style.transform = `translateY(${window.scrollY * 0.15}px)`
       }
@@ -387,7 +452,7 @@ export default function Home() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Intersection Observer for animations
+  // Animations observer
   useEffect(() => {
     const obs = new IntersectionObserver(entries => {
       entries.forEach(e => {
@@ -399,7 +464,7 @@ export default function Home() {
     return () => obs.disconnect()
   }, [lang])
 
-  // Typewriter effect for hero
+  // Typewriter
   useEffect(() => {
     const fullText = l.hero.titleAccent
     setHeroTyped('')
@@ -424,7 +489,6 @@ export default function Home() {
 
   return (
     <>
-      {/* SCROLL PROGRESS */}
       <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
 
       {/* NAV */}
@@ -441,6 +505,7 @@ export default function Home() {
               <div className="nav-lang">
                 <button className={lang === 'pl' ? 'active' : ''} onClick={() => setLang('pl')}>PL</button>
                 <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
+                <button className={lang === 'el' ? 'active' : ''} onClick={() => setLang('el')}>ΕΛ</button>
               </div>
             </li>
             <li>
@@ -468,24 +533,31 @@ export default function Home() {
               <span className="line2">{l.hero.title2}</span>
             </h1>
             <p className="hero-desc anim-fade delay-3">{l.hero.desc}</p>
-            <button className="hero-cta anim-fade delay-4" onClick={() => scrollTo('contact')}>
-              <span>{l.hero.cta}</span>
-              <span className="arrow">→</span>
-            </button>
+            <div className="hero-cta-row anim-fade delay-4">
+              <button className="hero-cta" onClick={() => scrollTo('contact')}>
+                <span>{l.hero.cta}</span>
+                <span className="arrow">→</span>
+              </button>
+              <a className="hero-secondary" onClick={() => scrollTo('packages')}>{l.hero.secondary}</a>
+            </div>
+            <div className="hero-features anim-fade delay-5">
+              {l.hero.features.map((f, i) => (
+                <div key={i} className="hero-feature">
+                  <div className="hero-feature-sym">{f.sym}</div>
+                  <div className="hero-feature-label">{f.label}</div>
+                  <div className="hero-feature-sub">{f.sub}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        {/* Shield / warrior deco with parallax */}
         <div className="hero-deco" ref={heroDecoRef}>
-          <svg width="400" height="400" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="420" height="420" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
             <circle cx="100" cy="100" r="70" stroke="currentColor" strokeWidth="0.3" opacity="0.2" />
             <path d="M100 30 L100 170 M30 100 L170 100" stroke="currentColor" strokeWidth="0.3" opacity="0.15" />
-            <text x="100" y="105" textAnchor="middle" fill="currentColor" fontSize="24" fontFamily="Cormorant Garamond" opacity="0.4">ἀρετή</text>
+            <text x="100" y="108" textAnchor="middle" fill="currentColor" fontSize="28" fontFamily="Cormorant Garamond" opacity="0.5">ἀρετή</text>
           </svg>
-        </div>
-        <div className="hero-scroll">
-          <span>{l.hero.scroll}</span>
-          <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1" y="1" width="14" height="22" rx="7" /><line x1="8" y1="6" x2="8" y2="10" /></svg>
         </div>
       </section>
 
@@ -493,6 +565,8 @@ export default function Home() {
 
       {/* ABOUT */}
       <section id="about" className="section section-alt">
+        <SideQuote text="ἓν οἶδα ὅτι οὐδὲν οἶδα" source="ΣΩΚΡΆΤΗΣ" position="left" top="12%" />
+        <SideQuote text="γνῶθι σεαυτόν" source="ΔΕΛΦΟΊ" position="right" top="25%" />
         <div className="container">
           <div className="about-grid">
             <div className="about-photo-wrap anim-fade-left">
@@ -510,16 +584,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* EPIGRAPH */}
-      <div className="epigraph anim-fade">
-        «ἓν οἶδα ὅτι οὐδὲν οἶδα»
-        <div className="epigraph-source">— ΣΩΚΡΆΤΗΣ</div>
-      </div>
-
       <MeanderSVG animated />
 
       {/* PILLARS */}
       <section id="approach" className="section">
+        <SideQuote text="νοῦς ὑγιὴς ἐν σώματι ὑγιεῖ" source="IUVENALIS" position="left" top="20%" />
+        <SideQuote text="μηδὲν ἄγαν" source="ΔΕΛΦΟΊ" position="right" top="55%" />
         <div className="container">
           <div className="section-header">
             <div className="section-tagline anim-fade">{l.pillars.tagline}</div>
@@ -541,6 +611,8 @@ export default function Home() {
 
       {/* FOR WHO */}
       <section className="section section-alt">
+        <SideQuote text="χαλεπὰ τὰ καλά" source="ΠΛΆΤΩΝ" position="left" top="15%" />
+        <SideQuote text="πάθει μάθος" source="ΑΙΣΧΎΛΟΣ" position="right" top="60%" />
         <div className="container">
           <div className="section-header">
             <div className="section-tagline anim-fade">{l.forWho.tagline}</div>
@@ -573,6 +645,8 @@ export default function Home() {
 
       {/* PACKAGES */}
       <section id="packages" className="section">
+        <SideQuote text="ἀρχὴ ἥμισυ παντός" source="ΠΥΘΑΓΌΡΑΣ" position="left" top="10%" />
+        <SideQuote text="τὸ σῶμα γίγνωσκε" source="ΑΡΧΑῖΟΝ" position="right" top="55%" />
         <div className="container">
           <div className="section-header">
             <div className="section-tagline anim-fade">{l.packages.tagline}</div>
@@ -585,8 +659,11 @@ export default function Home() {
             <div className="pkg-card anim-fade delay-2">
               <div className="pkg-name">{l.packages.paideia.name}</div>
               <div className="pkg-greek">{l.packages.paideia.greek}</div>
-              <div className="pkg-price"><Counter end={199} /></div>
-              <div className="pkg-price-suffix">{l.packages.paideia.suffix}</div>
+              <div className="pkg-price">
+                <span className="pkg-price-currency">{currencySymbol(l.packages.paideia.currency)}</span>
+                <Counter key={`paideia-${lang}`} end={l.packages.paideia.price} />
+              </div>
+              <div className="pkg-price-suffix">{l.packages.paideia.currency} · {l.packages.paideia.suffix}</div>
               <ul className="pkg-features">
                 {l.packages.paideia.features.map((f, i) => <li key={i}>{f}</li>)}
               </ul>
@@ -597,8 +674,11 @@ export default function Home() {
             <div className="pkg-card anim-fade delay-3">
               <div className="pkg-name">{l.packages.askesis.name}</div>
               <div className="pkg-greek">{l.packages.askesis.greek}</div>
-              <div className="pkg-price"><Counter end={279} /></div>
-              <div className="pkg-price-suffix">{l.packages.askesis.suffix}</div>
+              <div className="pkg-price">
+                <span className="pkg-price-currency">{currencySymbol(l.packages.askesis.currency)}</span>
+                <Counter key={`askesis-${lang}`} end={l.packages.askesis.price} />
+              </div>
+              <div className="pkg-price-suffix">{l.packages.askesis.currency} {l.packages.askesis.suffix}</div>
               <div className="pkg-discount">{l.packages.askesis.discount}</div>
               <ul className="pkg-features">
                 {l.packages.askesis.features.map((f, i) => <li key={i}>{f}</li>)}
@@ -611,8 +691,11 @@ export default function Home() {
               <div className="pkg-badge">{l.packages.arete.badge}</div>
               <div className="pkg-name">{l.packages.arete.name}</div>
               <div className="pkg-greek">{l.packages.arete.greek}</div>
-              <div className="pkg-price"><Counter end={449} /></div>
-              <div className="pkg-price-suffix">{l.packages.arete.suffix}</div>
+              <div className="pkg-price">
+                <span className="pkg-price-currency">{currencySymbol(l.packages.arete.currency)}</span>
+                <Counter key={`arete-${lang}`} end={l.packages.arete.price} />
+              </div>
+              <div className="pkg-price-suffix">{l.packages.arete.currency} {l.packages.arete.suffix}</div>
               <div className="pkg-discount">{l.packages.arete.discount}</div>
               <ul className="pkg-features">
                 {l.packages.arete.features.map((f, i) => <li key={i}>{f}</li>)}
@@ -622,23 +705,32 @@ export default function Home() {
           </div>
 
           {/* IN-PERSON */}
-          <div className="anim-fade delay-3">
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', marginBottom: '0.5rem' }}>{l.packages.inperson.title}</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{l.packages.inperson.subtitle}</p>
+          <div className="inperson-wrap anim-fade delay-3">
+            <h3 className="inperson-title">{l.packages.inperson.title}</h3>
+            <p className="inperson-subtitle">{l.packages.inperson.subtitle}</p>
             <div className="inperson-card">
               <div>
                 <div className="inperson-item-label">{l.packages.inperson.single.label}</div>
-                <div className="inperson-item-price"><Counter end={150} /></div>
+                <div className="inperson-item-price">
+                  <span className="inperson-item-currency">{currencySymbol(l.packages.inperson.currency)}</span>
+                  <Counter key={`single-${lang}`} end={l.packages.inperson.single.price} />
+                </div>
                 <div className="inperson-item-detail">{l.packages.inperson.single.detail}</div>
               </div>
               <div>
                 <div className="inperson-item-label">{l.packages.inperson.pack8.label}</div>
-                <div className="inperson-item-price"><Counter end={130} /></div>
+                <div className="inperson-item-price">
+                  <span className="inperson-item-currency">{currencySymbol(l.packages.inperson.currency)}</span>
+                  <Counter key={`p8-${lang}`} end={l.packages.inperson.pack8.price} />
+                </div>
                 <div className="inperson-item-detail">{l.packages.inperson.pack8.detail}</div>
               </div>
               <div>
                 <div className="inperson-item-label">{l.packages.inperson.pack12.label}</div>
-                <div className="inperson-item-price"><Counter end={120} /></div>
+                <div className="inperson-item-price">
+                  <span className="inperson-item-currency">{currencySymbol(l.packages.inperson.currency)}</span>
+                  <Counter key={`p12-${lang}`} end={l.packages.inperson.pack12.price} />
+                </div>
                 <div className="inperson-item-detail">{l.packages.inperson.pack12.detail}</div>
               </div>
             </div>
@@ -650,6 +742,8 @@ export default function Home() {
 
       {/* PROCESS */}
       <section id="process" className="section section-alt">
+        <SideQuote text="ἀρχὴ σοφίας ἡ τῶν ὀνομάτων ἐπίσκεψις" source="ΑΝΤΙΣΘΈΝΗΣ" position="left" top="18%" />
+        <SideQuote text="ἔργον εὖ ποιεῖν" source="" position="right" top="58%" />
         <div className="container">
           <div className="section-header">
             <div className="section-tagline anim-fade">{l.process.tagline}</div>
@@ -667,16 +761,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* EPIGRAPH 2 */}
-      <div className="epigraph anim-fade">
-        «γνῶθι σεαυτόν»
-        <div className="epigraph-source">— ΔΕΛΦΟΊ</div>
-      </div>
-
       <MeanderSVG animated />
 
       {/* TESTIMONIALS */}
       <section className="section">
+        <SideQuote text="ἡ ἀλήθεια ἐν τοῖς ἔργοις" source="" position="left" top="15%" />
+        <SideQuote text="ἔργα μαρτυρεῖ" source="" position="right" top="55%" />
         <div className="container">
           <div className="section-header">
             <div className="section-tagline anim-fade">{l.testimonials.tagline}</div>
@@ -703,6 +793,8 @@ export default function Home() {
 
       {/* CONTACT */}
       <section id="contact" className="section section-alt">
+        <SideQuote text="ἀρχὴ ἥμισυ παντός" source="ΠΥΘΑΓΌΡΑΣ" position="left" top="18%" />
+        <SideQuote text="τόλμα ἄρχεσθαι" source="" position="right" top="55%" />
         <div className="container">
           <div className="contact-grid">
             <div className="contact-info anim-fade-left">
