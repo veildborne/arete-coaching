@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import DashboardClient from './DashboardClient'
 
 export default async function DashboardPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
@@ -16,7 +16,6 @@ export default async function DashboardPage() {
 
   if (profile?.role !== 'coach') redirect('/client')
 
-  // Get all clients
   const { data: clients } = await supabase
     .from('profiles')
     .select('*')
