@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import ClientPortal from './ClientPortal'
 
 export default async function ClientPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
@@ -16,7 +16,6 @@ export default async function ClientPage() {
 
   if (profile?.role === 'coach') redirect('/dashboard')
 
-  // Get active plan
   const { data: activePlan } = await supabase
     .from('training_plans')
     .select('*')
@@ -24,7 +23,6 @@ export default async function ClientPage() {
     .eq('is_active', true)
     .single()
 
-  // Get recent logs
   const { data: recentLogs } = await supabase
     .from('training_logs')
     .select('*')
