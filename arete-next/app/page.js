@@ -1,5 +1,291 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
+
+// ===== AUTH MODAL =====
+function AuthModal({ lang, onClose }) {
+  const [mode, setMode] = useState('login') // 'login' | 'register' | 'reset'
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [msg, setMsg] = useState(null) // { type: 'ok'|'err', text }
+  const overlayRef = useRef(null)
+
+  const copy = {
+    pl: {
+      login: 'Zaloguj się', register: 'Utwórz konto', reset: 'Reset hasła',
+      email: 'Email', password: 'Hasło', name: 'Imię i nazwisko',
+      doLogin: 'Zaloguj się', doRegister: 'Utwórz konto', doReset: 'Wyślij link',
+      toRegister: 'Nie masz konta?', toLogin: 'Masz już konto?', forgot: 'Zapomniałeś hasła?',
+      back: '← Wróć',
+      loginOk: 'Zalogowano! Przekierowuję…',
+      registerOk: 'Sprawdź email — link weryfikacyjny wysłany.',
+      resetOk: 'Link do resetu hasła wysłany na podany email.',
+      errInvalid: 'Nieprawidłowy email lub hasło.',
+      errEmail: 'Ten email jest już zajęty.',
+      errShort: 'Hasło musi mieć min. 8 znaków.',
+      errGeneric: 'Coś poszło nie tak. Spróbuj ponownie.',
+    },
+    en: {
+      login: 'Log in', register: 'Create account', reset: 'Reset password',
+      email: 'Email', password: 'Password', name: 'Full name',
+      doLogin: 'Log in', doRegister: 'Create account', doReset: 'Send link',
+      toRegister: "Don't have an account?", toLogin: 'Already have an account?', forgot: 'Forgot password?',
+      back: '← Back',
+      loginOk: 'Logged in! Redirecting…',
+      registerOk: 'Check your email — verification link sent.',
+      resetOk: 'Password reset link sent to your email.',
+      errInvalid: 'Invalid email or password.',
+      errEmail: 'This email is already taken.',
+      errShort: 'Password must be at least 8 characters.',
+      errGeneric: 'Something went wrong. Please try again.',
+    },
+    el: {
+      login: 'Σύνδεση', register: 'Δημιουργία λογαριασμού', reset: 'Επαναφορά κωδικού',
+      email: 'Email', password: 'Κωδικός', name: 'Ονοματεπώνυμο',
+      doLogin: 'Σύνδεση', doRegister: 'Δημιουργία', doReset: 'Αποστολή συνδέσμου',
+      toRegister: 'Δεν έχεις λογαριασμό;', toLogin: 'Έχεις ήδη λογαριασμό;', forgot: 'Ξέχασες τον κωδικό;',
+      back: '← Πίσω',
+      loginOk: 'Συνδέθηκες! Ανακατεύθυνση…',
+      registerOk: 'Έλεγξε το email σου — εστάλη σύνδεσμος επαλήθευσης.',
+      resetOk: 'Ο σύνδεσμος επαναφοράς κωδικού εστάλη στο email σου.',
+      errInvalid: 'Λανθασμένο email ή κωδικός.',
+      errEmail: 'Αυτό το email χρησιμοποιείται ήδη.',
+      errShort: 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.',
+      errGeneric: 'Κάτι πήγε στραβά. Δοκίμασε ξανά.',
+    },
+  }
+  const c = copy[lang] || copy.pl
+
+  // Close on overlay click
+  const handleOverlay = (e) => {
+    if (e.target === overlayRef.current) onClose()
+  }
+
+  // Close on Escape
+  useEffect(() => {
+    const fn = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', fn)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', fn)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
+  const handleSubmit = async () => {
+    setMsg(null)
+    setLoading(true)
+    try {
+      if (mode === 'login') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) { setMsg({ type: 'err', text: c.errInvalid }); return }
+        setMsg({ type: 'ok', text: c.loginOk })
+        setTimeout(() => { window.location.href = '/dashboard' }, 1000)
+
+      } else if (mode === 'register') {
+        if (password.length < 8) { setMsg({ type: 'err', text: c.errShort }); return }
+        const { error } = await supabase.auth.signUp({
+          email, password,
+          options: { data: { full_name: name } }
+        })
+        if (error?.message?.toLowerCase().includes('already')) {
+          setMsg({ type: 'err', text: c.errEmail }); return
+        }
+        if (error) { setMsg({ type: 'err', text: c.errGeneric }); return }
+        setMsg({ type: 'ok', text: c.registerOk })
+
+      } else if (mode === 'reset') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`
+        })
+        if (error) { setMsg({ type: 'err', text: c.errGeneric }); return }
+        setMsg({ type: 'ok', text: c.resetOk })
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const titles = { login: c.login, register: c.register, reset: c.reset }
+
+  return (
+    <div ref={overlayRef} onClick={handleOverlay} style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'rgba(10,14,26,0.85)',
+      backdropFilter: 'blur(8px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '1rem',
+    }}>
+      <div style={{
+        background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
+        border: '1px solid rgba(184,166,119,0.25)',
+        borderRadius: '16px',
+        padding: '2.5rem 2rem',
+        width: '100%',
+        maxWidth: '420px',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(184,166,119,0.1)',
+        position: 'relative',
+        animation: 'modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+      }}>
+        {/* Close btn */}
+        <button onClick={onClose} style={{
+          position: 'absolute', top: '1rem', right: '1rem',
+          background: 'none', border: 'none', cursor: 'pointer',
+          color: 'rgba(184,166,119,0.5)', fontSize: '1.4rem', lineHeight: 1,
+          transition: 'color 0.2s',
+        }}
+          onMouseEnter={e => e.target.style.color = '#b8a677'}
+          onMouseLeave={e => e.target.style.color = 'rgba(184,166,119,0.5)'}
+        >×</button>
+
+        {/* Greek deco top */}
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '0.7rem', letterSpacing: '0.25em', color: 'rgba(184,166,119,0.4)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            ἀρετή
+          </div>
+          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.6rem', fontWeight: 600, color: '#b8a677', letterSpacing: '0.1em' }}>
+            ARETÉ
+          </div>
+          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(184,166,119,0.3), transparent)', marginTop: '1rem' }} />
+        </div>
+
+        {/* Title */}
+        <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '1.1rem', fontWeight: 500, color: '#e8e8e8', textAlign: 'center', marginBottom: '1.75rem', letterSpacing: '0.05em' }}>
+          {titles[mode]}
+        </h2>
+
+        {/* Fields */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {mode === 'register' && (
+            <div>
+              <label style={labelStyle}>{c.name}</label>
+              <input
+                type="text" value={name} onChange={e => setName(e.target.value)}
+                placeholder="np. Jan Kowalski"
+                style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'}
+              />
+            </div>
+          )}
+          <div>
+            <label style={labelStyle}>{c.email}</label>
+            <input
+              type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="jan@example.com"
+              style={inputStyle}
+              onKeyDown={e => e.key === 'Enter' && !loading && handleSubmit()}
+              onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'}
+              onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'}
+            />
+          </div>
+          {mode !== 'reset' && (
+            <div>
+              <label style={labelStyle}>{c.password}</label>
+              <input
+                type="password" value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                style={inputStyle}
+                onKeyDown={e => e.key === 'Enter' && !loading && handleSubmit()}
+                onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Message */}
+        {msg && (
+          <div style={{
+            marginTop: '1rem', padding: '0.6rem 0.9rem', borderRadius: '8px',
+            fontSize: '0.82rem', fontFamily: 'Outfit, sans-serif',
+            background: msg.type === 'ok' ? 'rgba(76,175,80,0.12)' : 'rgba(239,68,68,0.12)',
+            border: `1px solid ${msg.type === 'ok' ? 'rgba(76,175,80,0.3)' : 'rgba(239,68,68,0.3)'}`,
+            color: msg.type === 'ok' ? '#81c784' : '#f87171',
+          }}>
+            {msg.text}
+          </div>
+        )}
+
+        {/* Submit */}
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          style={{
+            width: '100%', marginTop: '1.5rem',
+            padding: '0.85rem',
+            background: loading ? 'rgba(184,166,119,0.3)' : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
+            color: loading ? 'rgba(184,166,119,0.6)' : '#0f1a2e',
+            border: 'none', borderRadius: '8px', cursor: loading ? 'not-allowed' : 'pointer',
+            fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem', fontWeight: 600,
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+            transition: 'all 0.2s',
+          }}
+        >
+          {loading ? '…' : mode === 'login' ? c.doLogin : mode === 'register' ? c.doRegister : c.doReset}
+        </button>
+
+        {/* Links */}
+        <div style={{ marginTop: '1.25rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {mode === 'login' && (
+            <>
+              <button onClick={() => { setMode('register'); setMsg(null) }} style={linkStyle}>
+                {c.toRegister} <span style={{ color: '#b8a677' }}>Zarejestruj się</span>
+              </button>
+              <button onClick={() => { setMode('reset'); setMsg(null) }} style={linkStyle}>
+                {c.forgot}
+              </button>
+            </>
+          )}
+          {mode === 'register' && (
+            <button onClick={() => { setMode('login'); setMsg(null) }} style={linkStyle}>
+              {c.toLogin} <span style={{ color: '#b8a677' }}>Zaloguj się</span>
+            </button>
+          )}
+          {mode === 'reset' && (
+            <button onClick={() => { setMode('login'); setMsg(null) }} style={linkStyle}>
+              {c.back}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.92) translateY(12px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+const labelStyle = {
+  display: 'block', marginBottom: '0.4rem',
+  fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem',
+  color: 'rgba(184,166,119,0.7)', letterSpacing: '0.06em', textTransform: 'uppercase',
+}
+const inputStyle = {
+  width: '100%', padding: '0.7rem 0.9rem',
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(184,166,119,0.2)',
+  borderRadius: '8px', outline: 'none',
+  color: '#e8e8e8', fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem',
+  transition: 'border-color 0.2s',
+}
+const linkStyle = {
+  background: 'none', border: 'none', cursor: 'pointer',
+  color: 'rgba(184,166,119,0.55)', fontFamily: 'Outfit, sans-serif',
+  fontSize: '0.8rem', letterSpacing: '0.02em',
+  transition: 'color 0.2s',
+}
 
 // ===== TRANSLATIONS =====
 const t = {
@@ -435,8 +721,10 @@ export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0)
   const [heroTyped, setHeroTyped] = useState('')
   const [showCursor, setShowCursor] = useState(true)
+  const [authOpen, setAuthOpen] = useState(false)
   const heroDecoRef = useRef(null)
   const l = t[lang]
+  const closeAuth = useCallback(() => setAuthOpen(false), [])
 
   // Scroll
   useEffect(() => {
@@ -489,6 +777,7 @@ export default function Home() {
 
   return (
     <>
+      {authOpen && <AuthModal lang={lang} onClose={closeAuth} />}
       <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
 
       {/* NAV */}
@@ -509,7 +798,7 @@ export default function Home() {
               </div>
             </li>
             <li>
-              <button className="nav-login" onClick={() => window.location.href = '/login'}>
+              <button className="nav-login" onClick={() => setAuthOpen(true)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 {l.nav.login}
               </button>
