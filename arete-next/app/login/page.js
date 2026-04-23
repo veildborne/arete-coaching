@@ -1,34 +1,58 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
+  const [mode, setMode] = useState('login') // 'login' | 'register' | 'reset'
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [msg, setMsg] = useState(null)
+  const router = useRouter()
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e?.preventDefault()
+    setMsg(null)
     setLoading(true)
-    setError('')
-
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
 
-    if (error) {
-      setError('Wystąpił błąd. Spróbuj ponownie.')
-      setLoading(false)
-    } else {
-      setSent(true)
+    try {
+      if (mode === 'login') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) { setMsg({ type: 'err', text: 'Nieprawidłowy email lub hasło.' }); return }
+        setMsg({ type: 'ok', text: 'Zalogowano! Przekierowuję…' })
+        setTimeout(() => { window.location.href = '/dashboard' }, 800)
+
+      } else if (mode === 'register') {
+        if (password.length < 8) {
+          setMsg({ type: 'err', text: 'Hasło musi mieć min. 8 znaków.' }); return
+        }
+        const { error } = await supabase.auth.signUp({
+          email, password,
+          options: { data: { full_name: name } }
+        })
+        if (error?.message?.toLowerCase().includes('already')) {
+          setMsg({ type: 'err', text: 'Ten email jest już zajęty.' }); return
+        }
+        if (error) { setMsg({ type: 'err', text: 'Coś poszło nie tak. Spróbuj ponownie.' }); return }
+        setMsg({ type: 'ok', text: 'Konto utworzone! Możesz się zalogować.' })
+        setTimeout(() => { setMode('login'); setMsg(null) }, 1500)
+
+      } else if (mode === 'reset') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`
+        })
+        if (error) { setMsg({ type: 'err', text: 'Coś poszło nie tak.' }); return }
+        setMsg({ type: 'ok', text: 'Link do resetu hasła wysłany na email.' })
+      }
+    } finally {
       setLoading(false)
     }
   }
+
+  const titles = { login: 'Zaloguj się', register: 'Utwórz konto', reset: 'Reset hasła' }
 
   return (
     <div style={{
@@ -36,141 +60,200 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'var(--bg-primary)',
+      background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
       padding: '2rem',
+      fontFamily: 'Outfit, sans-serif',
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '420px',
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        padding: '3rem 2.5rem',
+        maxWidth: '440px',
+        background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
+        border: '1px solid rgba(184,166,119,0.25)',
+        borderRadius: '16px',
+        padding: '2.75rem 2.25rem',
+        position: 'relative',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(184,166,119,0.1)',
       }}>
-        {/* Logo */}
+        {/* Gold top accent */}
         <div style={{
-          textAlign: 'center',
-          marginBottom: '2.5rem',
-        }}>
+          position: 'absolute', top: 0, left: '10%', right: '10%', height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(184,166,119,0.5), transparent)',
+        }} />
+
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{
+            fontFamily: 'Cormorant Garamond, serif',
+            fontSize: '0.7rem',
+            letterSpacing: '0.25em',
+            color: 'rgba(184,166,119,0.4)',
+            textTransform: 'uppercase',
+            marginBottom: '0.5rem',
+          }}>ἀρετή</div>
           <h1 style={{
-            fontFamily: 'var(--font-heading)',
+            fontFamily: 'Cormorant Garamond, serif',
             fontSize: '1.8rem',
             fontWeight: 600,
-            color: 'var(--gold)',
-            letterSpacing: '0.35em',
-            marginBottom: '0.5rem',
+            color: '#d4c494',
+            letterSpacing: '0.3em',
+            margin: 0,
           }}>ARETÉ</h1>
-          <p style={{
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-          }}>Panel klienta</p>
+          <div style={{
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(184,166,119,0.3), transparent)',
+            marginTop: '1.25rem', marginBottom: '1.25rem',
+          }} />
+          <h2 style={{
+            fontFamily: 'Outfit, sans-serif',
+            fontSize: '1rem',
+            fontWeight: 500,
+            color: '#e8e8e8',
+            letterSpacing: '0.1em',
+            margin: 0,
+          }}>{titles[mode]}</h2>
         </div>
 
-        {!sent ? (
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.7rem',
-                fontWeight: 500,
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                color: 'var(--text-secondary)',
-                marginBottom: '0.4rem',
-              }}>Email</label>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {mode === 'register' && (
+            <div>
+              <label style={labelStyle}>Imię i nazwisko</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text" value={name} onChange={e => setName(e.target.value)}
+                placeholder="np. Jan Kowalski"
                 required
-                placeholder="twoj@email.com"
-                style={{
-                  width: '100%',
-                  padding: '0.85rem 1rem',
-                  background: 'var(--bg-primary)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text-primary)',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '0.9rem',
-                  fontWeight: 300,
-                  outline: 'none',
-                }}
+                style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'}
               />
             </div>
-
-            {error && (
-              <p style={{
-                fontSize: '0.8rem',
-                color: '#c0392b',
-                marginBottom: '1rem',
-              }}>{error}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                background: loading ? 'var(--gold-dim)' : 'var(--gold)',
-                color: 'var(--bg-primary)',
-                fontFamily: 'var(--font-body)',
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-                border: 'none',
-                cursor: loading ? 'wait' : 'pointer',
-                transition: 'background 0.3s',
-              }}
-            >
-              {loading ? 'Wysyłam...' : 'Wyślij link logowania'}
-            </button>
-          </form>
-        ) : (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: '2.5rem',
-              marginBottom: '1rem',
-            }}>✉️</div>
-            <h2 style={{
-              fontFamily: 'var(--font-heading)',
-              fontSize: '1.4rem',
-              fontWeight: 600,
-              marginBottom: '0.75rem',
-              color: 'var(--text-primary)',
-            }}>Sprawdź skrzynkę</h2>
-            <p style={{
-              fontSize: '0.9rem',
-              color: 'var(--text-secondary)',
-              lineHeight: 1.7,
-            }}>
-              Wysłałem link logowania na <strong style={{ color: 'var(--gold)' }}>{email}</strong>.
-              Kliknij link w mailu żeby się zalogować.
-            </p>
-            <p style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-              marginTop: '1.5rem',
-            }}>Nie widzisz maila? Sprawdź spam.</p>
+          )}
+          <div>
+            <label style={labelStyle}>Email</label>
+            <input
+              type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="twoj@email.com"
+              required
+              style={inputStyle}
+              onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'}
+              onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'}
+            />
           </div>
-        )}
+          {mode !== 'reset' && (
+            <div>
+              <label style={labelStyle}>Hasło</label>
+              <input
+                type="password" value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'}
+              />
+            </div>
+          )}
 
-        {/* Back to home */}
+          {msg && (
+            <div style={{
+              padding: '0.65rem 0.9rem', borderRadius: '8px',
+              fontSize: '0.82rem',
+              background: msg.type === 'ok' ? 'rgba(76,175,80,0.12)' : 'rgba(239,68,68,0.12)',
+              border: `1px solid ${msg.type === 'ok' ? 'rgba(76,175,80,0.3)' : 'rgba(239,68,68,0.3)'}`,
+              color: msg.type === 'ok' ? '#81c784' : '#f87171',
+            }}>{msg.text}</div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              marginTop: '0.5rem',
+              padding: '0.9rem',
+              background: loading ? 'rgba(184,166,119,0.3)' : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
+              color: loading ? 'rgba(184,166,119,0.6)' : '#0f1a2e',
+              border: 'none', borderRadius: '8px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontFamily: 'Outfit, sans-serif',
+              fontSize: '0.85rem', fontWeight: 600,
+              letterSpacing: '0.15em', textTransform: 'uppercase',
+              transition: 'transform 0.2s',
+            }}
+            onMouseEnter={e => { if (!loading) e.target.style.transform = 'translateY(-1px)' }}
+            onMouseLeave={e => { if (!loading) e.target.style.transform = 'translateY(0)' }}
+          >
+            {loading ? '…' : mode === 'login' ? 'Zaloguj się' : mode === 'register' ? 'Utwórz konto' : 'Wyślij link'}
+          </button>
+        </form>
+
+        {/* Mode switches */}
         <div style={{
-          textAlign: 'center',
-          marginTop: '2rem',
-          paddingTop: '1.5rem',
-          borderTop: '1px solid var(--border)',
+          marginTop: '1.5rem',
+          paddingTop: '1.25rem',
+          borderTop: '1px solid rgba(184,166,119,0.15)',
+          display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center',
         }}>
+          {mode === 'login' && (
+            <>
+              <button type="button" onClick={() => { setMode('register'); setMsg(null) }} style={linkStyle}>
+                Nie masz konta? <span style={{ color: '#b8a677' }}>Zarejestruj się</span>
+              </button>
+              <button type="button" onClick={() => { setMode('reset'); setMsg(null) }} style={linkStyle}>
+                Zapomniałeś hasła?
+              </button>
+            </>
+          )}
+          {mode === 'register' && (
+            <button type="button" onClick={() => { setMode('login'); setMsg(null) }} style={linkStyle}>
+              Masz już konto? <span style={{ color: '#b8a677' }}>Zaloguj się</span>
+            </button>
+          )}
+          {mode === 'reset' && (
+            <button type="button" onClick={() => { setMode('login'); setMsg(null) }} style={linkStyle}>
+              ← Wróć do logowania
+            </button>
+          )}
           <a href="/" style={{
+            marginTop: '0.5rem',
             fontSize: '0.75rem',
-            color: 'var(--text-muted)',
+            color: 'rgba(160,160,160,0.5)',
             letterSpacing: '0.1em',
+            textDecoration: 'none',
           }}>← Wróć na stronę główną</a>
         </div>
       </div>
     </div>
   )
+}
+
+const labelStyle = {
+  display: 'block', marginBottom: '0.4rem',
+  fontFamily: 'Outfit, sans-serif',
+  fontSize: '0.7rem',
+  fontWeight: 500,
+  color: 'rgba(184,166,119,0.7)',
+  letterSpacing: '0.15em',
+  textTransform: 'uppercase',
+}
+
+const inputStyle = {
+  width: '100%',
+  padding: '0.8rem 1rem',
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(184,166,119,0.2)',
+  borderRadius: '8px',
+  outline: 'none',
+  color: '#e8e8e8',
+  fontFamily: 'Outfit, sans-serif',
+  fontSize: '0.9rem',
+  fontWeight: 400,
+  transition: 'border-color 0.2s',
+}
+
+const linkStyle = {
+  background: 'none', border: 'none', cursor: 'pointer',
+  color: 'rgba(160,160,160,0.7)',
+  fontFamily: 'Outfit, sans-serif',
+  fontSize: '0.8rem', letterSpacing: '0.02em',
+  transition: 'color 0.2s',
+  padding: 0,
 }
