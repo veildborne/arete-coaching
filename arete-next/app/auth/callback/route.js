@@ -5,9 +5,11 @@ import { NextResponse } from 'next/server'
 export async function GET(request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const next = requestUrl.searchParams.get('next') || '/client'
 
   if (code) {
-    const cookieStore = await cookies()
+    // Next.js 14 — cookies() is SYNCHRONOUS, no await
+    const cookieStore = cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -30,19 +32,36 @@ export async function GET(request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      // Get user role and redirect accordingly
       const { data: { user } } = await supabase.auth.getUser()
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
 
-      const redirectPath = profile?.role === 'coach' ? '/dashboard' : '/client'
-      return NextResponse.redirect(new URL(redirectPath, requestUrl.origin))
+      if (user) {
+        // Auto-create profile if missing
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+
+        if (!profile) {
+          await supabase.from('profiles').insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || '',
+            role: 'client',
+          })
+          return NextResponse.redirect(new URL('/client', requestUrl.origin))
+        }
+
+        const redirectPath = profile.role === 'coach' ? '/dashboard' : '/client'
+        return NextResponse.redirect(new URL(redirectPath, requestUrl.origin))
+      }
     }
   }
 
-  // Auth failed — back to login
+  // If next param present (e.g. reset-password flow)
+  if (next !== '/client') {
+    return NextResponse.redirect(new URL(next, requestUrl.origin))
+  }
+
   return NextResponse.redirect(new URL('/login', requestUrl.origin))
 }
