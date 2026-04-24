@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 export async function GET(request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') || '/client'
+  const next = requestUrl.searchParams.get('next') || ''
 
   if (code) {
     // Next.js 14 — cookies() is SYNCHRONOUS, no await
@@ -15,9 +15,7 @@ export async function GET(request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       {
         cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
+          getAll() { return cookieStore.getAll() },
           setAll(cookiesToSet) {
             try {
               cookiesToSet.forEach(({ name, value, options }) =>
@@ -35,32 +33,22 @@ export async function GET(request) {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
-        // Auto-create profile if missing
+        // Tylko odczyt roli — nie tworzymy profilu tutaj (trigger w bazie to robi)
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single()
 
-        if (!profile) {
-          await supabase.from('profiles').insert({
-            id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name || '',
-            role: 'client',
-          })
-          return NextResponse.redirect(new URL('/client', requestUrl.origin))
+        // Bezpieczny next — tylko lokalne ścieżki zaczynające się od /
+        if (next && next.startsWith('/') && !next.startsWith('//')) {
+          return NextResponse.redirect(new URL(next, requestUrl.origin))
         }
 
-        const redirectPath = profile.role === 'coach' ? '/dashboard' : '/client'
+        const redirectPath = profile?.role === 'coach' ? '/dashboard' : '/client'
         return NextResponse.redirect(new URL(redirectPath, requestUrl.origin))
       }
     }
-  }
-
-  // If next param present (e.g. reset-password flow)
-  if (next !== '/client') {
-    return NextResponse.redirect(new URL(next, requestUrl.origin))
   }
 
   return NextResponse.redirect(new URL('/login', requestUrl.origin))
