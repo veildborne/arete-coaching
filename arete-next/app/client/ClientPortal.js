@@ -320,12 +320,12 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
           marginBottom: '2rem',
         }}>
           {[
-            { icon: '⚡', label: 'Loguj trening', sub: 'Nowa sesja', disabled: true },
+            { icon: '⚡', label: 'Loguj trening', sub: 'Nowa sesja', disabled: false, href: '/client/workout' },
             { icon: '◈', label: 'Check-in', sub: 'Cotygodniowy', disabled: true },
             { icon: '△', label: 'Statystyki', sub: 'Postępy', disabled: true },
             { icon: '◉', label: 'Żywienie', sub: 'Makro dnia', disabled: true },
           ].map((action, i) => (
-            <button key={i} disabled={action.disabled} style={{
+            <button key={i} disabled={action.disabled} onClick={() => action.href && router.push(action.href)} style={{
               background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
               border: '1px solid rgba(184,166,119,0.15)',
               borderRadius: '12px', padding: '1.25rem 1rem',
