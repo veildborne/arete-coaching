@@ -94,7 +94,7 @@ function AuthModal({ lang, onClose }) {
           target = profile?.role === 'coach' ? '/dashboard' : '/client'
         }
         setMsg({ type: 'ok', text: c.loginOk })
-        setTimeout(() => { window.location.href = target }, 800)
+        setTimeout(() => { window.location.href = '/api/me/redirect' }, 800)
 
       } else if (mode === 'register') {
         if (password.length < 8) { setMsg({ type: 'err', text: c.errShort }); return }

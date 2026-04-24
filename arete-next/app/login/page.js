@@ -31,7 +31,7 @@ export default function LoginPage() {
             .single()
           setMsg({ type: 'ok', text: 'Zalogowano! Przekierowuję…' })
           const target = profile?.role === 'coach' ? '/dashboard' : '/client'
-          setTimeout(() => { window.location.href = target }, 800)
+          setTimeout(() => { window.location.href = '/api/me/redirect' }, 800)
         } else {
           window.location.href = '/client'
         }
