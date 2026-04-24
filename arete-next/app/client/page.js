@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import ClientPortal from './ClientPortal'
 
 export default async function ClientPage() {
-  const supabase = await createClient()
+  const supabase = createClient() // Next.js 14: NO await
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
