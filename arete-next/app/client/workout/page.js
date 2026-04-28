@@ -17,17 +17,29 @@ export default async function WorkoutPage() {
     .order('muscle_group')
     .order('name')
 
+  // Brak is_active — bierzemy najnowszy plan
   const { data: activePlan } = await supabase
     .from('training_plans')
     .select('*')
     .eq('client_id', user.id)
-    .eq('is_active', true)
-    .single()
+    .order('id', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // Parse equipment z JSON stringa na tablicę
+  const parsedExercises = (exercises || []).map(ex => ({
+    ...ex,
+    equipment: (() => {
+      if (!ex.equipment) return []
+      if (Array.isArray(ex.equipment)) return ex.equipment
+      try { return JSON.parse(ex.equipment) } catch { return [ex.equipment] }
+    })()
+  }))
 
   return (
     <WorkoutLogger
       profile={profile}
-      exercises={exercises || []}
+      exercises={parsedExercises}
       activePlan={activePlan}
       clientId={user.id}
     />
