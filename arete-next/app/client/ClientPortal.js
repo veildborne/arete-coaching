@@ -373,6 +373,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
     fontSize: '0.75rem', cursor: 'pointer',
     fontFamily: 'Outfit, sans-serif',
     letterSpacing: '0.1em', textTransform: 'uppercase',
+    width: '100%', marginBottom: '1rem',
   }}
 >
   Wypełnij ankietę onboardingową
