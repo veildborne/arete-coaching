@@ -196,14 +196,16 @@ export default function ClientDetail({ client, plans, logs, checkins, coachName 
         {/* PLANS TAB */}
         {tab === 'plans' && (
           <Section title="Plany treningowe" action={
-            <button style={{
-              fontSize: 12, padding: '7px 16px', borderRadius: 99,
-              border: '1px solid rgba(184,166,119,0.3)', background: 'transparent',
-              color: '#b8a677', cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,166,119,0.08)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >+ Nowy plan</button>
+            <button
+  onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)}
+  style={{
+    fontSize: 12, padding: '7px 16px', borderRadius: 99,
+    border: '1px solid rgba(184,166,119,0.3)', background: 'transparent',
+    color: '#b8a677', cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
+  }}
+  onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,166,119,0.08)'}
+  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+>+ Nowy plan</button>
           }>
             {plans.length === 0 ? (
               <EmptyState text="Brak planów. Kliknij '+ Nowy plan' żeby dodać pierwszy." />
