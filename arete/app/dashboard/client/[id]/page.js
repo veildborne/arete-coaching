@@ -20,7 +20,6 @@ export default async function ClientPage({ params }) {
     .from('profiles')
     .select('*')
     .eq('id', params.id)
-    .eq('role', 'client')
     .single()
 
   if (!client) notFound()
