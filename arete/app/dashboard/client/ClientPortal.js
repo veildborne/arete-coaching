@@ -273,15 +273,18 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
                   Mezocykl {weekProgress.current}/{weekProgress.max} tygodni
                 </p>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <button style={{
-                    background: 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
-                    color: '#0f1a2e', border: 'none',
-                    padding: '0.75rem 1.5rem', borderRadius: '8px',
-                    fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 600,
-                    cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
-                    textTransform: 'uppercase',
-                    transition: 'transform 0.2s',
-                  }}
+                  {/* ← JEDYNA ZMIANA: dodany onClick */}
+                  <button
+                    onClick={() => router.push('/client/plan')}
+                    style={{
+                      background: 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
+                      color: '#0f1a2e', border: 'none',
+                      padding: '0.75rem 1.5rem', borderRadius: '8px',
+                      fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 600,
+                      cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
+                      textTransform: 'uppercase',
+                      transition: 'transform 0.2s',
+                    }}
                     onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
                     onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
                   >Zobacz plan →</button>
@@ -321,9 +324,9 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
         }}>
           {[
             { icon: '⚡', label: 'Loguj trening', sub: 'Nowa sesja', disabled: false, href: '/client/workout' },
-{ icon: '◈', label: 'Check-in', sub: 'Cotygodniowy', disabled: false, href: '/client/checkin' },
-{ icon: '△', label: 'Statystyki', sub: 'Postępy', disabled: true },
-{ icon: '◉', label: 'Żywienie', sub: 'Makro dnia', disabled: true },
+            { icon: '◈', label: 'Check-in', sub: 'Cotygodniowy', disabled: false, href: '/client/checkin' },
+            { icon: '△', label: 'Statystyki', sub: 'Postępy', disabled: true },
+            { icon: '◉', label: 'Żywienie', sub: 'Makro dnia', disabled: true },
           ].map((action, i) => (
             <button key={i} disabled={action.disabled} onClick={() => action.href && router.push(action.href)} style={{
               background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
@@ -363,21 +366,22 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
             </button>
           ))}
         </div>
+
         <button
-  onClick={() => router.push('/client/questionnaire')}
-  style={{
-    background: 'transparent',
-    border: '1px solid rgba(184,166,119,0.2)',
-    color: 'rgba(184,166,119,0.6)',
-    padding: '0.6rem 1.2rem', borderRadius: 6,
-    fontSize: '0.75rem', cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-    letterSpacing: '0.1em', textTransform: 'uppercase',
-    width: '100%', marginBottom: '1rem',
-  }}
->
-  Wypełnij ankietę onboardingową
-</button>
+          onClick={() => router.push('/client/questionnaire')}
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(184,166,119,0.2)',
+            color: 'rgba(184,166,119,0.6)',
+            padding: '0.6rem 1.2rem', borderRadius: 6,
+            fontSize: '0.75rem', cursor: 'pointer',
+            fontFamily: 'Outfit, sans-serif',
+            letterSpacing: '0.1em', textTransform: 'uppercase',
+            width: '100%', marginBottom: '1rem',
+          }}
+        >
+          Wypełnij ankietę onboardingową
+        </button>
 
         <Meander />
 
