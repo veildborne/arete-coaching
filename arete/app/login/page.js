@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { roleRedirectPath } from '@/lib/auth-roles'
 
 export default function LoginPage() {
   const [mode, setMode] = useState('login')
@@ -30,8 +31,8 @@ export default function LoginPage() {
             .eq('id', userId)
             .single()
           setMsg({ type: 'ok', text: 'Zalogowano! Przekierowuję…' })
-          const target = profile?.role === 'coach' ? '/dashboard' : '/client'
-          setTimeout(() => { window.location.href = '/api/me/redirect' }, 800)
+          const target = roleRedirectPath(profile, data.user)
+          setTimeout(() => { window.location.href = target }, 800)
         } else {
           window.location.href = '/client'
         }

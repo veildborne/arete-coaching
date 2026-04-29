@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect, notFound } from 'next/navigation'
 import ClientDetail from './ClientDetail'
+import { isCoachProfile } from '@/lib/auth-roles'
 
 export default async function ClientPage({ params }) {
   const supabase = createClient() // Next.js 14: NO await
@@ -14,7 +15,7 @@ export default async function ClientPage({ params }) {
     .eq('id', user.id)
     .single()
 
-  if (coach?.role !== 'coach') redirect('/client')
+  if (!isCoachProfile(coach, user)) redirect('/client')
 
   const { data: client } = await supabase
     .from('profiles')

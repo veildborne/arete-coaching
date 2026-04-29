@@ -152,7 +152,7 @@ function SessionCard({ sessionKey, session, onUpdate, onRemove, allExercises }) 
   )
 }
 
-export default function PlanBuilder({ client, questionnaire, exercises, clientId }) {
+export default function PlanBuilder({ client, questionnaire, exercises = [], clientId }) {
   const router = useRouter()
   const [plan, setPlan] = useState(null)
   const [planName, setPlanName] = useState('')

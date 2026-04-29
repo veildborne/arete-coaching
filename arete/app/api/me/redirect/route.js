@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { roleRedirectPath } from '@/lib/auth-roles'
 
 export async function GET(request) {
   const cookieStore = cookies()
@@ -34,6 +35,6 @@ export async function GET(request) {
     .eq('id', user.id)
     .single()
 
-  const target = profile?.role === 'coach' ? '/dashboard' : '/client'
+  const target = roleRedirectPath(profile, user)
   return NextResponse.redirect(new URL(target, request.url))
 }

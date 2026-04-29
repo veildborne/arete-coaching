@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import DashboardClient from './DashboardClient'
+import { isCoachProfile } from '@/lib/auth-roles'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -14,7 +15,7 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'coach') redirect('/client')
+  if (!isCoachProfile(profile, user)) redirect('/client')
 
   const { data: clients } = await supabase
     .from('profiles')

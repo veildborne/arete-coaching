@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
+import { roleRedirectPath } from '@/lib/auth-roles'
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
@@ -60,7 +61,7 @@ export async function middleware(request) {
         .single()
 
       const url = request.nextUrl.clone()
-      url.pathname = profile?.role === 'coach' ? '/dashboard' : '/client'
+      url.pathname = roleRedirectPath(profile, user)
       return NextResponse.redirect(url)
     }
   }
