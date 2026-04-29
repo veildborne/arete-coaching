@@ -363,6 +363,20 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
             </button>
           ))}
         </div>
+        <button
+  onClick={() => router.push('/client/questionnaire')}
+  style={{
+    background: 'transparent',
+    border: '1px solid rgba(184,166,119,0.2)',
+    color: 'rgba(184,166,119,0.6)',
+    padding: '0.6rem 1.2rem', borderRadius: 6,
+    fontSize: '0.75rem', cursor: 'pointer',
+    fontFamily: 'Outfit, sans-serif',
+    letterSpacing: '0.1em', textTransform: 'uppercase',
+  }}
+>
+  Wypełnij ankietę onboardingową
+</button>
 
         <Meander />
 
