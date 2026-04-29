@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import ClientPortal from './ClientPortal'
+import DashboardClient from './DashboardClient'
 
-export default async function ClientPage() {
+export default async function DashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -14,23 +14,13 @@ export default async function ClientPage() {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role === 'coach') redirect('/dashboard')
+  if (profile?.role !== 'coach') redirect('/client')
 
-  // Brak is_active — bierzemy najnowszy plan
-  const { data: activePlan } = await supabase
-    .from('training_plans')
+  const { data: clients } = await supabase
+    .from('profiles')
     .select('*')
-    .eq('client_id', user.id)
-    .order('id', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+    .eq('role', 'client')
+    .order('created_at', { ascending: false })
 
-  const { data: recentLogs } = await supabase
-    .from('training_logs')
-    .select('*')
-    .eq('client_id', user.id)
-    .order('session_date', { ascending: false })
-    .limit(5)
-
-  return <ClientPortal profile={profile} activePlan={activePlan} recentLogs={recentLogs || []} />
+  return <DashboardClient profile={profile} clients={clients || []} />
 }
