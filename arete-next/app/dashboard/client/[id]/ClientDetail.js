@@ -283,34 +283,73 @@ export default function ClientDetail({ client, plans, logs, checkins, coachName 
         )}
 
         {/* CHECKINS TAB */}
-        {tab === 'checkins' && (
-          <Section title="Check-iny">
-            {checkins.length === 0 ? (
-              <EmptyState text="Brak check-inów. Klient jeszcze nie wysłał żadnego." />
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {checkins.map(ci => (
-                  <div key={ci.id} style={{
-                    background: '#1a1a1a',
-                    border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: 10, padding: '14px 18px',
-                  }}>
-                    <div style={{ fontSize: 12, color: '#555', marginBottom: 6 }}>
-                      {formatDate(ci.created_at)}
-                    </div>
-                    <pre style={{
-                      fontSize: 12, color: '#a0a0a0',
-                      whiteSpace: 'pre-wrap', fontFamily: "'Outfit', sans-serif",
-                      margin: 0, lineHeight: 1.6,
-                    }}>
-                      {JSON.stringify(ci, null, 2)}
-                    </pre>
-                  </div>
-                ))}
+{tab === 'checkins' && (
+  <Section title="Check-iny">
+    {checkins.length === 0 ? (
+      <EmptyState text="Brak check-inów. Klient jeszcze nie wysłał żadnego." />
+    ) : (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {checkins.map(ci => (
+          <div key={ci.id} style={{
+            background: '#1a1a1a',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 10, padding: '16px 18px',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <span style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 16, color: '#b8a677', fontWeight: 600,
+              }}>
+                Tydzień {ci.week_number}
+              </span>
+              <span style={{ fontSize: 11, color: '#555' }}>{formatDate(ci.submitted_at)}</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginBottom: 12 }}>
+              {[
+                { label: 'Masa ciała',  value: ci.body_weight ? `${ci.body_weight} kg` : '—' },
+                { label: 'Energia',     value: ci.energy_level ? `${ci.energy_level}/10` : '—' },
+                { label: 'Sen',         value: ci.sleep_quality ? `${ci.sleep_quality}/10` : '—' },
+                { label: 'Zakwasy',     value: ci.soreness_level ? `${ci.soreness_level}/10` : '—' },
+                { label: 'Adherencja', value: ci.adherence_pct != null ? `${ci.adherence_pct}%` : '—' },
+              ].map(m => (
+                <div key={m.label} style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  borderRadius: 6, padding: '8px 12px',
+                }}>
+                  <div style={{ fontSize: 10, color: '#555', marginBottom: 2 }}>{m.label}</div>
+                  <div style={{ fontSize: 14, color: '#e8e8e8', fontWeight: 500 }}>{m.value}</div>
+                </div>
+              ))}
+            </div>
+
+            {ci.client_notes && (
+              <div style={{
+                background: 'rgba(255,255,255,0.02)',
+                borderRadius: 6, padding: '10px 12px', marginBottom: 8,
+                borderLeft: '2px solid rgba(184,166,119,0.3)',
+              }}>
+                <div style={{ fontSize: 10, color: '#555', marginBottom: 4 }}>Notatki klienta</div>
+                <div style={{ fontSize: 13, color: '#a0a0a0', lineHeight: 1.5 }}>{ci.client_notes}</div>
               </div>
             )}
-          </Section>
-        )}
+
+            {ci.coach_feedback && (
+              <div style={{
+                background: 'rgba(192,80,0,0.05)',
+                borderRadius: 6, padding: '10px 12px',
+                borderLeft: '2px solid rgba(192,80,0,0.3)',
+              }}>
+                <div style={{ fontSize: 10, color: '#C05000', marginBottom: 4 }}>Feedback trenera</div>
+                <div style={{ fontSize: 13, color: '#a0a0a0', lineHeight: 1.5 }}>{ci.coach_feedback}</div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </Section>
+)}
 
       </main>
     </div>
