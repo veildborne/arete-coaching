@@ -1,17 +1,18 @@
 import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { redirect, notFound } from 'next/navigation'
 import PlanBuilder from './PlanBuilder'
 import { isCoachProfile } from '@/lib/auth-roles'
 
-async function loadExercises(supabase) {
-  const primary = await supabase
+async function loadExercises(admin) {
+  const { data, error } = await admin
     .from('exercises')
     .select('*')
     .order('name', { ascending: true })
 
-  if (!primary.error) return primary.data || []
+  if (!error && data?.length) return data
 
-  const fallback = await supabase
+  const fallback = await admin
     .from('exercise_library')
     .select('*')
     .order('name', { ascending: true })
@@ -21,8 +22,9 @@ async function loadExercises(supabase) {
 
 export default async function NewPlanPage({ params }) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const admin = createAdminClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const { data: coach } = await supabase
@@ -33,7 +35,7 @@ export default async function NewPlanPage({ params }) {
 
   if (!isCoachProfile(coach, user)) redirect('/client')
 
-  const { data: client } = await supabase
+  const { data: client } = await admin
     .from('profiles')
     .select('*')
     .eq('id', params.id)
@@ -41,7 +43,7 @@ export default async function NewPlanPage({ params }) {
 
   if (!client) notFound()
 
-  const { data: questionnaire } = await supabase
+  const { data: questionnaire } = await admin
     .from('questionnaires')
     .select('*')
     .eq('client_id', params.id)
@@ -49,7 +51,7 @@ export default async function NewPlanPage({ params }) {
     .limit(1)
     .maybeSingle()
 
-  const exercises = await loadExercises(supabase)
+  const exercises = await loadExercises(admin)
 
   return (
     <PlanBuilder
