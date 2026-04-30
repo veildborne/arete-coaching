@@ -1,12 +1,14 @@
 import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { redirect } from 'next/navigation'
 import DashboardClient from './DashboardClient'
 import { isCoachProfile } from '@/lib/auth-roles'
 
 export default async function DashboardPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const admin = createAdminClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
@@ -17,7 +19,7 @@ export default async function DashboardPage() {
 
   if (!isCoachProfile(profile, user)) redirect('/client')
 
-  const { data: clients } = await supabase
+  const { data: clients } = await admin
     .from('profiles')
     .select('*')
     .eq('role', 'client')
