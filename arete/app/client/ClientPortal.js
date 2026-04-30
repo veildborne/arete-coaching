@@ -1,118 +1,118 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 
-// ===== FIREFLY PARTICLES =====
-function Particles() {
-  const canvasRef = useRef(null)
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    let animId
-    let particles = []
-    const resize = () => {
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
-    }
-    resize()
-    window.addEventListener('resize', resize)
-    for (let i = 0; i < 22; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 2 + 0.8,
-        speedX: (Math.random() - 0.5) * 0.15,
-        speedY: (Math.random() - 0.5) * 0.15,
-        opacity: Math.random() * 0.4 + 0.15,
-        pulse: Math.random() * Math.PI * 2,
-        pulseSpeed: Math.random() * 0.012 + 0.008,
-      })
-    }
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      particles.forEach(p => {
-        p.x += p.speedX; p.y += p.speedY; p.pulse += p.pulseSpeed
-        const pf = 0.4 + 0.6 * Math.abs(Math.sin(p.pulse))
-        const op = p.opacity * pf
-        if (p.x < -10) p.x = canvas.width + 10
-        if (p.x > canvas.width + 10) p.x = -10
-        if (p.y < -10) p.y = canvas.height + 10
-        if (p.y > canvas.height + 10) p.y = -10
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5)
-        grad.addColorStop(0, `rgba(232, 200, 74, ${op * 0.3})`)
-        grad.addColorStop(1, 'rgba(212, 175, 55, 0)')
-        ctx.fillStyle = grad
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2); ctx.fill()
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(232, 200, 74, ${op})`; ctx.fill()
-      })
-      animId = requestAnimationFrame(animate)
-    }
-    animate()
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize) }
-  }, [])
-  return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, opacity: 0.6 }} />
+const tiers = {
+  paideia: { name: 'Paideia', tone: 'text-text-muted border-white/10 bg-white/[0.03]' },
+  askesis: { name: 'Askesis', tone: 'text-gold border-gold/25 bg-gold/10' },
+  arete: { name: 'Areté', tone: 'text-gold border-gold/35 bg-gold/15' },
+  inperson: { name: 'Stacjonarny', tone: 'text-text border-white/10 bg-white/[0.04]' },
 }
 
-// ===== MEANDER =====
-function Meander() {
-  const pattern = "M0,10 L5,10 L5,5 L10,5 L10,15 L15,15 L15,5 L20,5 L20,10 L25,10 L25,5 L30,5 L30,15 L35,15 L35,5 L40,5 L40,10"
-  const fullPath = Array.from({ length: 20 }, (_, i) =>
-    pattern.replace(/(\d+)/g, (m) => parseInt(m) + i * 40)
-  ).join(' ')
-  return (
-    <div style={{ width: '100%', height: '20px', margin: '1rem 0', opacity: 0.15 }}>
-      <svg viewBox="0 0 800 20" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-        <path d={fullPath} fill="none" stroke="#b8a677" strokeWidth="0.8" />
-      </svg>
-    </div>
-  )
+const stages = ['Fundament', 'Akumulacja', 'Wzrost', 'Intensyfikacja', 'Próba', 'Regeneracja']
+
+// MOCK — do podpięcia z Supabase
+const characterStats = [
+  { label: 'Strength', value: 60 },
+  { label: 'Consistency', value: 80 },
+  { label: 'Recovery', value: 45 },
+  { label: 'Nutrition', value: 70 },
+  { label: 'Technique', value: 55 },
+]
+
+// MOCK — do podpięcia z Supabase
+const xpHistory = ['+80 XP Trening ukończony', '+40 XP Check-in']
+
+function getInitials(name, email) {
+  const source = name || email || 'Areté'
+  const parts = source.trim().split(/\s+/)
+  if (parts.length > 1) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+  return source.slice(0, 2).toUpperCase()
 }
 
-// ===== PROGRESS RING =====
-function ProgressRing({ value, max, label }) {
-  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0
-  const r = 45
-  const circ = 2 * Math.PI * r
-  const offset = circ - (pct / 100) * circ
+function getPlanPayload(activePlan) {
+  return activePlan?.plan_data || activePlan?.plan_json || activePlan?.generated_plan || activePlan?.plan || activePlan || {}
+}
+
+function getTodaySession(activePlan) {
+  const payload = getPlanPayload(activePlan)
+  const sessions = payload.sessions || activePlan?.sessions || {}
+  const entries = Array.isArray(sessions) ? sessions : Object.entries(sessions)
+  if (!entries.length) return null
+
+  const dayIndex = new Date().getDay()
+  const sessionIndex = Math.max(0, (dayIndex + 5) % 7)
+  const selected = entries[sessionIndex % entries.length]
+  const key = Array.isArray(selected) ? selected[0] : selected?.key
+  const session = Array.isArray(selected) ? selected[1] : selected
+  if (!session) return null
+
+  return {
+    key,
+    name: session.name || session.label || activePlan?.day_label || `Upper ${String(key || 'A').toUpperCase()}`,
+    exercises: Array.isArray(session.exercises) ? session.exercises : [],
+  }
+}
+
+function getTargetRir(activePlan, currentWeek) {
+  const payload = getPlanPayload(activePlan)
+  const progression = payload.weekly_progression || activePlan?.weekly_progression
+  const weekData = Array.isArray(progression)
+    ? progression.find(item => Number(item.week) === Number(currentWeek))
+    : null
+  return weekData?.rir ?? activePlan?.target_rir ?? activePlan?.rir_target ?? 2
+}
+
+function formatDate(date) {
+  if (!date) return '—'
+  return new Date(date).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })
+}
+
+function ProgressRing({ current, max }) {
+  const pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0
+  const circumference = 2 * Math.PI * 38
+  const offset = circumference - (pct / 100) * circumference
 
   return (
-    <div style={{ position: 'relative', width: '110px', height: '110px' }}>
-      <svg width="110" height="110" viewBox="0 0 110 110" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="55" cy="55" r={r} fill="none" stroke="rgba(184,166,119,0.1)" strokeWidth="4" />
-        <circle cx="55" cy="55" r={r} fill="none" stroke="url(#ringGrad)" strokeWidth="4"
-          strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)' }}
+    <div className="relative h-28 w-28 shrink-0">
+      <svg className="-rotate-90" width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
+        <circle cx="56" cy="56" r="38" fill="none" stroke="rgba(212,181,112,0.12)" strokeWidth="8" />
+        <circle
+          cx="56"
+          cy="56"
+          r="38"
+          fill="none"
+          stroke="#D4B570"
+          strokeLinecap="round"
+          strokeWidth="8"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="transition-all duration-1000 ease-out"
         />
-        <defs>
-          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#d4c494" />
-            <stop offset="100%" stopColor="#b8a677" />
-          </linearGradient>
-        </defs>
       </svg>
-      <div style={{
-        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-      }}>
-        <div style={{
-          fontFamily: 'Cormorant Garamond, serif', fontSize: '1.6rem', fontWeight: 700,
-          color: '#d4c494', lineHeight: 1,
-        }}>{value}<span style={{ fontSize: '0.9rem', opacity: 0.5 }}>/{max}</span></div>
-        <div style={{ fontSize: '0.6rem', color: 'rgba(160,160,160,0.7)', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '0.2rem' }}>
-          {label}
-        </div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-display text-2xl font-semibold text-gold">{pct}%</span>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-text-muted">mezocykl</span>
       </div>
     </div>
   )
 }
 
+function Panel({ children, className = '' }) {
+  return (
+    <section className={`rounded-lg border border-border bg-surface/85 shadow-2xl shadow-black/20 ${className}`}>
+      {children}
+    </section>
+  )
+}
+
 export default function ClientPortal({ profile, activePlan, recentLogs }) {
   const router = useRouter()
-  const [visible, setVisible] = useState(false)
-  useEffect(() => { setVisible(true) }, [])
+  const [entered, setEntered] = useState(false)
+
+  useEffect(() => setEntered(true), [])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -120,374 +120,293 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
     router.push('/')
   }
 
-  const tiers = {
-    paideia: { name: 'Paideia', greek: 'παιδεία', color: '#8a9db8' },
-    askesis: { name: 'Askesis', greek: 'ἄσκησις', color: '#b8a677' },
-    arete: { name: 'Areté', greek: 'ἀρετή', color: '#d4c494' },
-    inperson: { name: 'Stacjonarny', greek: 'κατ᾽ἰδίαν', color: '#a0a0a0' },
-  }
+  const safeLogs = recentLogs || []
+  const tier = tiers[profile?.package_tier] || { name: 'Nie przypisano', tone: 'text-text-muted border-white/10 bg-white/[0.03]' }
+  const firstName = profile?.full_name?.split(' ')?.[0] || 'Kliencie'
 
-  const tier = tiers[profile?.package_tier] || { name: 'Nie przypisano', greek: '—', color: '#8a9db8' }
-  const firstName = profile?.full_name?.split(' ')[0] || 'Wojowniku'
+  const planInfo = useMemo(() => {
+    const payload = getPlanPayload(activePlan)
+    const currentWeek = activePlan?.current_week || payload.current_week || 1
+    const maxWeeks = activePlan?.mesocycle_weeks || payload.mesocycle_weeks || 6
+    const session = getTodaySession(activePlan)
+    const rir = getTargetRir(activePlan, currentWeek)
+    const exerciseCount = session?.exercises?.length || activePlan?.exercise_count || 6
+    const estimatedTime = Math.max(45, Math.min(90, exerciseCount * 10))
+    const stageIndex = Math.min(stages.length - 1, Math.max(0, Math.ceil((currentWeek / maxWeeks) * stages.length) - 1))
 
-  const weekProgress = activePlan
-    ? { current: activePlan.current_week || 0, max: activePlan.mesocycle_weeks || 6 }
-    : { current: 0, max: 6 }
+    return {
+      currentWeek,
+      maxWeeks,
+      sessionName: session?.name || activePlan?.session_name || activePlan?.name || 'Upper A',
+      rir,
+      exerciseCount,
+      estimatedTime,
+      stageIndex,
+      mesocycleName: activePlan?.name || payload.split_name || 'Podstawa',
+      isRestDay: activePlan && !session && new Date().getDay() === 0,
+    }
+  }, [activePlan])
 
-  const weekSessions = recentLogs.filter(log => {
-    if (!log.session_date) return false
-    const date = new Date(log.session_date)
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    return date > weekAgo
-  }).length
+  const heroStatus = activePlan
+    ? `Dzisiaj: ${planInfo.sessionName} · Tydzień ${planInfo.currentWeek}/${planInfo.maxWeeks} · Cel: RIR ${planInfo.rir}`
+    : 'Plan treningowy w przygotowaniu'
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
-      color: '#e8e8e8',
-      fontFamily: 'Outfit, sans-serif',
-      position: 'relative',
-    }}>
-      <Particles />
+    <div className="min-h-screen bg-bg font-body text-text">
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,rgba(212,181,112,0.13),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(71,209,140,0.08),transparent_24%)]" />
 
-      {/* TOP BAR */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(10,14,26,0.85)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(184,166,119,0.15)',
-        padding: '1rem 2rem',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '1.5rem' }}>
-          <span style={{
-            fontFamily: 'Cormorant Garamond, serif', fontSize: '1.4rem',
-            color: '#d4c494', letterSpacing: '0.35em', fontWeight: 600,
-          }}>ARETÉ</span>
-          <span style={{
-            fontSize: '0.65rem', color: 'rgba(184,166,119,0.5)',
-            letterSpacing: '0.25em', textTransform: 'uppercase',
-            paddingLeft: '1.5rem', borderLeft: '1px solid rgba(184,166,119,0.2)',
-          }}>Twój Panel</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.85rem', color: '#e8e8e8', fontWeight: 500 }}>
-              {profile?.full_name || 'Klient'}
+      <nav className="sticky top-0 z-50 border-b border-border bg-bg/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+          <button onClick={() => router.push('/client')} className="font-display text-xl font-bold tracking-[0.28em] text-gold">
+            ARETÉ
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="hidden text-right sm:block">
+              <p className="text-sm font-medium text-text">{profile?.full_name || firstName}</p>
+              <p className="text-xs text-text-muted">{profile?.email}</p>
             </div>
-            <div style={{
-              fontSize: '0.7rem', color: tier.color,
-              letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
-            }}>
+            <span className={`hidden rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] sm:inline-flex ${tier.tone}`}>
               {tier.name}
-            </div>
+            </span>
+            <button
+              onClick={handleLogout}
+              className="rounded-md border border-border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-gold-muted transition hover:border-gold hover:text-gold"
+            >
+              Wyloguj
+            </button>
           </div>
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '50%',
-            background: `linear-gradient(135deg, ${tier.color} 0%, ${tier.color}99 100%)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'Cormorant Garamond, serif', fontWeight: 700, color: '#0f1a2e',
-            fontSize: '1rem',
-          }}>
-            {firstName.charAt(0).toUpperCase()}
-          </div>
-          <button onClick={handleLogout} style={{
-            background: 'transparent',
-            border: '1px solid rgba(184,166,119,0.3)', color: 'rgba(184,166,119,0.7)',
-            padding: '0.5rem 1rem', borderRadius: '6px',
-            fontSize: '0.7rem', letterSpacing: '0.15em', cursor: 'pointer',
-            fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase',
-            transition: 'all 0.2s',
-          }}
-            onMouseEnter={e => { e.target.style.borderColor = '#b8a677'; e.target.style.color = '#d4c494' }}
-            onMouseLeave={e => { e.target.style.borderColor = 'rgba(184,166,119,0.3)'; e.target.style.color = 'rgba(184,166,119,0.7)' }}
-          >Wyloguj</button>
         </div>
       </nav>
 
-      {/* MAIN */}
-      <main style={{
-        maxWidth: '1100px', margin: '0 auto', padding: '2.5rem 2rem 4rem',
-        position: 'relative', zIndex: 1,
-      }}>
-        {/* HERO WELCOME */}
-        <div style={{
-          marginBottom: '2.5rem',
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(-8px)',
-          transition: 'all 0.6s',
-        }}>
-          <div style={{
-            fontSize: '0.7rem', color: 'rgba(184,166,119,0.5)',
-            letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '0.5rem',
-          }}>
-            {tier.greek} · χαῖρε
-          </div>
-          <h1 style={{
-            fontFamily: 'Cormorant Garamond, serif', fontSize: '2.25rem', fontWeight: 600,
-            margin: 0, letterSpacing: '0.02em',
-          }}>
-            Witaj, <span style={{ color: '#d4c494' }}>{firstName}</span>
-          </h1>
-          <p style={{ color: 'rgba(160,160,160,0.7)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            {new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
-        </div>
-
-        {/* PLAN OVERVIEW CARD */}
-        <div style={{
-          background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
-          border: '1px solid rgba(184,166,119,0.2)',
-          borderRadius: '16px',
-          padding: '2rem',
-          marginBottom: '1.5rem',
-          position: 'relative',
-          overflow: 'hidden',
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(12px)',
-          transition: 'all 0.7s 0.1s',
-        }}>
-          {/* Gold top accent */}
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-            background: 'linear-gradient(90deg, transparent, #d4c494 50%, transparent)',
-          }} />
-
-          {activePlan ? (
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1fr auto',
-              alignItems: 'center', gap: '2rem',
-            }}>
+      <main className="relative mx-auto max-w-7xl px-4 pb-28 pt-6 md:px-6 md:pb-12">
+        <section className={`fade-in grid gap-4 lg:grid-cols-[1fr_360px] ${entered ? '' : 'opacity-0'}`}>
+          <Panel className="overflow-hidden p-5 md:p-8">
+            <div className="mb-6 h-px w-full bg-[linear-gradient(90deg,transparent,#D4B570,transparent)] opacity-60" />
+            <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
               <div>
-                <div style={{
-                  fontSize: '0.65rem', color: 'rgba(184,166,119,0.6)',
-                  letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '0.75rem',
-                }}>Twój aktualny plan</div>
-                <h2 style={{
-                  fontFamily: 'Cormorant Garamond, serif', fontSize: '1.7rem', fontWeight: 600,
-                  color: '#e8e8e8', margin: 0, marginBottom: '0.5rem',
-                }}>{activePlan.name}</h2>
-                <p style={{ fontSize: '0.9rem', color: 'rgba(160,160,160,0.8)', marginBottom: '1rem' }}>
-                  Mezocykl {weekProgress.current}/{weekProgress.max} tygodni
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">
+                  {new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </p>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  {/* ← JEDYNA ZMIANA: dodany onClick */}
+                <h1 className="font-display text-4xl font-semibold leading-tight text-text md:text-6xl">
+                  Witaj, <span className="text-gold">{firstName}</span>
+                </h1>
+                <p className="mt-4 max-w-3xl text-base text-text-muted md:text-lg">{heroStatus}</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    onClick={() => router.push(activePlan ? '/client/workout' : '/client/plan')}
+                    className="pulse-gold rounded-md bg-gold px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-bg transition hover:bg-[#e0c17b]"
+                  >
+                    {activePlan ? 'Zacznij trening' : 'Zobacz plan'}
+                  </button>
                   <button
                     onClick={() => router.push('/client/plan')}
-                    style={{
-                      background: 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
-                      color: '#0f1a2e', border: 'none',
-                      padding: '0.75rem 1.5rem', borderRadius: '8px',
-                      fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 600,
-                      cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
-                      textTransform: 'uppercase',
-                      transition: 'transform 0.2s',
-                    }}
-                    onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
-                    onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
-                  >Zobacz plan →</button>
-                  <button style={{
-                    background: 'transparent', color: '#b8a677',
-                    border: '1px solid rgba(184,166,119,0.3)',
-                    padding: '0.75rem 1.5rem', borderRadius: '8px',
-                    fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 500,
-                    cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
-                    textTransform: 'uppercase',
-                  }}>Historia</button>
+                    className="rounded-md border border-border px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-gold transition hover:border-gold"
+                  >
+                    Plan
+                  </button>
                 </div>
               </div>
-              <ProgressRing value={weekProgress.current} max={weekProgress.max} label="Tydzień" />
+              <ProgressRing current={planInfo.currentWeek} max={planInfo.maxWeeks} />
             </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-              <div style={{
-                fontFamily: 'Cormorant Garamond, serif', fontSize: '3rem',
-                color: 'rgba(184,166,119,0.3)', lineHeight: 1, marginBottom: '1rem',
-              }}>∮</div>
-              <h3 style={{
-                fontFamily: 'Cormorant Garamond, serif', fontSize: '1.4rem',
-                fontWeight: 600, color: '#e8e8e8', margin: 0, marginBottom: '0.5rem',
-              }}>Plan treningowy w przygotowaniu</h3>
-              <p style={{ color: 'rgba(160,160,160,0.6)', fontSize: '0.9rem' }}>
-                Twój spersonalizowany plan pojawi się tutaj gdy trener go przygotuje.
+          </Panel>
+
+          <Panel className="p-5 md:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Today Quest</p>
+                <h2 className="mt-3 font-display text-3xl font-semibold text-text">
+                  {planInfo.isRestDay ? 'Regeneracja' : planInfo.sessionName}
+                </h2>
+              </div>
+              <span className="rounded-full border border-gold/25 bg-gold/10 px-3 py-1 text-xs font-bold text-gold">
+                +120 XP
+              </span>
+            </div>
+            <p className="mt-5 text-sm leading-6 text-text-muted">
+              {planInfo.isRestDay
+                ? 'Dzień regeneracji · Spacer + stretching'
+                : `${planInfo.exerciseCount} ćwiczeń · około ${planInfo.estimatedTime} min · cel RIR ${planInfo.rir}`}
+            </p>
+            <button
+              onClick={() => router.push('/client/workout')}
+              disabled={!activePlan}
+              className="mt-6 w-full rounded-md bg-gold py-4 text-sm font-black uppercase tracking-[0.22em] text-bg transition hover:bg-[#e0c17b] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              START
+            </button>
+          </Panel>
+        </section>
+
+        <section className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <Panel className="card-hover p-5 md:p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Campaign Progress</p>
+                <h2 className="mt-2 font-display text-3xl font-semibold text-text">Mezocykl: {planInfo.mesocycleName}</h2>
+              </div>
+              <span className="text-sm text-text-muted">{planInfo.currentWeek}/{planInfo.maxWeeks}</span>
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+              {stages.map((stage, index) => (
+                <div
+                  key={stage}
+                  className={`rounded-md border px-3 py-3 text-center text-xs font-semibold transition ${
+                    index === planInfo.stageIndex
+                      ? 'border-gold bg-gold/15 text-gold'
+                      : index < planInfo.stageIndex
+                        ? 'border-success/25 bg-success/10 text-success'
+                        : 'border-white/10 bg-white/[0.03] text-text-muted'
+                  }`}
+                >
+                  {stage}
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 h-2 overflow-hidden rounded-full bg-white/5">
+              <div
+                className="h-full rounded-full bg-gold transition-all duration-1000"
+                style={{ width: `${Math.min(100, (planInfo.currentWeek / planInfo.maxWeeks) * 100)}%` }}
+              />
+            </div>
+          </Panel>
+
+          <Panel className="card-hover p-5 md:p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Character Stats</p>
+            <div className="mt-5 space-y-4">
+              {characterStats.map(stat => (
+                <div key={stat.label}>
+                  <div className="mb-2 flex items-center justify-between text-sm">
+                    <span className="text-text">{stat.label}</span>
+                    <span className="text-text-muted">{stat.value}</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-white/5">
+                    <div
+                      className="h-full rounded-full bg-[linear-gradient(90deg,#9E8650,#D4B570)] transition-all duration-1000"
+                      style={{ width: entered ? `${stat.value}%` : 0 }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Panel>
+        </section>
+
+        <section className="mt-5 grid gap-5 lg:grid-cols-3">
+          <Panel className="card-hover p-5 md:p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Level</p>
+            <div className="mt-3 flex items-end justify-between">
+              <div>
+                <h2 className="font-display text-4xl font-semibold text-gold">3</h2>
+                <p className="text-sm uppercase tracking-[0.18em] text-text-muted">Adept</p>
+              </div>
+              <p className="text-sm text-text-muted">340/500 XP</p>
+            </div>
+            <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/5">
+              <div className="h-full w-[68%] rounded-full bg-gold" />
+            </div>
+            <div className="mt-5 space-y-2">
+              {xpHistory.map(item => (
+                <div key={item} className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-muted">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </Panel>
+
+          <Panel className="card-hover p-5 md:p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/25 bg-gold/10 font-display text-lg font-bold text-gold">
+                AP
+              </div>
+              <div>
+                <p className="font-semibold text-text">Alexander</p>
+                <p className="text-xs text-text-muted">Dzisiaj</p>
+              </div>
+            </div>
+            <p className="mt-5 text-sm leading-6 text-text-muted">
+              W tym tygodniu pilnujemy techniki w RDL.
+            </p>
+          </Panel>
+
+          <Panel className="card-hover p-5 md:p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Quick Actions</p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {[
+                { label: 'Loguj trening', href: '/client/workout', disabled: false },
+                { label: 'Check-in', href: '/client/checkin', disabled: false },
+                { label: 'Statystyki', disabled: true },
+                { label: 'Żywienie', disabled: true },
+              ].map(action => (
+                <button
+                  key={action.label}
+                  onClick={() => action.href && router.push(action.href)}
+                  disabled={action.disabled}
+                  className="rounded-md border border-border bg-surface2/70 px-3 py-4 text-left text-sm font-semibold text-text transition hover:border-gold disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  {action.label}
+                  {action.disabled && <span className="mt-1 block text-xs font-normal text-text-muted">wkrótce</span>}
+                </button>
+              ))}
+            </div>
+          </Panel>
+        </section>
+
+        <Panel className="card-hover mt-5 p-5 md:p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Recent Activity</p>
+              <h2 className="mt-2 font-display text-3xl font-semibold text-text">Historia pracy</h2>
+            </div>
+            <span className="rounded-full border border-border px-3 py-1 text-xs text-text-muted">{safeLogs.length} wpisów</span>
+          </div>
+
+          {safeLogs.length === 0 ? (
+            <div className="mt-8 rounded-lg border border-dashed border-border bg-white/[0.02] p-8 text-center">
+              <div className="text-4xl" aria-hidden="true">🦉</div>
+              <p className="mt-4 text-sm text-text-muted">
+                Jeszcze nie ma aktywności. Pierwszy trening otworzy historię.
               </p>
             </div>
+          ) : (
+            <div className="mt-6 divide-y divide-white/10">
+              {safeLogs.slice(0, 5).map(log => (
+                <div key={log.id} className="flex items-center justify-between gap-4 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 text-gold">✓</div>
+                    <div>
+                      <p className="font-medium text-text">{log.day_label || log.session_name || 'Trening ukończony'}</p>
+                      <p className="text-xs text-text-muted">Sesja treningowa</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-text-muted">{formatDate(log.session_date || log.created_at)}</span>
+                </div>
+              ))}
+            </div>
           )}
-        </div>
+        </Panel>
+      </main>
 
-        {/* QUICK ACTIONS */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem',
-          marginBottom: '2rem',
-        }}>
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-bg/90 px-2 py-2 backdrop-blur-xl md:hidden">
+        <div className="grid grid-cols-5 gap-1 text-[11px]">
           {[
-            { icon: '⚡', label: 'Loguj trening', sub: 'Nowa sesja', disabled: false, href: '/client/workout' },
-            { icon: '◈', label: 'Check-in', sub: 'Cotygodniowy', disabled: false, href: '/client/checkin' },
-            { icon: '△', label: 'Statystyki', sub: 'Postępy', disabled: true },
-            { icon: '◉', label: 'Żywienie', sub: 'Makro dnia', disabled: true },
-          ].map((action, i) => (
-            <button key={i} disabled={action.disabled} onClick={() => action.href && router.push(action.href)} style={{
-              background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
-              border: '1px solid rgba(184,166,119,0.15)',
-              borderRadius: '12px', padding: '1.25rem 1rem',
-              cursor: action.disabled ? 'not-allowed' : 'pointer',
-              textAlign: 'center',
-              opacity: action.disabled ? 0.5 : 1,
-              transition: 'all 0.25s',
-              fontFamily: 'Outfit, sans-serif',
-              color: '#e8e8e8',
-              transform: visible ? 'translateY(0)' : 'translateY(8px)',
-              transitionDelay: `${i * 50 + 200}ms`,
-            }}
-              onMouseEnter={e => {
-                if (action.disabled) return
-                e.currentTarget.style.borderColor = 'rgba(184,166,119,0.4)'
-                e.currentTarget.style.transform = 'translateY(-2px)'
-              }}
-              onMouseLeave={e => {
-                if (action.disabled) return
-                e.currentTarget.style.borderColor = 'rgba(184,166,119,0.15)'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
+            { label: 'Home', icon: '⌂', href: '/client', disabled: false },
+            { label: 'Trening', icon: '⚡', href: '/client/workout', disabled: false },
+            { label: 'Plan', icon: '▦', href: '/client/plan', disabled: false },
+            { label: 'Check-in', icon: '✓', href: '/client/checkin', disabled: false },
+            { label: 'Profil', icon: '○', disabled: true },
+          ].map(item => (
+            <button
+              key={item.label}
+              onClick={() => item.href && router.push(item.href)}
+              disabled={item.disabled}
+              className="flex flex-col items-center gap-1 rounded-md px-2 py-2 text-text-muted transition hover:bg-white/5 hover:text-gold disabled:opacity-40"
             >
-              <div style={{
-                fontSize: '1.5rem', color: '#b8a677', marginBottom: '0.5rem',
-                fontFamily: 'Cormorant Garamond, serif',
-              }}>{action.icon}</div>
-              <div style={{
-                fontSize: '0.78rem', fontWeight: 500, letterSpacing: '0.08em',
-                textTransform: 'uppercase', marginBottom: '0.15rem',
-              }}>{action.label}</div>
-              <div style={{ fontSize: '0.65rem', color: 'rgba(160,160,160,0.6)' }}>
-                {action.disabled ? 'wkrótce' : action.sub}
-              </div>
+              <span className="text-base">{item.icon}</span>
+              <span>{item.label}</span>
             </button>
           ))}
         </div>
-
-        <button
-          onClick={() => router.push('/client/questionnaire')}
-          style={{
-            background: 'transparent',
-            border: '1px solid rgba(184,166,119,0.2)',
-            color: 'rgba(184,166,119,0.6)',
-            padding: '0.6rem 1.2rem', borderRadius: 6,
-            fontSize: '0.75rem', cursor: 'pointer',
-            fontFamily: 'Outfit, sans-serif',
-            letterSpacing: '0.1em', textTransform: 'uppercase',
-            width: '100%', marginBottom: '1rem',
-          }}
-        >
-          Wypełnij ankietę onboardingową
-        </button>
-
-        <Meander />
-
-        {/* STATS GRID */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem',
-          marginBottom: '2rem', marginTop: '2rem',
-        }}>
-          {/* Recent sessions */}
-          <div style={{
-            background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
-            border: '1px solid rgba(184,166,119,0.12)',
-            borderRadius: '12px', padding: '1.75rem',
-          }}>
-            <div style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-              marginBottom: '1.25rem',
-            }}>
-              <div>
-                <div style={{
-                  fontSize: '0.65rem', color: 'rgba(184,166,119,0.6)',
-                  letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.25rem',
-                }}>Ostatnie treningi</div>
-                <div style={{
-                  fontFamily: 'Cormorant Garamond, serif',
-                  fontSize: '1.25rem', fontWeight: 600, color: '#e8e8e8',
-                }}>Sesje</div>
-              </div>
-              <div style={{
-                background: 'rgba(184,166,119,0.1)', padding: '0.3rem 0.7rem',
-                borderRadius: '99px', fontSize: '0.7rem', color: '#d4c494',
-                letterSpacing: '0.1em', fontWeight: 500,
-              }}>
-                {weekSessions} w tym tyg.
-              </div>
-            </div>
-            {recentLogs.length === 0 ? (
-              <div style={{ padding: '1.5rem 0', textAlign: 'center' }}>
-                <div style={{
-                  fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem',
-                  color: 'rgba(184,166,119,0.25)', lineHeight: 1, marginBottom: '0.5rem',
-                }}>○</div>
-                <p style={{ color: 'rgba(160,160,160,0.6)', fontSize: '0.85rem' }}>
-                  Brak zalogowanych treningów.<br />Zacznij logować żeby śledzić postępy.
-                </p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {recentLogs.slice(0, 5).map(log => (
-                  <div key={log.id} style={{
-                    padding: '0.75rem 1rem',
-                    background: 'rgba(184,166,119,0.04)',
-                    borderRadius: '8px',
-                    borderLeft: '2px solid rgba(184,166,119,0.4)',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  }}>
-                    <span style={{ fontSize: '0.85rem', color: '#e8e8e8', fontWeight: 500 }}>
-                      {log.day_label || 'Trening'}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: 'rgba(160,160,160,0.6)' }}>
-                      {log.session_date ? new Date(log.session_date).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }) : '—'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Philosophy / Motivation */}
-          <div style={{
-            background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
-            border: '1px solid rgba(184,166,119,0.12)',
-            borderRadius: '12px', padding: '1.75rem',
-            display: 'flex', flexDirection: 'column', justifyContent: 'center',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', right: '-40px', bottom: '-40px',
-              fontFamily: 'Cormorant Garamond, serif', fontSize: '8rem',
-              color: 'rgba(184,166,119,0.04)', lineHeight: 1, fontStyle: 'italic',
-            }}>ἀ</div>
-            <div style={{
-              fontSize: '0.65rem', color: 'rgba(184,166,119,0.6)',
-              letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.75rem',
-            }}>Maksyma dnia</div>
-            <blockquote style={{
-              fontFamily: 'Cormorant Garamond, serif',
-              fontSize: '1.25rem', lineHeight: 1.5, color: '#e8e8e8',
-              fontStyle: 'italic', margin: 0, position: 'relative', zIndex: 1,
-            }}>
-              "Ἀρχὴ ἥμισυ παντός"
-            </blockquote>
-            <p style={{
-              fontSize: '0.8rem', color: 'rgba(160,160,160,0.7)',
-              marginTop: '0.75rem', lineHeight: 1.5, position: 'relative', zIndex: 1,
-            }}>
-              Początek to połowa wszystkiego.
-            </p>
-            <div style={{
-              fontSize: '0.7rem', color: 'rgba(184,166,119,0.5)',
-              marginTop: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase',
-              position: 'relative', zIndex: 1,
-            }}>— Πυθαγόρας</div>
-          </div>
-        </div>
-      </main>
+      </nav>
     </div>
   )
 }

@@ -2,13 +2,22 @@
 /* Navy + Gold | Tighter layout, side decorations */
 
 :root {
+  --bg: #070B14;
+  --surface: #0D1424;
+  --surface-2: #111B2E;
+  --gold-muted: #9E8650;
+  --text: #F4EFE3;
+  --success: #47D18C;
+  --danger: #EF6B73;
+  --amber: #C05000;
+
   --bg-primary: #0f1a2e;
   --bg-secondary: #131f36;
   --bg-tertiary: #182743;
   --bg-card: #1a2a4a;
   --bg-card-hover: #1e3154;
 
-  --gold: #d4af37;
+  --gold: #D4B570;
   --gold-dim: #b8973a;
   --gold-bright: #e8c84a;
   --gold-glow: rgba(212, 175, 55, 0.15);
@@ -16,9 +25,9 @@
 
   --text-primary: #e8e4dc;
   --text-secondary: #9ca8bf;
-  --text-muted: #5a6a85;
+  --text-muted: #8F9AAF;
 
-  --border: rgba(212, 175, 55, 0.1);
+  --border: rgba(212, 181, 112, 0.18);
   --border-hover: rgba(212, 175, 55, 0.3);
 
   --font-heading: 'Cormorant Garamond', Georgia, serif;
@@ -815,4 +824,76 @@ img { max-width: 100%; display: block; }
 
 @media (max-width: 700px) {
   .footer-content { flex-direction: column; gap: 1.5rem; }
+}
+
+/* ===== Areté app microinteractions ===== */
+.card-hover {
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+}
+
+.fade-in {
+  animation: fade-in-up 0.65s ease both;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pulse-gold {
+  animation: pulse-gold 2.8s ease-in-out infinite;
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(212, 181, 112, 0);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(212, 181, 112, 0.22);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(212, 181, 112, 0.12), transparent);
+  animation: skeleton-shimmer 1.35s infinite;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover,
+  .fade-in,
+  .pulse-gold,
+  .skeleton::after {
+    animation: none;
+    transition: none;
+  }
+
+  .card-hover:hover {
+    transform: none;
+  }
 }
