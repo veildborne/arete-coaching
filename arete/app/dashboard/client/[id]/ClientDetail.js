@@ -67,7 +67,131 @@ function EmptyState({ text }) {
   )
 }
 
-export default function ClientDetail({ client, plans, logs, checkins, coachName }) {
+// ─── Ankieta viewer ───────────────────────────────────────────────────────────
+
+const BLOCK_LABELS = {
+  imie: 'Imię i nazwisko',
+  wiek: 'Wiek',
+  plec: 'Płeć',
+  wzrost_cm: 'Wzrost (cm)',
+  waga_kg: 'Waga (kg)',
+  cel: 'Główny cel',
+  cel_wagowy: 'Cel wagowy',
+  deadline: 'Deadline',
+  priorytetowe_partie: 'Priorytetowe partie',
+  staz: 'Staż treningowy',
+  aktualny_split: 'Aktualny split',
+  pr_squat: 'PR Przysiad',
+  pr_bench: 'PR Wyciskanie',
+  pr_deadlift: 'PR Martwy ciąg',
+  pr_ohp: 'PR OHP',
+  pr_row: 'PR Wiosłowanie',
+  programy_wczesniej: 'Programy wcześniej',
+  kontuzje_aktualne: 'Aktualne kontuzje',
+  kontuzje_przeszle: 'Przeszłe kontuzje',
+  cwiczenia_unikane: 'Unikane ćwiczenia',
+  mobilnosc: 'Problemy z mobilnością',
+  dni_tydzien: 'Dni / tydzień',
+  czas_sesji: 'Czas sesji',
+  miejsce_treningu: 'Miejsce treningu',
+  brak_sprzetu: 'Brak sprzętu',
+  cardio_typ: 'Cardio',
+  cardio_ile: 'Cardio ile razy',
+  dieta_aktualna: 'Dieta aktualna',
+  posilki_dziennie: 'Posiłki / dzień',
+  dieta_doswiadczenie: 'Doświadczenie z dietą',
+  alergie: 'Alergie',
+  suplementy: 'Suplementy',
+  praca: 'Typ pracy',
+  sen: 'Sen',
+  stres: 'Poziom stresu',
+  dodatkowe_info: 'Dodatkowe info',
+}
+
+const BLOCKS_ORDER = [
+  { title: 'Dane podstawowe', keys: ['imie','wiek','plec','wzrost_cm','waga_kg'] },
+  { title: 'Cel treningowy', keys: ['cel','cel_wagowy','deadline','priorytetowe_partie'] },
+  { title: 'Historia treningowa', keys: ['staz','aktualny_split','pr_squat','pr_bench','pr_deadlift','pr_ohp','pr_row','programy_wczesniej'] },
+  { title: 'Kontuzje i ograniczenia', keys: ['kontuzje_aktualne','kontuzje_przeszle','cwiczenia_unikane','mobilnosc'] },
+  { title: 'Dostępność i sprzęt', keys: ['dni_tydzien','czas_sesji','miejsce_treningu','brak_sprzetu','cardio_typ','cardio_ile'] },
+  { title: 'Żywienie', keys: ['dieta_aktualna','posilki_dziennie','dieta_doswiadczenie','alergie','suplementy'] },
+  { title: 'Styl życia', keys: ['praca','sen','stres','dodatkowe_info'] },
+]
+
+function AnkietaViewer({ questionnaire }) {
+  if (!questionnaire) return (
+    <div style={{
+      padding: '32px 20px', textAlign: 'center',
+      border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 10,
+    }}>
+      <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.3 }}>∅</div>
+      <div style={{ color: '#444', fontSize: 13 }}>Klient nie wypełnił jeszcze ankiety.</div>
+    </div>
+  )
+
+  const data = questionnaire.data || {}
+
+  return (
+    <div>
+      <div style={{
+        fontSize: 11, color: 'rgba(184,166,119,0.5)',
+        marginBottom: 16,
+        letterSpacing: '0.05em',
+      }}>
+        Wypełniono: {formatDate(questionnaire.created_at)}
+      </div>
+
+      {BLOCKS_ORDER.map(block => {
+        const entries = block.keys
+          .map(k => ({ label: BLOCK_LABELS[k] || k, value: data[k] }))
+          .filter(e => e.value)
+
+        if (entries.length === 0) return null
+
+        return (
+          <div key={block.title} style={{
+            background: '#1a1a1a',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 10, padding: '16px 18px',
+            marginBottom: 10,
+          }}>
+            <div style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 14, color: '#b8a677', fontWeight: 600,
+              marginBottom: 12, paddingBottom: 8,
+              borderBottom: '1px solid rgba(255,255,255,0.05)',
+            }}>
+              {block.title}
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: 8,
+            }}>
+              {entries.map(({ label, value }) => (
+                <div key={label} style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  borderRadius: 6, padding: '8px 10px',
+                }}>
+                  <div style={{ fontSize: 10, color: '#555', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    {label}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#e8e8e8', lineHeight: 1.4 }}>
+                    {String(value)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── main ─────────────────────────────────────────────────────────────────────
+
+export default function ClientDetail({ client, plans, logs, checkins, questionnaire, coachName }) {
   const router = useRouter()
   const [tab, setTab] = useState('plans')
 
@@ -76,9 +200,10 @@ export default function ClientDetail({ client, plans, logs, checkins, coachName 
   const initials = getInitials(client.full_name, client.email)
 
   const TABS = [
-    { id: 'plans',    label: 'Plany treningowe',  count: plans.length },
-    { id: 'logs',     label: 'Historia treningów', count: logs.length },
-    { id: 'checkins', label: 'Check-iny',          count: checkins.length },
+    { id: 'plans',       label: 'Plany treningowe',  count: plans.length },
+    { id: 'logs',        label: 'Historia treningów', count: logs.length },
+    { id: 'checkins',    label: 'Check-iny',          count: checkins.length },
+    { id: 'questionnaire', label: 'Ankieta',          count: questionnaire ? 1 : 0 },
   ]
 
   return (
@@ -155,6 +280,11 @@ export default function ClientDetail({ client, plans, logs, checkins, coachName 
                 <Pill color={status.color} bg={`${status.color}15`} border={`${status.color}40`}>
                   {status.label}
                 </Pill>
+                {questionnaire && (
+                  <Pill color="#52B788" bg="rgba(82,183,136,0.1)" border="rgba(82,183,136,0.3)">
+                    Ankieta ✓
+                  </Pill>
+                )}
               </div>
               <div style={{ fontSize: 13, color: '#555', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                 <span>{client.email}</span>
@@ -197,15 +327,15 @@ export default function ClientDetail({ client, plans, logs, checkins, coachName 
         {tab === 'plans' && (
           <Section title="Plany treningowe" action={
             <button
-  onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)}
-  style={{
-    fontSize: 12, padding: '7px 16px', borderRadius: 99,
-    border: '1px solid rgba(184,166,119,0.3)', background: 'transparent',
-    color: '#b8a677', cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
-  }}
-  onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,166,119,0.08)'}
-  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
->+ Nowy plan</button>
+              onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)}
+              style={{
+                fontSize: 12, padding: '7px 16px', borderRadius: 99,
+                border: '1px solid rgba(184,166,119,0.3)', background: 'transparent',
+                color: '#b8a677', cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,166,119,0.08)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >+ Nowy plan</button>
           }>
             {plans.length === 0 ? (
               <EmptyState text="Brak planów. Kliknij '+ Nowy plan' żeby dodać pierwszy." />
@@ -328,6 +458,13 @@ export default function ClientDetail({ client, plans, logs, checkins, coachName 
                 ))}
               </div>
             )}
+          </Section>
+        )}
+
+        {/* ANKIETA TAB */}
+        {tab === 'questionnaire' && (
+          <Section title="Ankieta onboardingowa">
+            <AnkietaViewer questionnaire={questionnaire} />
           </Section>
         )}
 

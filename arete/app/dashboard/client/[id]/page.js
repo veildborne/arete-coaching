@@ -47,12 +47,21 @@ export default async function ClientPage({ params }) {
     .order('created_at', { ascending: false })
     .limit(10)
 
+  const { data: questionnaire } = await admin
+    .from('questionnaires')
+    .select('*')
+    .eq('client_id', params.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   return (
     <ClientDetail
       client={client}
       plans={plans || []}
       logs={logs || []}
       checkins={checkins || []}
+      questionnaire={questionnaire || null}
       coachName={coach?.full_name}
     />
   )
