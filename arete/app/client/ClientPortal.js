@@ -4,33 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 
-const tiers = {
-  paideia: { name: 'Paideia', tone: 'text-text-muted border-white/10 bg-white/[0.03]' },
-  askesis: { name: 'Askesis', tone: 'text-gold border-gold/25 bg-gold/10' },
-  arete: { name: 'Areté', tone: 'text-gold border-gold/35 bg-gold/15' },
-  inperson: { name: 'Stacjonarny', tone: 'text-text border-white/10 bg-white/[0.04]' },
-}
-
 const stages = ['Fundament', 'Akumulacja', 'Wzrost', 'Intensyfikacja', 'Próba', 'Regeneracja']
-
-// MOCK — do podpięcia z Supabase
-const characterStats = [
-  { label: 'Strength', value: 60 },
-  { label: 'Consistency', value: 80 },
-  { label: 'Recovery', value: 45 },
-  { label: 'Nutrition', value: 70 },
-  { label: 'Technique', value: 55 },
-]
-
-// MOCK — do podpięcia z Supabase
-const xpHistory = ['+80 XP Trening ukończony', '+40 XP Check-in']
-
-function getInitials(name, email) {
-  const source = name || email || 'Areté'
-  const parts = source.trim().split(/\s+/)
-  if (parts.length > 1) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-  return source.slice(0, 2).toUpperCase()
-}
 
 function getPlanPayload(activePlan) {
   return activePlan?.plan_data || activePlan?.plan_json || activePlan?.generated_plan || activePlan?.plan || activePlan || {}
@@ -70,44 +44,6 @@ function formatDate(date) {
   return new Date(date).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })
 }
 
-function ProgressRing({ current, max }) {
-  const pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0
-  const circumference = 2 * Math.PI * 38
-  const offset = circumference - (pct / 100) * circumference
-
-  return (
-    <div className="relative h-28 w-28 shrink-0">
-      <svg className="-rotate-90" width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
-        <circle cx="56" cy="56" r="38" fill="none" stroke="rgba(212,181,112,0.12)" strokeWidth="8" />
-        <circle
-          cx="56"
-          cy="56"
-          r="38"
-          fill="none"
-          stroke="#D4B570"
-          strokeLinecap="round"
-          strokeWidth="8"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="transition-all duration-1000 ease-out"
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-display text-2xl font-semibold text-gold">{pct}%</span>
-        <span className="text-[10px] uppercase tracking-[0.18em] text-text-muted">mezocykl</span>
-      </div>
-    </div>
-  )
-}
-
-function Panel({ children, className = '' }) {
-  return (
-    <section className={`rounded-lg border border-border bg-surface/85 shadow-2xl shadow-black/20 ${className}`}>
-      {children}
-    </section>
-  )
-}
-
 export default function ClientPortal({ profile, activePlan, recentLogs }) {
   const router = useRouter()
   const [entered, setEntered] = useState(false)
@@ -121,7 +57,6 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
   }
 
   const safeLogs = recentLogs || []
-  const tier = tiers[profile?.package_tier] || { name: 'Nie przypisano', tone: 'text-text-muted border-white/10 bg-white/[0.03]' }
   const firstName = profile?.full_name?.split(' ')?.[0] || 'Kliencie'
 
   const planInfo = useMemo(() => {
@@ -147,265 +82,117 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
     }
   }, [activePlan])
 
-  const heroStatus = activePlan
-    ? `Dzisiaj: ${planInfo.sessionName} · Tydzień ${planInfo.currentWeek}/${planInfo.maxWeeks} · Cel: RIR ${planInfo.rir}`
-    : 'Plan treningowy w przygotowaniu'
+  const todayDate = new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="min-h-screen bg-bg font-body text-text">
-      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,rgba(212,181,112,0.13),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(71,209,140,0.08),transparent_24%)]" />
-
-      <nav className="sticky top-0 z-50 border-b border-border bg-bg/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
-          <button onClick={() => router.push('/client')} className="font-display text-xl font-bold tracking-[0.28em] text-gold">
-            ARETÉ
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium text-text">{profile?.full_name || firstName}</p>
-              <p className="text-xs text-text-muted">{profile?.email}</p>
-            </div>
-            <span className={`hidden rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] sm:inline-flex ${tier.tone}`}>
-              {tier.name}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="rounded-md border border-border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-gold-muted transition hover:border-gold hover:text-gold"
-            >
-              Wyloguj
-            </button>
-          </div>
+    <div className="min-h-screen bg-[#070B14] text-[#F4EFE3] font-sans pb-20">
+      <nav className="sticky top-0 z-50 bg-[#070B14]/80 backdrop-blur-md border-b border-[rgba(212,181,112,0.18)] px-6 py-4 flex items-center justify-between">
+        <span className="font-serif text-2xl text-[#D4B570] tracking-widest">ARETÉ</span>
+        <div className="flex items-center gap-3 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
+          <span className="text-sm text-[#8F9AAF]">{firstName}</span>
+          <button onClick={handleLogout} className="text-xs border border-[rgba(212,181,112,0.3)] text-[#D4B570] px-3 py-1.5 rounded-lg hover:bg-[#D4B570] hover:text-[#070B14] transition">Wyloguj</button>
         </div>
       </nav>
 
-      <main className="relative mx-auto max-w-7xl px-4 pb-28 pt-6 md:px-6 md:pb-12">
-        <section className={`fade-in grid gap-4 lg:grid-cols-[1fr_360px] ${entered ? '' : 'opacity-0'}`}>
-          <Panel className="overflow-hidden p-5 md:p-8">
-            <div className="mb-6 h-px w-full bg-[linear-gradient(90deg,transparent,#D4B570,transparent)] opacity-60" />
-            <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-              <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">
-                  {new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </p>
-                <h1 className="font-display text-4xl font-semibold leading-tight text-text md:text-6xl">
-                  Witaj, <span className="text-gold">{firstName}</span>
-                </h1>
-                <p className="mt-4 max-w-3xl text-base text-text-muted md:text-lg">{heroStatus}</p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <button
-                    onClick={() => router.push(activePlan ? '/client/workout' : '/client/plan')}
-                    className="pulse-gold rounded-md bg-gold px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-bg transition hover:bg-[#e0c17b]"
-                  >
-                    {activePlan ? 'Zacznij trening' : 'Zobacz plan'}
-                  </button>
-                  <button
-                    onClick={() => router.push('/client/plan')}
-                    className="rounded-md border border-border px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-gold transition hover:border-gold"
-                  >
-                    Plan
-                  </button>
-                </div>
-              </div>
-              <ProgressRing current={planInfo.currentWeek} max={planInfo.maxWeeks} />
-            </div>
-          </Panel>
+      <main className={`max-w-2xl mx-auto px-4 py-8 space-y-6 transition-opacity duration-500 ${entered ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="block bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 m-0 text-[#F4EFE3]">
+          <p className="text-xs text-[#D4B570] tracking-widest uppercase mb-1">ARETÉ · ΧΑΙΡΕ</p>
+          <h1 className="text-3xl font-serif mb-1">Witaj, <span className="text-[#D4B570]">{firstName}</span></h1>
+          <p className="text-sm text-[#8F9AAF] mb-4">{todayDate}</p>
+          <p className="text-sm text-[#8F9AAF] mb-4">
+            {activePlan ? `${planInfo.mesocycleName} · tydzień ${planInfo.currentWeek}/${planInfo.maxWeeks}` : 'Plan treningowy w przygotowaniu'}
+          </p>
+          <button onClick={() => router.push(activePlan ? '/client/workout' : '/client/plan')} className="bg-[#D4B570] text-[#070B14] font-bold px-6 py-3 rounded-xl hover:opacity-90 transition text-sm">Zobacz plan →</button>
+        </div>
 
-          <Panel className="p-5 md:p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Today Quest</p>
-                <h2 className="mt-3 font-display text-3xl font-semibold text-text">
-                  {planInfo.isRestDay ? 'Regeneracja' : planInfo.sessionName}
-                </h2>
-              </div>
-              <span className="rounded-full border border-gold/25 bg-gold/10 px-3 py-1 text-xs font-bold text-gold">
-                +120 XP
-              </span>
-            </div>
-            <p className="mt-5 text-sm leading-6 text-text-muted">
-              {planInfo.isRestDay
-                ? 'Dzień regeneracji · Spacer + stretching'
-                : `${planInfo.exerciseCount} ćwiczeń · około ${planInfo.estimatedTime} min · cel RIR ${planInfo.rir}`}
-            </p>
-            <button
-              onClick={() => router.push('/client/workout')}
-              disabled={!activePlan}
-              className="mt-6 w-full rounded-md bg-gold py-4 text-sm font-black uppercase tracking-[0.22em] text-bg transition hover:bg-[#e0c17b] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              START
-            </button>
-          </Panel>
-        </section>
-
-        <section className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-          <Panel className="card-hover p-5 md:p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Campaign Progress</p>
-                <h2 className="mt-2 font-display text-3xl font-semibold text-text">Mezocykl: {planInfo.mesocycleName}</h2>
-              </div>
-              <span className="text-sm text-text-muted">{planInfo.currentWeek}/{planInfo.maxWeeks}</span>
-            </div>
-            <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-              {stages.map((stage, index) => (
-                <div
-                  key={stage}
-                  className={`rounded-md border px-3 py-3 text-center text-xs font-semibold transition ${
-                    index === planInfo.stageIndex
-                      ? 'border-gold bg-gold/15 text-gold'
-                      : index < planInfo.stageIndex
-                        ? 'border-success/25 bg-success/10 text-success'
-                        : 'border-white/10 bg-white/[0.03] text-text-muted'
-                  }`}
-                >
-                  {stage}
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 h-2 overflow-hidden rounded-full bg-white/5">
-              <div
-                className="h-full rounded-full bg-gold transition-all duration-1000"
-                style={{ width: `${Math.min(100, (planInfo.currentWeek / planInfo.maxWeeks) * 100)}%` }}
-              />
-            </div>
-          </Panel>
-
-          <Panel className="card-hover p-5 md:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Character Stats</p>
-            <div className="mt-5 space-y-4">
-              {characterStats.map(stat => (
-                <div key={stat.label}>
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="text-text">{stat.label}</span>
-                    <span className="text-text-muted">{stat.value}</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-white/5">
-                    <div
-                      className="h-full rounded-full bg-[linear-gradient(90deg,#9E8650,#D4B570)] transition-all duration-1000"
-                      style={{ width: entered ? `${stat.value}%` : 0 }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Panel>
-        </section>
-
-        <section className="mt-5 grid gap-5 lg:grid-cols-3">
-          <Panel className="card-hover p-5 md:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Level</p>
-            <div className="mt-3 flex items-end justify-between">
-              <div>
-                <h2 className="font-display text-4xl font-semibold text-gold">3</h2>
-                <p className="text-sm uppercase tracking-[0.18em] text-text-muted">Adept</p>
-              </div>
-              <p className="text-sm text-text-muted">340/500 XP</p>
-            </div>
-            <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/5">
-              <div className="h-full w-[68%] rounded-full bg-gold" />
-            </div>
-            <div className="mt-5 space-y-2">
-              {xpHistory.map(item => (
-                <div key={item} className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-muted">
-                  {item}
-                </div>
-              ))}
-            </div>
-          </Panel>
-
-          <Panel className="card-hover p-5 md:p-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/25 bg-gold/10 font-display text-lg font-bold text-gold">
-                AP
-              </div>
-              <div>
-                <p className="font-semibold text-text">Alexander</p>
-                <p className="text-xs text-text-muted">Dzisiaj</p>
-              </div>
-            </div>
-            <p className="mt-5 text-sm leading-6 text-text-muted">
-              W tym tygodniu pilnujemy techniki w RDL.
-            </p>
-          </Panel>
-
-          <Panel className="card-hover p-5 md:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Quick Actions</p>
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              {[
-                { label: 'Loguj trening', href: '/client/workout', disabled: false },
-                { label: 'Check-in', href: '/client/checkin', disabled: false },
-                { label: 'Statystyki', disabled: true },
-                { label: 'Żywienie', disabled: true },
-              ].map(action => (
-                <button
-                  key={action.label}
-                  onClick={() => action.href && router.push(action.href)}
-                  disabled={action.disabled}
-                  className="rounded-md border border-border bg-surface2/70 px-3 py-4 text-left text-sm font-semibold text-text transition hover:border-gold disabled:cursor-not-allowed disabled:opacity-45"
-                >
-                  {action.label}
-                  {action.disabled && <span className="mt-1 block text-xs font-normal text-text-muted">wkrótce</span>}
-                </button>
-              ))}
-            </div>
-          </Panel>
-        </section>
-
-        <Panel className="card-hover mt-5 p-5 md:p-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-muted">Recent Activity</p>
-              <h2 className="mt-2 font-display text-3xl font-semibold text-text">Historia pracy</h2>
-            </div>
-            <span className="rounded-full border border-border px-3 py-1 text-xs text-text-muted">{safeLogs.length} wpisów</span>
+        <div className="block bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 m-0 text-[#F4EFE3]">
+          <p className="text-xs text-[#8F9AAF] uppercase tracking-widest mb-3">Dzisiejszy quest</p>
+          <h2 className="text-2xl font-serif text-[#D4B570] mb-2">{planInfo.isRestDay ? 'Regeneracja' : planInfo.sessionName}</h2>
+          <div className="flex gap-4 text-sm text-[#8F9AAF] mb-4 px-0 py-0 m-0 bg-transparent">
+            <span>{planInfo.exerciseCount} ćwiczeń</span>
+            <span>~{planInfo.estimatedTime} min</span>
+            <span>RIR {planInfo.rir}</span>
+            <span className="text-[#47D18C]">+120 XP</span>
           </div>
+          <button onClick={() => router.push('/client/workout')} disabled={!activePlan} className="w-full bg-[#D4B570] text-[#070B14] font-bold py-4 rounded-xl hover:opacity-90 transition text-lg tracking-wide disabled:opacity-50">START</button>
+        </div>
 
+        <div className="block bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 m-0 text-[#F4EFE3]">
+          <div className="flex justify-between items-center mb-3 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
+            <div className="block px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
+              <p className="text-xs text-[#8F9AAF] uppercase tracking-widest">Poziom</p>
+              <p className="text-2xl font-serif text-[#D4B570]">3 · Adept</p>
+            </div>
+            <span className="text-sm text-[#8F9AAF]">340 / 500 XP</span>
+          </div>
+          <div className="block w-full bg-[#111B2E] rounded-full h-2 p-0 m-0 text-[#F4EFE3]">
+            <div className="block bg-[#D4B570] h-2 rounded-full p-0 m-0 text-[#070B14] w-[68%]"></div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 p-0 m-0 bg-transparent text-[#F4EFE3]">
+          <button onClick={() => router.push('/client/workout')} className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 text-center hover:border-[#D4B570] transition">
+            <div className="block text-2xl mb-2 p-0 bg-transparent text-[#F4EFE3]">⚡</div>
+            <p className="text-sm font-medium">Loguj trening</p>
+            <p className="text-xs text-[#8F9AAF]">Nowa sesja</p>
+          </button>
+          <button onClick={() => router.push('/client/checkin')} className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 text-center hover:border-[#D4B570] transition">
+            <div className="block text-2xl mb-2 p-0 bg-transparent text-[#F4EFE3]">◈</div>
+            <p className="text-sm font-medium">Check-in</p>
+            <p className="text-xs text-[#8F9AAF]">Cotygodniowy</p>
+          </button>
+        </div>
+
+        <div className="block bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 m-0 text-[#F4EFE3]">
+          <p className="text-xs text-[#8F9AAF] uppercase tracking-widest mb-3">Wiadomość od trenera</p>
+          <div className="flex gap-3 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
+            <div className="w-10 h-10 rounded-full bg-[#D4B570] flex items-center justify-center text-[#070B14] font-bold text-sm flex-shrink-0 p-0 m-0">AP</div>
+            <div className="block px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
+              <p className="text-sm font-medium text-[#D4B570] mb-1">Alexander</p>
+              <p className="text-sm text-[#8F9AAF]">W tym tygodniu pilnujemy techniki w RDL.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="block bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 m-0 text-[#F4EFE3]">
+          <p className="text-xs text-[#8F9AAF] uppercase tracking-widest mb-4">Ostatnia aktywność</p>
           {safeLogs.length === 0 ? (
-            <div className="mt-8 rounded-lg border border-dashed border-border bg-white/[0.02] p-8 text-center">
-              <div className="text-4xl" aria-hidden="true">🦉</div>
-              <p className="mt-4 text-sm text-text-muted">
-                Jeszcze nie ma aktywności. Pierwszy trening otworzy historię.
-              </p>
+            <div className="block text-center py-8 px-0 m-0 bg-transparent text-[#F4EFE3]">
+              <p className="text-[#8F9AAF] text-sm">Jeszcze nie ma aktywności.<br />Pierwszy trening otworzy historię.</p>
             </div>
           ) : (
-            <div className="mt-6 divide-y divide-white/10">
+            <div className="block divide-y divide-[rgba(212,181,112,0.18)] p-0 m-0 bg-transparent text-[#F4EFE3]">
               {safeLogs.slice(0, 5).map(log => (
-                <div key={log.id} className="flex items-center justify-between gap-4 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 text-gold">✓</div>
-                    <div>
-                      <p className="font-medium text-text">{log.day_label || log.session_name || 'Trening ukończony'}</p>
-                      <p className="text-xs text-text-muted">Sesja treningowa</p>
-                    </div>
+                <div key={log.id} className="flex items-center justify-between gap-4 py-3 px-0 m-0 bg-transparent text-[#F4EFE3]">
+                  <div className="block px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
+                    <p className="text-sm font-medium">{log.day_label || log.session_name || 'Trening ukończony'}</p>
+                    <p className="text-xs text-[#8F9AAF]">Sesja treningowa</p>
                   </div>
-                  <span className="text-sm text-text-muted">{formatDate(log.session_date || log.created_at)}</span>
+                  <span className="text-[#8F9AAF] text-sm">{formatDate(log.session_date || log.created_at)}</span>
                 </div>
               ))}
             </div>
           )}
-        </Panel>
+        </div>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-bg/90 px-2 py-2 backdrop-blur-xl md:hidden">
-        <div className="grid grid-cols-5 gap-1 text-[11px]">
-          {[
-            { label: 'Home', icon: '⌂', href: '/client', disabled: false },
-            { label: 'Trening', icon: '⚡', href: '/client/workout', disabled: false },
-            { label: 'Plan', icon: '▦', href: '/client/plan', disabled: false },
-            { label: 'Check-in', icon: '✓', href: '/client/checkin', disabled: false },
-            { label: 'Profil', icon: '○', disabled: true },
-          ].map(item => (
-            <button
-              key={item.label}
-              onClick={() => item.href && router.push(item.href)}
-              disabled={item.disabled}
-              className="flex flex-col items-center gap-1 rounded-md px-2 py-2 text-text-muted transition hover:bg-white/5 hover:text-gold disabled:opacity-40"
-            >
-              <span className="text-base">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </div>
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#070B14]/95 backdrop-blur-md border-t border-[rgba(212,181,112,0.18)] px-4 py-3 flex justify-around z-50">
+        <button onClick={() => router.push('/client')} className="flex flex-col items-center gap-1 text-[#D4B570]">
+          <span className="text-lg">⌂</span>
+          <span className="text-xs">Home</span>
+        </button>
+        <button onClick={() => router.push('/client/workout')} className="flex flex-col items-center gap-1 text-[#8F9AAF] hover:text-[#D4B570] transition">
+          <span className="text-lg">⚡</span>
+          <span className="text-xs">Trening</span>
+        </button>
+        <button onClick={() => router.push('/client/plan')} className="flex flex-col items-center gap-1 text-[#8F9AAF] hover:text-[#D4B570] transition">
+          <span className="text-lg">▦</span>
+          <span className="text-xs">Plan</span>
+        </button>
+        <button onClick={() => router.push('/client/checkin')} className="flex flex-col items-center gap-1 text-[#8F9AAF] hover:text-[#D4B570] transition">
+          <span className="text-lg">✓</span>
+          <span className="text-xs">Check-in</span>
+        </button>
       </nav>
     </div>
   )
