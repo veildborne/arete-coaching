@@ -85,7 +85,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
   const todayDate = new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="min-h-screen bg-[#070B14] text-[#F4EFE3] font-sans pb-20">
+    <div className="dashboard-root min-h-screen bg-[#070B14] text-[#F4EFE3] font-sans pb-20">
       <nav className="sticky top-0 z-50 bg-[#070B14]/80 backdrop-blur-md border-b border-[rgba(212,181,112,0.18)] px-6 py-4 flex items-center justify-between">
         <span className="font-serif text-2xl text-[#D4B570] tracking-widest">ARETÉ</span>
         <div className="flex items-center gap-3 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">

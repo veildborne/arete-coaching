@@ -65,7 +65,7 @@ export default function DashboardClient({ profile, clients }) {
   }, [safeClients])
 
   return (
-    <div className="min-h-screen bg-[#070B14] text-[#F4EFE3] font-sans">
+    <div className="dashboard-root min-h-screen bg-[#070B14] text-[#F4EFE3] font-sans">
       <nav className="sticky top-0 z-50 bg-[#070B14]/80 backdrop-blur-md border-b border-[rgba(212,181,112,0.18)] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
           <span className="font-serif text-2xl text-[#D4B570] tracking-widest">ARETÉ</span>
