@@ -1,45 +1,47 @@
-import { createClient } from '@/lib/supabase-server'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import WorkoutLogger from './WorkoutLogger'
+import WorkoutLogger from '@/components/client/WorkoutLogger'
 
 export default async function WorkoutPage() {
-  const supabase = createClient()
+  const supabase = createServerComponentClient({ cookies })
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles').select('*').eq('id', user.id).single()
+  // Fetch in parallel
+  const [profileRes, exercisesRes, planRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, full_name, role, package_tier')
+      .eq('id', user.id)
+      .single(),
+
+    supabase
+      .from('exercises')
+      .select('id, name, name_pl, muscle_group, equipment, sfr_rating, stretch_position')
+      .order('name', { ascending: true }),
+
+    supabase
+      .from('training_plans')
+      .select('id, plan_data, current_week, status')
+      .eq('client_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1),
+  ])
+
+  const profile   = profileRes.data
+  const exercises = exercisesRes.data ?? []
+  const activePlan = planRes.data?.[0] ?? null
+
+  // Guard: only clients
   if (profile?.role === 'coach') redirect('/dashboard')
-
-  const { data: exercises } = await supabase
-    .from('exercises')
-    .select('id, name, name_pl, muscle_group, equipment, sfr_rating, stretch_position, compound')
-    .order('muscle_group')
-    .order('name')
-
-  // Brak is_active — bierzemy najnowszy plan
-  const { data: activePlan } = await supabase
-    .from('training_plans')
-    .select('*')
-    .eq('client_id', user.id)
-    .order('id', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  // Parse equipment z JSON stringa na tablicę
-  const parsedExercises = (exercises || []).map(ex => ({
-    ...ex,
-    equipment: (() => {
-      if (!ex.equipment) return []
-      if (Array.isArray(ex.equipment)) return ex.equipment
-      try { return JSON.parse(ex.equipment) } catch { return [ex.equipment] }
-    })()
-  }))
 
   return (
     <WorkoutLogger
       profile={profile}
-      exercises={parsedExercises}
+      exercises={exercises}
       activePlan={activePlan}
       clientId={user.id}
     />
