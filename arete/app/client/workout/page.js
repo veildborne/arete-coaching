@@ -1,19 +1,18 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import WorkoutLogger from '@/components/client/WorkoutLogger'
+import { isCoachProfile } from '@/lib/auth-roles'
+import WorkoutLogger from '../WorkoutLogger'
 
 export default async function WorkoutPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = createClient() // Next.js 14: NO await
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch in parallel
   const [profileRes, exercisesRes, planRes] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, full_name, role, package_tier')
+      .select('*')
       .eq('id', user.id)
       .single(),
 
@@ -24,19 +23,18 @@ export default async function WorkoutPage() {
 
     supabase
       .from('training_plans')
-      .select('id, plan_data, current_week, status')
+      .select('*')
       .eq('client_id', user.id)
-      .eq('status', 'active')
+      .eq('is_active', true)
       .order('created_at', { ascending: false })
       .limit(1),
   ])
 
-  const profile   = profileRes.data
-  const exercises = exercisesRes.data ?? []
+  const profile    = profileRes.data
+  const exercises  = exercisesRes.data ?? []
   const activePlan = planRes.data?.[0] ?? null
 
-  // Guard: only clients
-  if (profile?.role === 'coach') redirect('/dashboard')
+  if (isCoachProfile(profile, user)) redirect('/dashboard')
 
   return (
     <WorkoutLogger
