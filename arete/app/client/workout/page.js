@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { isCoachProfile } from '@/lib/auth-roles'
-import WorkoutLogger from '../WorkoutLogger'
+import WorkoutLogger from './WorkoutLogger'
 
 export default async function WorkoutPage() {
   const supabase = createClient() // Next.js 14: NO await
