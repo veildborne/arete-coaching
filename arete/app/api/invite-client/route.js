@@ -51,6 +51,11 @@ export async function POST(request) {
     )
   }
 
+  // FIX: Auto-potwierdź email, żeby klient mógł się zalogować bez weryfikacji
+  await supabase.auth.admin.updateUserById(invited.user.id, {
+    email_confirm: true,
+  })
+
   const { error: profileError } = await supabase
     .from('profiles')
     .upsert(

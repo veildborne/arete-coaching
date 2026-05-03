@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase-browser'
 
 function getInitials(name, email) {
   const source = name || email || 'AR'
@@ -271,6 +272,16 @@ export default function DashboardClient({ profile, clients }) {
             + Dodaj klienta
           </button>
           <span className="text-sm text-muted">{profile?.full_name || profile?.email}</span>
+          <button
+            onClick={async () => {
+              const supabase = createClient()
+              await supabase.auth.signOut()
+              window.location.href = '/'
+            }}
+            className="border border-gold/30 text-gold px-3 py-1.5 rounded-lg text-xs hover:bg-gold/10 transition"
+          >
+            Wyloguj
+          </button>
         </div>
       </nav>
 
