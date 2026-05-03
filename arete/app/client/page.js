@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import ClientPortal from './ClientPortal'
-import { isCoachProfile } from '@/lib/auth-roles'
+import { isCoachProfile, isPendingProfile } from '@/lib/auth-roles'
 
 export default async function ClientPage() {
   const supabase = createClient() // Next.js 14: NO await
@@ -16,6 +16,7 @@ export default async function ClientPage() {
     .single()
 
   if (isCoachProfile(profile, user)) redirect('/dashboard')
+  if (isPendingProfile(profile)) redirect('/accept-invite')
 
   const { data: activePlan } = await supabase
     .from('training_plans')

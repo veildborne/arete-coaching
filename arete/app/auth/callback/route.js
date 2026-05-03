@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { roleRedirectPath } from '@/lib/auth-roles'
+import { roleRedirectPath, isCoachProfile, isPendingProfile } from '@/lib/auth-roles'
 
 export async function GET(request) {
   const requestUrl = new URL(request.url)
@@ -34,12 +34,17 @@ export async function GET(request) {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
-        // Tylko odczyt roli — nie tworzymy profilu tutaj (trigger w bazie to robi)
+        // Tylko odczyt roli/statusu — nie tworzymy profilu tutaj (trigger w bazie to robi)
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, status')
           .eq('id', user.id)
           .single()
+
+        // Zaproszony klient — przekierowanie do akceptacji zaproszenia
+        if (!isCoachProfile(profile, user) && isPendingProfile(profile)) {
+          return NextResponse.redirect(new URL('/accept-invite', requestUrl.origin))
+        }
 
         // Bezpieczny next — tylko lokalne ścieżki zaczynające się od /
         if (next && next.startsWith('/') && !next.startsWith('//')) {

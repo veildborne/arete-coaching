@@ -17,3 +17,7 @@ export function isCoachProfile(profile, user) {
 export function roleRedirectPath(profile, user) {
   return isCoachProfile(profile, user) ? '/dashboard' : '/client'
 }
+
+export function isPendingProfile(profile) {
+  return typeof profile?.status === 'string' && profile.status.trim().toLowerCase() === 'pending'
+}

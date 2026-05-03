@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 function getInitials(name, email) {
@@ -47,7 +47,151 @@ function ClientCard({ client }) {
   )
 }
 
+function InviteClientModal({ open, onClose, onSuccess }) {
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
+
+  if (!open) return null
+
+  const reset = () => {
+    setFullName('')
+    setEmail('')
+    setError('')
+    setSuccessMsg('')
+    setSubmitting(false)
+  }
+
+  const handleClose = () => {
+    if (submitting) return
+    reset()
+    onClose()
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setSuccessMsg('')
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/invite-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, full_name: fullName }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.ok) {
+        setError(json.error || 'Nie udało się wysłać zaproszenia.')
+        setSubmitting(false)
+        return
+      }
+      setSuccessMsg(`Zaproszenie wysłane na ${email}`)
+      setSubmitting(false)
+      onSuccess?.()
+    } catch (err) {
+      setError(err?.message || 'Błąd sieci.')
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={handleClose}>
+      <div
+        className="w-full max-w-md bg-[#0D1424] border border-[rgba(212,181,112,0.3)] rounded-2xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-serif text-xl text-[#D4B570]">Zaproś klienta</h3>
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={submitting}
+            className="text-[#8F9AAF] hover:text-[#F4EFE3] text-xl leading-none disabled:opacity-50"
+            aria-label="Zamknij"
+          >
+            ×
+          </button>
+        </div>
+
+        {successMsg ? (
+          <div className="space-y-4">
+            <div className="bg-[#0F2A1A] border border-[rgba(71,209,140,0.3)] text-[#47D18C] text-sm rounded-lg p-3">
+              {successMsg}
+            </div>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="w-full bg-[#D4B570] text-[#070B14] py-2 rounded-lg font-medium hover:opacity-90 transition"
+            >
+              Zamknij
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs text-[#8F9AAF] uppercase tracking-widest mb-1">
+                Imię i nazwisko
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                disabled={submitting}
+                className="w-full bg-[#070B14] border border-[rgba(212,181,112,0.18)] rounded-lg px-3 py-2 text-[#F4EFE3] focus:outline-none focus:border-[#D4B570] disabled:opacity-50"
+                placeholder="Jan Kowalski"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-[#8F9AAF] uppercase tracking-widest mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={submitting}
+                className="w-full bg-[#070B14] border border-[rgba(212,181,112,0.18)] rounded-lg px-3 py-2 text-[#F4EFE3] focus:outline-none focus:border-[#D4B570] disabled:opacity-50"
+                placeholder="klient@example.com"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-[#2A1414] border border-[rgba(239,107,115,0.3)] text-[#EF6B73] text-sm rounded-lg p-3">
+                {error}
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={submitting}
+                className="flex-1 border border-[rgba(212,181,112,0.3)] text-[#D4B570] py-2 rounded-lg hover:bg-[#D4B570] hover:text-[#070B14] transition disabled:opacity-50"
+              >
+                Anuluj
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="flex-1 bg-[#D4B570] text-[#070B14] py-2 rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50"
+              >
+                {submitting ? 'Wysyłanie…' : 'Wyślij zaproszenie'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function DashboardClient({ profile, clients }) {
+  const router = useRouter()
+  const [inviteOpen, setInviteOpen] = useState(false)
   const safeClients = clients || []
 
   const stats = useMemo(() => {
@@ -71,8 +215,22 @@ export default function DashboardClient({ profile, clients }) {
           <span className="font-serif text-2xl text-[#D4B570] tracking-widest">ARETÉ</span>
           <span className="text-xs text-[#8F9AAF] uppercase tracking-widest">Panel Trenera</span>
         </div>
-        <span className="text-sm text-[#8F9AAF]">{profile?.full_name || profile?.email}</span>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setInviteOpen(true)}
+            className="bg-[#D4B570] text-[#070B14] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
+          >
+            + Dodaj klienta
+          </button>
+          <span className="text-sm text-[#8F9AAF]">{profile?.full_name || profile?.email}</span>
+        </div>
       </nav>
+
+      <InviteClientModal
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        onSuccess={() => router.refresh()}
+      />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 p-0 bg-transparent text-[#F4EFE3]">
