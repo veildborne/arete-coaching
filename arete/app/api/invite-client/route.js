@@ -59,7 +59,7 @@ export async function POST(request) {
         email,
         full_name,
         role: 'client',
-        status: 'pending',
+        status: 'inactive',
       },
       { onConflict: 'id' }
     )

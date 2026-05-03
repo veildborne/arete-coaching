@@ -67,7 +67,7 @@ export default function AcceptInvitePage() {
 
         // 5. Jeśli coach lub już aktywny → przekieruj
         const isCoach = profileData?.role === 'coach'
-        const isPending = profileData?.status?.toLowerCase() === 'pending'
+        const isPending = profileData?.status?.toLowerCase() === 'inactive'
 
         if (isCoach) {
           router.push('/dashboard')
@@ -117,7 +117,7 @@ export default function AcceptInvitePage() {
       }
 
       // 2. Flip status do 'active' (tylko dla invite flow, recovery pomija)
-      if (authType === 'invite' || profile?.status?.toLowerCase() === 'pending') {
+      if (authType === 'invite' || profile?.status?.toLowerCase() === 'inactive') {
         const res = await fetch('/api/accept-invite', { method: 'POST' })
         const json = await res.json().catch(() => ({}))
         if (!res.ok && res.status !== 400) {

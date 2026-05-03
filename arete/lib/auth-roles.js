@@ -19,5 +19,5 @@ export function roleRedirectPath(profile, user) {
 }
 
 export function isPendingProfile(profile) {
-  return typeof profile?.status === 'string' && profile.status.trim().toLowerCase() === 'pending'
+  return typeof profile?.status === 'string' && profile.status.trim().toLowerCase() === 'inactive'
 }
