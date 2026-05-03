@@ -29,6 +29,110 @@ function formatDate(str) {
   return new Date(str).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+// ─── FAZA 6: Hypertrophy Engine helpers ──────────────────────────────────────
+
+function calculateVolumeByMuscle(logs) {
+  // Zwraca: { muscle_group: { sets: number, volume_kg: number, totalRIR: number, count: number } }
+  const byMuscle = {}
+
+  logs.forEach(log => {
+    const exercises = log.exercises || []
+    exercises.forEach(ex => {
+      const muscle = ex.muscle_group || 'Inne'
+      if (!byMuscle[muscle]) {
+        byMuscle[muscle] = { sets: 0, volume_kg: 0, totalRIR: 0, count: 0 }
+      }
+      const sets = ex.sets || []
+      sets.forEach(s => {
+        byMuscle[muscle].sets += 1
+        byMuscle[muscle].volume_kg += (s.weight_kg || 0) * (s.reps || 0)
+        if (s.rir_actual != null) {
+          byMuscle[muscle].totalRIR += s.rir_actual
+          byMuscle[muscle].count += 1
+        }
+      })
+    })
+  })
+
+  // Sortuj po volume malejąco
+  return Object.entries(byMuscle)
+    .map(([muscle, data]) => ({
+      muscle,
+      sets: data.sets,
+      volume_kg: Math.round(data.volume_kg),
+      avgRIR: data.count > 0 ? (data.totalRIR / data.count).toFixed(1) : '—',
+    }))
+    .sort((a, b) => b.volume_kg - a.volume_kg)
+}
+
+function calculateCompliance(logs, plans) {
+  // Ostatnie 4 tygodnie
+  const fourWeeksAgo = new Date()
+  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28)
+
+  const recentLogs = logs.filter(log => {
+    const date = new Date(log.session_date)
+    return date >= fourWeeksAgo
+  })
+
+  const activePlan = plans.find(p => p.is_active)
+  if (!activePlan) return null
+
+  const planData = activePlan.plan_data || activePlan.plan_json || {}
+  const sessions = planData.sessions || []
+  const sessionsPerWeek = sessions.length
+  const expectedSessions = sessionsPerWeek * 4
+
+  if (expectedSessions === 0) return null
+
+  const completedSessions = recentLogs.filter(log => log.completed !== false).length
+  const compliance = Math.round((completedSessions / expectedSessions) * 100)
+
+  return { compliance, completed: completedSessions, expected: expectedSessions }
+}
+
+function calculatePerformanceTrends(logs) {
+  // Grupuj po exercise_id, zbierz e1RM per sesja
+  const byExercise = {}
+
+  logs.forEach(log => {
+    const exercises = log.exercises || []
+    exercises.forEach(ex => {
+      const id = ex.exercise_id || ex.name
+      if (!byExercise[id]) {
+        byExercise[id] = { name: ex.name, e1rms: [] }
+      }
+      const sets = ex.sets || []
+      sets.forEach(s => {
+        if (s.estimated_1rm) {
+          byExercise[id].e1rms.push({ date: log.session_date, value: s.estimated_1rm })
+        }
+      })
+    })
+  })
+
+  // Dla każdego ćwiczenia: ostatni vs poprzedni
+  const trends = Object.entries(byExercise).map(([id, data]) => {
+    const sorted = data.e1rms.sort((a, b) => new Date(b.date) - new Date(a.date))
+    const latest = sorted[0]?.value || 0
+    const previous = sorted[1]?.value || latest
+
+    let trend = '→'
+    if (latest > previous) trend = '↑'
+    if (latest < previous) trend = '↓'
+
+    return {
+      exercise: data.name,
+      e1rm: latest,
+      trend,
+      change: latest - previous,
+    }
+  })
+
+  // Top 5 po e1RM
+  return trends.sort((a, b) => b.e1rm - a.e1rm).slice(0, 5)
+}
+
 function Pill({ children, color, bg, border }) {
   return (
     <span style={{
@@ -342,6 +446,9 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
 
   const pendingFeedback = checkins.filter(ci => !ci.coach_feedback).length
 
+  // FAZA 6: Compliance score
+  const complianceData = calculateCompliance(logs, plans)
+
   const TABS = [
     { id: 'plans',         label: 'Plany',           count: plans.length },
     { id: 'logs',          label: 'Treningi',         count: logs.length },
@@ -438,6 +545,15 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                     {pendingFeedback} check-in bez odpowiedzi
                   </Pill>
                 )}
+                {complianceData && (
+                  <Pill
+                    color={complianceData.compliance >= 80 ? '#47D18C' : complianceData.compliance >= 60 ? '#E8A020' : '#EF6B73'}
+                    bg={complianceData.compliance >= 80 ? 'rgba(71,209,140,0.1)' : complianceData.compliance >= 60 ? 'rgba(232,160,32,0.1)' : 'rgba(239,107,115,0.1)'}
+                    border={complianceData.compliance >= 80 ? 'rgba(71,209,140,0.3)' : complianceData.compliance >= 60 ? 'rgba(232,160,32,0.3)' : 'rgba(239,107,115,0.3)'}
+                  >
+                    Compliance: {complianceData.compliance}% ({complianceData.completed}/{complianceData.expected})
+                  </Pill>
+                )}
               </div>
               <div style={{ fontSize: 13, color: '#555', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                 <span>{client.email}</span>
@@ -524,35 +640,119 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
 
         {/* LOGS TAB */}
         {tab === 'logs' && (
-          <Section title="Historia treningów">
-            {logs.length === 0 ? (
-              <EmptyState text="Brak zalogowanych treningów." />
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {logs.map(log => (
-                  <div key={log.id} style={{
+          <>
+            {/* Volume Tracking */}
+            <Section title="Volume per partia (wszystkie logi)">
+              {logs.length === 0 ? (
+                <EmptyState text="Brak danych." />
+              ) : (() => {
+                const volumeData = calculateVolumeByMuscle(logs)
+                return volumeData.length === 0 ? (
+                  <EmptyState text="Brak danych o volume w logach." />
+                ) : (
+                  <div style={{
                     background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: 10, padding: '12px 18px',
-                    display: 'flex', alignItems: 'center', gap: 16,
+                    borderRadius: 10, overflow: 'hidden',
                   }}>
-                    <div style={{
-                      width: 36, height: 36, borderRadius: 8,
-                      background: 'rgba(184,166,119,0.08)',
-                      border: '1px solid rgba(184,166,119,0.15)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 13, fontWeight: 600, color: '#b8a677', flexShrink: 0,
-                    }}>
-                      {log.day_label || '?'}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, color: '#e8e8e8' }}>Dzień {log.day_label || '—'}</div>
-                      <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>{formatDate(log.session_date)}</div>
-                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: 'rgba(184,166,119,0.05)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                          <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>PARTIA</th>
+                          <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 11, color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>SERIE</th>
+                          <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 11, color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>VOLUME (kg)</th>
+                          <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 11, color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>AVG RIR</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {volumeData.map(row => (
+                          <tr key={row.muscle} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                            <td style={{ padding: '10px 16px', fontSize: 13, color: '#e8e8e8' }}>{row.muscle}</td>
+                            <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 13, color: '#b8a677', fontWeight: 600 }}>{row.sets}</td>
+                            <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 13, color: '#b8a677', fontWeight: 600 }}>{row.volume_kg.toLocaleString()}</td>
+                            <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 13, color: '#aaa' }}>{row.avgRIR}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
-              </div>
-            )}
-          </Section>
+                )
+              })()}
+            </Section>
+
+            {/* Performance Trends */}
+            <Section title="Top 5 ćwiczeń (estimated 1RM)">
+              {logs.length === 0 ? (
+                <EmptyState text="Brak danych." />
+              ) : (() => {
+                const trends = calculatePerformanceTrends(logs)
+                return trends.length === 0 ? (
+                  <EmptyState text="Brak danych o e1RM w logach." />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {trends.map((t, i) => (
+                      <div key={i} style={{
+                        background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
+                        borderRadius: 10, padding: '12px 18px',
+                        display: 'flex', alignItems: 'center', gap: 12,
+                      }}>
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 8,
+                          background: 'rgba(184,166,119,0.08)',
+                          border: '1px solid rgba(184,166,119,0.15)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 16, color: '#b8a677', flexShrink: 0,
+                        }}>
+                          {t.trend}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, color: '#e8e8e8', fontWeight: 500 }}>{t.exercise}</div>
+                          <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>
+                            e1RM: <span style={{ color: '#b8a677', fontWeight: 600 }}>{t.e1rm} kg</span>
+                            {t.change !== 0 && (
+                              <span style={{ marginLeft: 8, color: t.change > 0 ? '#47D18C' : '#EF6B73' }}>
+                                ({t.change > 0 ? '+' : ''}{t.change.toFixed(1)} kg)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+            </Section>
+
+            {/* Historia treningów (dotychczasowa lista) */}
+            <Section title="Historia treningów">
+              {logs.length === 0 ? (
+                <EmptyState text="Brak zalogowanych treningów." />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {logs.map(log => (
+                    <div key={log.id} style={{
+                      background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
+                      borderRadius: 10, padding: '12px 18px',
+                      display: 'flex', alignItems: 'center', gap: 16,
+                    }}>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 8,
+                        background: 'rgba(184,166,119,0.08)',
+                        border: '1px solid rgba(184,166,119,0.15)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 13, fontWeight: 600, color: '#b8a677', flexShrink: 0,
+                      }}>
+                        {log.day_label || '?'}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, color: '#e8e8e8' }}>Dzień {log.day_label || '—'}</div>
+                        <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>{formatDate(log.session_date)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Section>
+          </>
         )}
 
         {/* CHECKINS TAB */}

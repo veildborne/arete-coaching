@@ -21,10 +21,52 @@ function hasNoAssignedPlan(client) {
   return !client.active_plan && !client.active_plan_id && !client.current_plan_id && !client.plan_id && client.has_active_plan !== true
 }
 
+// ─── FAZA 6: Hypertrophy Engine helpers ──────────────────────────────────────
+
+function calculateCompliance(logs, plans) {
+  const fourWeeksAgo = new Date()
+  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28)
+
+  const recentLogs = (logs || []).filter(log => {
+    const date = new Date(log.session_date)
+    return date >= fourWeeksAgo
+  })
+
+  const activePlan = (plans || []).find(p => p.is_active)
+  if (!activePlan) return null
+
+  const planData = activePlan.plan_data || activePlan.plan_json || {}
+  const sessions = planData.sessions || []
+  const sessionsPerWeek = sessions.length
+  const expectedSessions = sessionsPerWeek * 4
+
+  if (expectedSessions === 0) return null
+
+  const completedSessions = recentLogs.filter(log => log.completed !== false).length
+  const compliance = Math.round((completedSessions / expectedSessions) * 100)
+
+  return { compliance, completed: completedSessions, expected: expectedSessions }
+}
+
+function daysSince(dateStr) {
+  if (!dateStr) return Infinity
+  const date = new Date(dateStr)
+  return (Date.now() - date.getTime()) / 86400000
+}
+
 function ClientCard({ client }) {
   const router = useRouter()
   const initials = getInitials(client.full_name, client.email)
   const needsPlan = hasNoAssignedPlan(client)
+
+  // FAZA 6: Compliance & auto-flags
+  const complianceData = calculateCompliance(client.logs, client.plans)
+  const lastTraining = client.logs?.[0]?.session_date
+  const lastCheckin = client.checkins?.[0]?.created_at
+  const noTrainingDays = daysSince(lastTraining)
+  const noCheckinDays = daysSince(lastCheckin)
+
+  const needsAttention = noTrainingDays > 5 || noCheckinDays > 7
 
   return (
     <div className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 hover:border-[#D4B570] transition cursor-pointer">
@@ -36,8 +78,13 @@ function ClientCard({ client }) {
           <p className="font-medium">{client.full_name || 'Bez nazwy'}</p>
           <p className="text-xs text-[#8F9AAF]">{client.email}</p>
           {needsPlan && <p className="text-xs text-[#EF6B73]">Brak aktywnego planu</p>}
+          {complianceData && (
+            <p className={`text-xs ${complianceData.compliance >= 80 ? 'text-[#47D18C]' : complianceData.compliance >= 60 ? 'text-[#E8A020]' : 'text-[#EF6B73]'}`}>
+              Compliance: {complianceData.compliance}%
+            </p>
+          )}
         </div>
-        <div className={`ml-auto w-2 h-2 rounded-full ${needsPlan ? 'bg-[#EF6B73]' : 'bg-[#47D18C]'} block p-0 text-[#F4EFE3]`}></div>
+        <div className={`ml-auto w-2 h-2 rounded-full ${needsAttention ? 'bg-[#EF6B73]' : needsPlan ? 'bg-[#E8A020]' : 'bg-[#47D18C]'} block p-0 text-[#F4EFE3]`}></div>
       </div>
       <div className="flex gap-2 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
         <button onClick={() => router.push(`/dashboard/client/${client.id}`)} className="flex-1 text-xs border border-[rgba(212,181,112,0.3)] text-[#D4B570] py-2 rounded-lg hover:bg-[#D4B570] hover:text-[#070B14] transition">Zobacz profil</button>
@@ -251,6 +298,48 @@ export default function DashboardClient({ profile, clients }) {
             <p className="text-3xl font-serif text-[#EF6B73]">{stats.inactive}</p>
           </div>
         </div>
+
+        {/* FAZA 6: Needs Attention Panel */}
+        {(() => {
+          const needsAttention = safeClients.filter(client => {
+            const noTrainingDays = daysSince(client.logs?.[0]?.session_date)
+            const noCheckinDays = daysSince(client.checkins?.[0]?.created_at)
+            return noTrainingDays > 5 || noCheckinDays > 7
+          })
+
+          if (needsAttention.length === 0) return null
+
+          return (
+            <div className="bg-[#0D1424] border border-[rgba(239,107,115,0.25)] rounded-2xl p-6 mb-6">
+              <h3 className="font-serif text-xl text-[#EF6B73] mb-4">⚠ Wymagają uwagi ({needsAttention.length})</h3>
+              <div className="space-y-3">
+                {needsAttention.map(client => {
+                  const noTrainingDays = daysSince(client.logs?.[0]?.session_date)
+                  const noCheckinDays = daysSince(client.checkins?.[0]?.created_at)
+                  const flags = []
+                  if (noTrainingDays > 5) flags.push(`Brak treningu: ${Math.floor(noTrainingDays)} dni`)
+                  if (noCheckinDays > 7) flags.push(`Brak check-inu: ${Math.floor(noCheckinDays)} dni`)
+
+                  return (
+                    <div
+                      key={client.id}
+                      onClick={() => router.push(`/dashboard/client/${client.id}`)}
+                      className="bg-[#070B14] border border-[rgba(239,107,115,0.15)] rounded-lg p-4 flex items-center gap-3 cursor-pointer hover:border-[#EF6B73] transition"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-[#111B2E] border border-[rgba(239,107,115,0.3)] flex items-center justify-center font-serif text-[#EF6B73] font-bold text-sm">
+                        {getInitials(client.full_name, client.email)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-[#F4EFE3] text-sm">{client.full_name || 'Bez nazwy'}</p>
+                        <p className="text-xs text-[#EF6B73]">{flags.join(' • ')}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
 
         <h2 className="font-serif text-2xl text-[#D4B570] mb-4">Klienci</h2>
         {safeClients.length === 0 ? (
