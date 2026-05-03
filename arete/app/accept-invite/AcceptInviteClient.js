@@ -1,14 +1,95 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
-export default function AcceptInviteClient({ profile, userEmail }) {
+export default function AcceptInviteClient() {
   const router = useRouter()
+  const [sessionLoading, setSessionLoading] = useState(true)
+  const [profile, setProfile] = useState(null)
+  const [authType, setAuthType] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    const initSession = async () => {
+      try {
+        // 1. Parsuj hash (Supabase invite/recovery używa implicit flow)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
+        const type = hashParams.get('type') || ''
+
+        setAuthType(type)
+
+        if (accessToken && refreshToken) {
+          // 2. Ustaw sesję z tokenów z hasha
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+
+          if (sessionError) {
+            setMsg({ type: 'err', text: 'Link wygasł lub jest nieprawidłowy.' })
+            setSessionLoading(false)
+            return
+          }
+
+          // Wyczyść hash z URL (estetyka)
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+
+        // 3. Pobierz aktualnego usera (może być już zalogowany z ciasteczek)
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+          setMsg({ type: 'err', text: 'Nie znaleziono sesji. Zaloguj się ponownie.' })
+          setSessionLoading(false)
+          return
+        }
+
+        // 4. Pobierz profil
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('role, status, full_name, email')
+          .eq('id', user.id)
+          .single()
+
+        if (profileError) {
+          setMsg({ type: 'err', text: 'Nie udało się pobrać profilu.' })
+          setSessionLoading(false)
+          return
+        }
+
+        // 5. Jeśli coach lub już aktywny → przekieruj
+        const isCoach = profileData?.role === 'coach'
+        const isPending = profileData?.status?.toLowerCase() === 'pending'
+
+        if (isCoach) {
+          router.push('/dashboard')
+          return
+        }
+
+        if (!isPending && type !== 'recovery') {
+          router.push('/client')
+          return
+        }
+
+        // 6. Gotowe — pokaż formularz
+        setProfile(profileData)
+        setSessionLoading(false)
+      } catch (err) {
+        setMsg({ type: 'err', text: err?.message || 'Błąd inicjalizacji.' })
+        setSessionLoading(false)
+      }
+    }
+
+    initSession()
+  }, [router])
 
   const handleSubmit = async (e) => {
     e?.preventDefault()
@@ -26,30 +107,92 @@ export default function AcceptInviteClient({ profile, userEmail }) {
     setLoading(true)
     try {
       const supabase = createClient()
+
+      // 1. Ustaw hasło
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) {
         setMsg({ type: 'err', text: updateError.message || 'Nie udało się ustawić hasła.' })
+        setLoading(false)
         return
       }
 
-      const res = await fetch('/api/accept-invite', { method: 'POST' })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok || !json.ok) {
-        setMsg({ type: 'err', text: json.error || 'Nie udało się aktywować konta.' })
-        return
+      // 2. Flip status do 'active' (tylko dla invite flow, recovery pomija)
+      if (authType === 'invite' || profile?.status?.toLowerCase() === 'pending') {
+        const res = await fetch('/api/accept-invite', { method: 'POST' })
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok && res.status !== 400) {
+          // 400 = już aktywne, OK to zignorować
+          setMsg({ type: 'err', text: json.error || 'Nie udało się aktywować konta.' })
+          setLoading(false)
+          return
+        }
       }
 
-      setMsg({ type: 'ok', text: 'Konto aktywowane! Przekierowuję…' })
-      setTimeout(() => { window.location.href = '/client/questionnaire' }, 600)
+      // 3. Przekieruj
+      setMsg({ type: 'ok', text: 'Hasło ustawione! Przekierowuję…' })
+      setTimeout(() => {
+        if (authType === 'invite') {
+          window.location.href = '/client/questionnaire'
+        } else {
+          window.location.href = '/client'
+        }
+      }, 600)
     } catch (err) {
       setMsg({ type: 'err', text: err?.message || 'Błąd sieci.' })
-    } finally {
       setLoading(false)
     }
   }
 
-  const displayName = profile?.full_name || userEmail || ''
+  const displayName = profile?.full_name || profile?.email || ''
 
+  // Loading state
+  if (sessionLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
+        fontFamily: 'Outfit, sans-serif', color: '#d4c494',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', marginBottom: '1rem' }}>ARETÉ</div>
+          <div style={{ fontSize: '0.9rem', color: 'rgba(160,160,160,0.7)' }}>Ładowanie…</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state (no session, no profile)
+  if (!profile) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
+        padding: '2rem', fontFamily: 'Outfit, sans-serif',
+      }}>
+        <div style={{
+          width: '100%', maxWidth: '440px',
+          background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
+          border: '1px solid rgba(184,166,119,0.25)', borderRadius: '16px',
+          padding: '2.75rem 2.25rem', textAlign: 'center',
+        }}>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', color: '#d4c494', marginBottom: '1rem' }}>ARETÉ</h1>
+          {msg && (
+            <div style={{
+              padding: '0.65rem 0.9rem', borderRadius: '8px', fontSize: '0.85rem',
+              background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
+              color: '#f87171', marginBottom: '1rem',
+            }}>{msg.text}</div>
+          )}
+          <a href="/login" style={{
+            display: 'inline-block', marginTop: '1rem', color: '#b8a677', fontSize: '0.85rem',
+            textDecoration: 'none', letterSpacing: '0.05em',
+          }}>← Wróć do logowania</a>
+        </div>
+      </div>
+    )
+  }
+
+  // Password form
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -72,10 +215,10 @@ export default function AcceptInviteClient({ profile, userEmail }) {
           <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 600, color: '#d4c494', letterSpacing: '0.3em', margin: 0 }}>ARETÉ</h1>
           <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(184,166,119,0.3), transparent)', marginTop: '1.25rem', marginBottom: '1.25rem' }} />
           <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '1rem', fontWeight: 500, color: '#e8e8e8', letterSpacing: '0.1em', margin: 0 }}>
-            Witaj{displayName ? `, ${displayName}` : ''}
+            {authType === 'recovery' ? 'Reset hasła' : `Witaj${displayName ? `, ${displayName}` : ''}`}
           </h2>
           <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'rgba(160,160,160,0.7)', letterSpacing: '0.02em' }}>
-            Ustaw hasło, aby aktywować konto.
+            {authType === 'recovery' ? 'Ustaw nowe hasło.' : 'Ustaw hasło, aby aktywować konto.'}
           </p>
         </div>
 
@@ -128,7 +271,7 @@ export default function AcceptInviteClient({ profile, userEmail }) {
             fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', fontWeight: 600,
             letterSpacing: '0.15em', textTransform: 'uppercase',
           }}>
-            {loading ? '…' : 'Aktywuj konto'}
+            {loading ? '…' : (authType === 'recovery' ? 'Zmień hasło' : 'Aktywuj konto')}
           </button>
         </form>
       </div>
