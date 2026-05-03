@@ -40,6 +40,7 @@ export async function POST(request) {
   const supabase = createAdminClient()
 
   const { data: invited, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email, {
+    redirectTo: 'https://arete-system.pl/accept-invite',
     data: { full_name },
   })
 
