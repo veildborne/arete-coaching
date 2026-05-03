@@ -42,8 +42,7 @@ export async function middleware(request) {
   // Protected routes: redirect to login if not authenticated
   if (!user && (
     pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/client') ||
-    pathname.startsWith('/accept-invite')
+    pathname.startsWith('/client')
   )) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
