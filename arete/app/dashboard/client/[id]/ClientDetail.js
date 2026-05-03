@@ -32,7 +32,6 @@ function formatDate(str) {
 // ─── FAZA 6: Hypertrophy Engine helpers ──────────────────────────────────────
 
 function calculateVolumeByMuscle(logs) {
-  // Zwraca: { muscle_group: { sets: number, volume_kg: number, totalRIR: number, count: number } }
   const byMuscle = {}
 
   logs.forEach(log => {
@@ -54,7 +53,6 @@ function calculateVolumeByMuscle(logs) {
     })
   })
 
-  // Sortuj po volume malejąco
   return Object.entries(byMuscle)
     .map(([muscle, data]) => ({
       muscle,
@@ -66,7 +64,6 @@ function calculateVolumeByMuscle(logs) {
 }
 
 function calculateCompliance(logs, plans) {
-  // Ostatnie 4 tygodnie
   const fourWeeksAgo = new Date()
   fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28)
 
@@ -92,7 +89,6 @@ function calculateCompliance(logs, plans) {
 }
 
 function calculatePerformanceTrends(logs) {
-  // Grupuj po exercise_id, zbierz e1RM per sesja
   const byExercise = {}
 
   logs.forEach(log => {
@@ -111,7 +107,6 @@ function calculatePerformanceTrends(logs) {
     })
   })
 
-  // Dla każdego ćwiczenia: ostatni vs poprzedni
   const trends = Object.entries(byExercise).map(([id, data]) => {
     const sorted = data.e1rms.sort((a, b) => new Date(b.date) - new Date(a.date))
     const latest = sorted[0]?.value || 0
@@ -129,29 +124,29 @@ function calculatePerformanceTrends(logs) {
     }
   })
 
-  // Top 5 po e1RM
   return trends.sort((a, b) => b.e1rm - a.e1rm).slice(0, 5)
 }
 
 function Pill({ children, color, bg, border }) {
   return (
-    <span style={{
-      fontSize: 11, padding: '3px 10px', borderRadius: 99,
-      background: bg || 'rgba(255,255,255,0.05)',
-      border: `1px solid ${border || 'rgba(255,255,255,0.12)'}`,
-      color: color || '#a0a0a0', fontWeight: 500, letterSpacing: '0.04em',
-    }}>{children}</span>
+    <span
+      className="text-[11px] px-2.5 py-0.5 rounded-full font-medium tracking-wide"
+      style={{
+        background: bg || 'rgba(255,255,255,0.05)',
+        border: `1px solid ${border || 'rgba(255,255,255,0.12)'}`,
+        color: color || '#a0a0a0',
+      }}
+    >
+      {children}
+    </span>
   )
 }
 
 function Section({ title, children, action }) {
   return (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h2 style={{
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          fontSize: 18, fontWeight: 600, color: '#e8e8e8', margin: 0,
-        }}>{title}</h2>
+    <div className="mb-7">
+      <div className="flex items-center justify-between mb-3.5">
+        <h2 className="font-display text-lg font-semibold text-[#e8e8e8] m-0">{title}</h2>
         {action}
       </div>
       {children}
@@ -161,12 +156,8 @@ function Section({ title, children, action }) {
 
 function EmptyState({ text }) {
   return (
-    <div style={{
-      padding: '32px 20px', textAlign: 'center',
-      border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 10,
-      color: '#444', fontSize: 13,
-    }}>
-      <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.3 }}>∅</div>
+    <div className="py-8 px-5 text-center border border-dashed border-white/[0.08] rounded-[10px] text-[#444] text-[13px]">
+      <div className="text-2xl mb-2 opacity-30">∅</div>
       {text}
     </div>
   )
@@ -205,12 +196,9 @@ const BLOCKS_ORDER = [
 
 function AnkietaViewer({ questionnaire }) {
   if (!questionnaire) return (
-    <div style={{
-      padding: '32px 20px', textAlign: 'center',
-      border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 10,
-    }}>
-      <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.3 }}>∅</div>
-      <div style={{ color: '#444', fontSize: 13 }}>Klient nie wypełnił jeszcze ankiety.</div>
+    <div className="py-8 px-5 text-center border border-dashed border-white/[0.08] rounded-[10px]">
+      <div className="text-2xl mb-2 opacity-30">∅</div>
+      <div className="text-[#444] text-[13px]">Klient nie wypełnił jeszcze ankiety.</div>
     </div>
   )
 
@@ -218,7 +206,7 @@ function AnkietaViewer({ questionnaire }) {
 
   return (
     <div>
-      <div style={{ fontSize: 11, color: 'rgba(184,166,119,0.5)', marginBottom: 16, letterSpacing: '0.05em' }}>
+      <div className="text-[11px] text-[rgba(184,166,119,0.5)] mb-4 tracking-wider">
         Wypełniono: {formatDate(questionnaire.created_at)}
       </div>
       {BLOCKS_ORDER.map(block => {
@@ -227,21 +215,15 @@ function AnkietaViewer({ questionnaire }) {
           .filter(e => e.value)
         if (entries.length === 0) return null
         return (
-          <div key={block.title} style={{
-            background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 10, padding: '16px 18px', marginBottom: 10,
-          }}>
-            <div style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 14, color: '#b8a677', fontWeight: 600,
-              marginBottom: 12, paddingBottom: 8,
-              borderBottom: '1px solid rgba(255,255,255,0.05)',
-            }}>{block.title}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+          <div key={block.title} className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4 mb-2.5">
+            <div className="font-display text-sm text-gold font-semibold mb-3 pb-2 border-b border-white/[0.05]">
+              {block.title}
+            </div>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
               {entries.map(({ label, value }) => (
-                <div key={label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 6, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 10, color: '#555', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
-                  <div style={{ fontSize: 13, color: '#e8e8e8', lineHeight: 1.4 }}>{String(value)}</div>
+                <div key={label} className="bg-white/[0.03] rounded-md p-2">
+                  <div className="text-[10px] text-[#555] mb-1 uppercase tracking-widest">{label}</div>
+                  <div className="text-[13px] text-[#e8e8e8] leading-snug">{String(value)}</div>
                 </div>
               ))}
             </div>
@@ -280,37 +262,29 @@ function CheckinCard({ ci, onFeedbackSaved }) {
   }
 
   return (
-    <div style={{
-      background: '#1a1a1a',
-      border: `1px solid ${hasFeedback ? 'rgba(184,166,119,0.15)' : 'rgba(239,107,115,0.2)'}`,
-      borderRadius: 10, padding: '16px 18px',
-    }}>
+    <div
+      className="bg-[#1a1a1a] rounded-[10px] p-4"
+      style={{ border: `1px solid ${hasFeedback ? 'rgba(184,166,119,0.15)' : 'rgba(239,107,115,0.2)'}` }}
+    >
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 16, color: '#b8a677', fontWeight: 600,
-          }}>Tydzień {ci.week_number}</span>
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-2.5">
+          <span className="font-display text-base text-gold font-semibold">Tydzień {ci.week_number}</span>
           {hasFeedback ? (
-            <span style={{
-              fontSize: 10, padding: '2px 8px', borderRadius: 99,
-              background: 'rgba(71,209,140,0.1)', border: '1px solid rgba(71,209,140,0.25)',
-              color: '#47D18C', letterSpacing: '0.05em',
-            }}>Odpowiedziano</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/10 border border-success/25 text-success tracking-wider">
+              Odpowiedziano
+            </span>
           ) : (
-            <span style={{
-              fontSize: 10, padding: '2px 8px', borderRadius: 99,
-              background: 'rgba(239,107,115,0.1)', border: '1px solid rgba(239,107,115,0.25)',
-              color: '#EF6B73', letterSpacing: '0.05em',
-            }}>Oczekuje</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-danger/10 border border-danger/25 text-danger tracking-wider">
+              Oczekuje
+            </span>
           )}
         </div>
-        <span style={{ fontSize: 11, color: '#555' }}>{formatDate(ci.submitted_at || ci.created_at)}</span>
+        <span className="text-[11px] text-[#555]">{formatDate(ci.submitted_at || ci.created_at)}</span>
       </div>
 
       {/* Metrics grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginBottom: 12 }}>
+      <div className="grid grid-cols-2 gap-2 mb-3">
         {[
           { label: 'Masa ciała',  value: ci.body_weight ? `${ci.body_weight} kg` : '—' },
           { label: 'Energia',     value: ci.energy_level ? `${ci.energy_level}/10` : '—' },
@@ -318,84 +292,58 @@ function CheckinCard({ ci, onFeedbackSaved }) {
           { label: 'Zakwasy',     value: ci.soreness_level ? `${ci.soreness_level}/10` : '—' },
           { label: 'Adherencja',  value: ci.adherence_pct != null ? `${ci.adherence_pct}%` : '—' },
         ].map(m => (
-          <div key={m.label} style={{
-            background: 'rgba(255,255,255,0.03)', borderRadius: 6, padding: '8px 12px',
-          }}>
-            <div style={{ fontSize: 10, color: '#555', marginBottom: 2 }}>{m.label}</div>
-            <div style={{ fontSize: 14, color: '#e8e8e8', fontWeight: 500 }}>{m.value}</div>
+          <div key={m.label} className="bg-white/[0.03] rounded-md p-2">
+            <div className="text-[10px] text-[#555] mb-0.5">{m.label}</div>
+            <div className="text-sm text-[#e8e8e8] font-medium">{m.value}</div>
           </div>
         ))}
       </div>
 
       {/* Client notes */}
       {ci.client_notes && (
-        <div style={{
-          background: 'rgba(255,255,255,0.02)', borderRadius: 6,
-          padding: '10px 12px', marginBottom: 10,
-          borderLeft: '2px solid rgba(184,166,119,0.3)',
-        }}>
-          <div style={{ fontSize: 10, color: '#555', marginBottom: 4 }}>Notatki klienta</div>
-          <div style={{ fontSize: 13, color: '#a0a0a0', lineHeight: 1.5 }}>{ci.client_notes}</div>
+        <div className="bg-white/[0.02] rounded-md p-2.5 mb-2.5 border-l-2 border-gold/30">
+          <div className="text-[10px] text-[#555] mb-1">Notatki klienta</div>
+          <div className="text-[13px] text-[#a0a0a0] leading-relaxed">{ci.client_notes}</div>
         </div>
       )}
 
       {/* Existing feedback */}
       {hasFeedback && !open && (
-        <div style={{
-          background: 'rgba(184,166,119,0.05)', borderRadius: 6,
-          padding: '10px 12px', marginBottom: 10,
-          borderLeft: '2px solid rgba(184,166,119,0.4)',
-        }}>
-          <div style={{ fontSize: 10, color: '#b8a677', marginBottom: 4 }}>Twój feedback</div>
-          <div style={{ fontSize: 13, color: '#a0a0a0', lineHeight: 1.5 }}>{ci.coach_feedback}</div>
+        <div className="bg-gold/[0.05] rounded-md p-2.5 mb-2.5 border-l-2 border-gold/40">
+          <div className="text-[10px] text-gold mb-1">Twój feedback</div>
+          <div className="text-[13px] text-[#a0a0a0] leading-relaxed">{ci.coach_feedback}</div>
         </div>
       )}
 
       {/* Feedback form */}
       {open && (
-        <div style={{ marginBottom: 10 }}>
+        <div className="mb-2.5">
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
             placeholder="Napisz feedback dla klienta — korekty planu, wskazówki, motywacja..."
             rows={4}
-            style={{
-              width: '100%', padding: '10px 12px', borderRadius: 8,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(184,166,119,0.25)',
-              color: '#e8e8e8', fontSize: 13,
-              fontFamily: "'Outfit', sans-serif",
-              boxSizing: 'border-box', outline: 'none',
-              resize: 'vertical', lineHeight: 1.6, marginBottom: 8,
-            }}
-            onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.5)'}
-            onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.25)'}
+            className="w-full p-2.5 rounded-lg bg-white/[0.04] border border-gold/25 text-[#e8e8e8] text-[13px] font-body box-border outline-none resize-y leading-relaxed mb-2 focus:border-gold/50"
             autoFocus
           />
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="flex gap-2">
             <button
               onClick={saveFeedback}
               disabled={saving || !text.trim()}
-              style={{
-                flex: 1, padding: '9px 0', borderRadius: 8,
-                background: saving ? 'rgba(184,166,119,0.3)' : 'linear-gradient(135deg, #b8a677, #d4c494)',
-                border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
-                color: '#0f1a2e', fontSize: 13, fontWeight: 700,
-                fontFamily: "'Outfit', sans-serif", letterSpacing: '0.06em',
-              }}
+              className={`flex-1 py-2 rounded-lg border-none text-[13px] font-bold font-body tracking-widest ${
+                saving
+                  ? 'bg-gold/30 cursor-not-allowed text-gold/60'
+                  : 'bg-gradient-to-br from-[#b8a677] to-[#d4c494] cursor-pointer text-[#0f1a2e]'
+              }`}
             >
               {saving ? 'Zapisuję...' : 'Wyślij feedback'}
             </button>
             <button
               onClick={() => { setOpen(false); setText(ci.coach_feedback || '') }}
-              style={{
-                padding: '9px 16px', borderRadius: 8,
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#666', fontSize: 13, cursor: 'pointer',
-                fontFamily: "'Outfit', sans-serif",
-              }}
-            >Anuluj</button>
+              className="py-2 px-4 rounded-lg bg-transparent border border-white/10 text-[#666] text-[13px] cursor-pointer font-body"
+            >
+              Anuluj
+            </button>
           </div>
         </div>
       )}
@@ -404,17 +352,11 @@ function CheckinCard({ ci, onFeedbackSaved }) {
       {!open && (
         <button
           onClick={() => setOpen(true)}
+          className="w-full py-2 rounded-lg bg-transparent text-xs cursor-pointer font-body tracking-widest transition-all hover:bg-gold/[0.06]"
           style={{
-            width: '100%', padding: '8px 0', borderRadius: 8,
-            background: 'transparent',
             border: `1px solid ${hasFeedback ? 'rgba(184,166,119,0.2)' : 'rgba(239,107,115,0.3)'}`,
             color: hasFeedback ? 'rgba(184,166,119,0.6)' : '#EF6B73',
-            fontSize: 12, cursor: 'pointer',
-            fontFamily: "'Outfit', sans-serif", letterSpacing: '0.06em',
-            transition: 'all 0.15s',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,166,119,0.06)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
           {hasFeedback ? '✎ Edytuj feedback' : '+ Dodaj feedback'}
         </button>
@@ -422,10 +364,7 @@ function CheckinCard({ ci, onFeedbackSaved }) {
 
       {/* Saved confirmation */}
       {saved && (
-        <div style={{
-          marginTop: 8, textAlign: 'center', fontSize: 12,
-          color: '#47D18C', fontFamily: "'Outfit', sans-serif",
-        }}>
+        <div className="mt-2 text-center text-xs text-success font-body">
           ✓ Feedback wysłany
         </div>
       )}
@@ -456,7 +395,6 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
     { id: 'questionnaire', label: 'Ankieta',          count: questionnaire ? 1 : 0 },
   ]
 
-  // Update local state after coach saves feedback
   function handleFeedbackSaved(checkinId, feedbackText) {
     setCheckins(prev => prev.map(ci =>
       ci.id === checkinId ? { ...ci, coach_feedback: feedbackText } : ci
@@ -464,69 +402,45 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
   }
 
   return (
-    <div style={{
-      minHeight: '100vh', background: '#0f0f0f',
-      color: '#e8e8e8', fontFamily: "'Outfit', system-ui, sans-serif",
-    }}>
+    <div className="min-h-screen bg-[#0f0f0f] text-[#e8e8e8] font-body">
       {/* Topbar */}
-      <header style={{
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-        padding: '0 28px', height: 56,
-        display: 'flex', alignItems: 'center', gap: 16,
-        position: 'sticky', top: 0,
-        background: 'rgba(15,15,15,0.95)',
-        backdropFilter: 'blur(12px)', zIndex: 50,
-      }}>
-        <span style={{
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          fontSize: 20, fontWeight: 700, color: '#b8a677', letterSpacing: '0.1em',
-        }}>ARETÉ</span>
-        <span style={{
-          fontSize: 10, padding: '2px 7px', borderRadius: 99,
-          border: '1px solid rgba(184,166,119,0.3)', color: '#8a7d5a', letterSpacing: '0.07em',
-        }}>BETA</span>
-        <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: 16 }}>|</span>
+      <header className="border-b border-white/[0.07] px-7 h-14 flex items-center gap-4 sticky top-0 bg-[rgba(15,15,15,0.95)] backdrop-blur-xl z-50">
+        <span className="font-display text-xl font-bold text-gold tracking-widest">ARETÉ</span>
+        <span className="text-[10px] px-2 py-0.5 rounded-full border border-gold/30 text-[#8a7d5a] tracking-widest">
+          BETA
+        </span>
+        <span className="text-white/15 text-base">|</span>
         <button
           onClick={() => router.push('/dashboard')}
-          style={{
-            fontSize: 13, color: '#666', background: 'none', border: 'none',
-            cursor: 'pointer', fontFamily: "'Outfit', sans-serif", padding: 0,
-          }}
-          onMouseEnter={e => e.target.style.color = '#b8a677'}
-          onMouseLeave={e => e.target.style.color = '#666'}
-        >← Klienci</button>
-        <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 13, color: '#555' }}>{coachName}</span>
+          className="text-[13px] text-[#666] bg-none border-none cursor-pointer font-body p-0 hover:text-gold transition"
+        >
+          ← Klienci
+        </button>
+        <div className="flex-1" />
+        <span className="text-[13px] text-[#555]">{coachName}</span>
       </header>
 
-      <main style={{ maxWidth: 860, margin: '0 auto', padding: '32px 24px' }}>
+      <main className="max-w-[860px] mx-auto px-6 py-8">
 
         {/* Client card */}
-        <div style={{
-          background: 'linear-gradient(135deg, #131f36 0%, #0f1a2e 100%)',
-          border: '1px solid rgba(184,166,119,0.15)',
-          borderRadius: 14, padding: '24px 28px',
-          marginBottom: 28, position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(184,166,119,0.4), transparent)',
-          }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
-            <div style={{
-              width: 60, height: 60, borderRadius: '50%',
-              background: tier.bg || 'rgba(255,255,255,0.05)',
-              border: `1px solid ${tier.border || 'rgba(255,255,255,0.1)'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 20, fontWeight: 700, color: tier.color || '#888', flexShrink: 0,
-            }}>{initials}</div>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-                <h1 style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 22, fontWeight: 600, color: '#e8e8e8', margin: 0,
-                }}>{client.full_name || 'Bez nazwy'}</h1>
+        <div className="bg-gradient-to-br from-[#131f36] to-[#0f1a2e] border border-gold/15 rounded-[14px] p-6 mb-7 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+          <div className="flex items-center gap-5 flex-wrap">
+            <div
+              className="w-15 h-15 rounded-full flex items-center justify-center font-display text-xl font-bold shrink-0"
+              style={{
+                background: tier.bg || 'rgba(255,255,255,0.05)',
+                border: `1px solid ${tier.border || 'rgba(255,255,255,0.1)'}`,
+                color: tier.color || '#888',
+              }}
+            >
+              {initials}
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
+                <h1 className="font-display text-[22px] font-semibold text-[#e8e8e8] m-0">
+                  {client.full_name || 'Bez nazwy'}
+                </h1>
                 {client.package_tier && (
                   <Pill color={tier.color} bg={tier.bg} border={tier.border}>
                     {client.package_tier.charAt(0).toUpperCase() + client.package_tier.slice(1)}
@@ -555,7 +469,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                   </Pill>
                 )}
               </div>
-              <div style={{ fontSize: 13, color: '#555', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              <div className="text-[13px] text-[#555] flex gap-4 flex-wrap">
                 <span>{client.email}</span>
                 {client.phone && <span>{client.phone}</span>}
                 <span>Dołączył: {formatDate(client.created_at)}</span>
@@ -565,30 +479,28 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
         </div>
 
         {/* Tabs */}
-        <div style={{
-          display: 'flex', gap: 2,
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
-          marginBottom: 24,
-        }}>
+        <div className="flex gap-0.5 border-b border-white/[0.07] mb-6">
           {TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              fontSize: 13, padding: '9px 16px',
-              borderBottom: `2px solid ${tab === t.id ? '#b8a677' : 'transparent'}`,
-              color: tab === t.id ? '#b8a677' : '#555',
-              background: 'none', border: 'none',
-              cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
-              transition: 'color 0.15s', marginBottom: -1,
-              display: 'flex', alignItems: 'center', gap: 7,
-            }}>
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`text-[13px] px-4 py-2 bg-none border-none cursor-pointer font-body transition-colors -mb-px flex items-center gap-2 ${
+                tab === t.id ? 'text-gold border-b-2 border-gold' : 'text-[#555] border-b-2 border-transparent'
+              }`}
+            >
               {t.label}
               {t.count > 0 && (
-                <span style={{
-                  fontSize: 10, padding: '1px 6px', borderRadius: 99,
-                  background: t.urgent
-                    ? 'rgba(239,107,115,0.15)'
-                    : tab === t.id ? 'rgba(184,166,119,0.15)' : 'rgba(255,255,255,0.05)',
-                  color: t.urgent ? '#EF6B73' : tab === t.id ? '#b8a677' : '#444',
-                }}>{t.count}</span>
+                <span
+                  className="text-[10px] px-1.5 py-0 rounded-full"
+                  style={{
+                    background: t.urgent
+                      ? 'rgba(239,107,115,0.15)'
+                      : tab === t.id ? 'rgba(184,166,119,0.15)' : 'rgba(255,255,255,0.05)',
+                    color: t.urgent ? '#EF6B73' : tab === t.id ? '#b8a677' : '#444',
+                  }}
+                >
+                  {t.count}
+                </span>
               )}
             </button>
           ))}
@@ -596,41 +508,36 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
 
         {/* PLANS TAB */}
         {tab === 'plans' && (
-          <Section title="Plany treningowe" action={
-            <button
-              onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)}
-              style={{
-                fontSize: 12, padding: '7px 16px', borderRadius: 99,
-                border: '1px solid rgba(184,166,119,0.3)', background: 'transparent',
-                color: '#b8a677', cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,166,119,0.08)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >+ Nowy plan</button>
-          }>
+          <Section
+            title="Plany treningowe"
+            action={
+              <button
+                onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)}
+                className="text-xs px-4 py-2 rounded-full border border-gold/30 bg-transparent text-gold cursor-pointer font-body hover:bg-gold/[0.08] transition"
+              >
+                + Nowy plan
+              </button>
+            }
+          >
             {plans.length === 0 ? (
               <EmptyState text="Brak planów. Kliknij '+ Nowy plan' żeby dodać pierwszy." />
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="flex flex-col gap-2">
                 {plans.map(plan => (
-                  <div key={plan.id} style={{
-                    background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: 10, padding: '14px 18px',
-                    display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer',
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(184,166,119,0.2)'; e.currentTarget.style.background = '#1e1e1e' }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = '#1a1a1a' }}
+                  <div
+                    key={plan.id}
+                    className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-3.5 flex items-center gap-3.5 cursor-pointer hover:border-gold/20 hover:bg-[#1e1e1e] transition"
                   >
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: '#e8e8e8', marginBottom: 4 }}>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-[#e8e8e8] mb-1">
                         {plan.name || 'Plan bez nazwy'}
                       </div>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <div className="flex gap-2 flex-wrap">
                         {plan.split && <Pill>{plan.split}</Pill>}
                         {plan.goal  && <Pill>{plan.goal}</Pill>}
                       </div>
                     </div>
-                    <span style={{ color: '#333', fontSize: 14 }}>›</span>
+                    <span className="text-[#333] text-sm">›</span>
                   </div>
                 ))}
               </div>
@@ -650,26 +557,23 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                 return volumeData.length === 0 ? (
                   <EmptyState text="Brak danych o volume w logach." />
                 ) : (
-                  <div style={{
-                    background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: 10, overflow: 'hidden',
-                  }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] overflow-hidden">
+                    <table className="w-full border-collapse">
                       <thead>
-                        <tr style={{ background: 'rgba(184,166,119,0.05)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                          <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>PARTIA</th>
-                          <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 11, color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>SERIE</th>
-                          <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 11, color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>VOLUME (kg)</th>
-                          <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 11, color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>AVG RIR</th>
+                        <tr className="bg-gold/[0.05] border-b border-white/[0.07]">
+                          <th className="px-4 py-2.5 text-left text-[11px] text-[#888] font-semibold tracking-wider">PARTIA</th>
+                          <th className="px-4 py-2.5 text-right text-[11px] text-[#888] font-semibold tracking-wider">SERIE</th>
+                          <th className="px-4 py-2.5 text-right text-[11px] text-[#888] font-semibold tracking-wider">VOLUME (kg)</th>
+                          <th className="px-4 py-2.5 text-right text-[11px] text-[#888] font-semibold tracking-wider">AVG RIR</th>
                         </tr>
                       </thead>
                       <tbody>
                         {volumeData.map(row => (
-                          <tr key={row.muscle} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                            <td style={{ padding: '10px 16px', fontSize: 13, color: '#e8e8e8' }}>{row.muscle}</td>
-                            <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 13, color: '#b8a677', fontWeight: 600 }}>{row.sets}</td>
-                            <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 13, color: '#b8a677', fontWeight: 600 }}>{row.volume_kg.toLocaleString()}</td>
-                            <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 13, color: '#aaa' }}>{row.avgRIR}</td>
+                          <tr key={row.muscle} className="border-b border-white/[0.04]">
+                            <td className="px-4 py-2.5 text-[13px] text-[#e8e8e8]">{row.muscle}</td>
+                            <td className="px-4 py-2.5 text-right text-[13px] text-gold font-semibold">{row.sets}</td>
+                            <td className="px-4 py-2.5 text-right text-[13px] text-gold font-semibold">{row.volume_kg.toLocaleString()}</td>
+                            <td className="px-4 py-2.5 text-right text-[13px] text-[#aaa]">{row.avgRIR}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -688,28 +592,18 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                 return trends.length === 0 ? (
                   <EmptyState text="Brak danych o e1RM w logach." />
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className="flex flex-col gap-2">
                     {trends.map((t, i) => (
-                      <div key={i} style={{
-                        background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
-                        borderRadius: 10, padding: '12px 18px',
-                        display: 'flex', alignItems: 'center', gap: 12,
-                      }}>
-                        <div style={{
-                          width: 32, height: 32, borderRadius: 8,
-                          background: 'rgba(184,166,119,0.08)',
-                          border: '1px solid rgba(184,166,119,0.15)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 16, color: '#b8a677', flexShrink: 0,
-                        }}>
+                      <div key={i} className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-gold/[0.08] border border-gold/15 flex items-center justify-center text-base text-gold shrink-0">
                           {t.trend}
                         </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 13, color: '#e8e8e8', fontWeight: 500 }}>{t.exercise}</div>
-                          <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>
-                            e1RM: <span style={{ color: '#b8a677', fontWeight: 600 }}>{t.e1rm} kg</span>
+                        <div className="flex-1">
+                          <div className="text-[13px] text-[#e8e8e8] font-medium">{t.exercise}</div>
+                          <div className="text-[11px] text-[#555] mt-0.5">
+                            e1RM: <span className="text-gold font-semibold">{t.e1rm} kg</span>
                             {t.change !== 0 && (
-                              <span style={{ marginLeft: 8, color: t.change > 0 ? '#47D18C' : '#EF6B73' }}>
+                              <span className={`ml-2 ${t.change > 0 ? 'text-success' : 'text-danger'}`}>
                                 ({t.change > 0 ? '+' : ''}{t.change.toFixed(1)} kg)
                               </span>
                             )}
@@ -722,30 +616,20 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
               })()}
             </Section>
 
-            {/* Historia treningów (dotychczasowa lista) */}
+            {/* Historia treningów */}
             <Section title="Historia treningów">
               {logs.length === 0 ? (
                 <EmptyState text="Brak zalogowanych treningów." />
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div className="flex flex-col gap-1.5">
                   {logs.map(log => (
-                    <div key={log.id} style={{
-                      background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
-                      borderRadius: 10, padding: '12px 18px',
-                      display: 'flex', alignItems: 'center', gap: 16,
-                    }}>
-                      <div style={{
-                        width: 36, height: 36, borderRadius: 8,
-                        background: 'rgba(184,166,119,0.08)',
-                        border: '1px solid rgba(184,166,119,0.15)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 13, fontWeight: 600, color: '#b8a677', flexShrink: 0,
-                      }}>
+                    <div key={log.id} className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-3 flex items-center gap-4">
+                      <div className="w-9 h-9 rounded-lg bg-gold/[0.08] border border-gold/15 flex items-center justify-center text-[13px] font-semibold text-gold shrink-0">
                         {log.day_label || '?'}
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, color: '#e8e8e8' }}>Dzień {log.day_label || '—'}</div>
-                        <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>{formatDate(log.session_date)}</div>
+                      <div className="flex-1">
+                        <div className="text-[13px] text-[#e8e8e8]">Dzień {log.day_label || '—'}</div>
+                        <div className="text-[11px] text-[#555] mt-0.5">{formatDate(log.session_date)}</div>
                       </div>
                     </div>
                   ))}
@@ -761,16 +645,9 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
             {checkins.length === 0 ? (
               <EmptyState text="Brak check-inów. Klient jeszcze nie wysłał żadnego." />
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {/* Summary */}
+              <div className="flex flex-col gap-2.5">
                 {pendingFeedback > 0 && (
-                  <div style={{
-                    padding: '10px 14px', borderRadius: 8,
-                    background: 'rgba(239,107,115,0.08)',
-                    border: '1px solid rgba(239,107,115,0.2)',
-                    fontSize: 13, color: '#EF6B73',
-                    marginBottom: 4,
-                  }}>
+                  <div className="p-2.5 rounded-lg bg-danger/[0.08] border border-danger/20 text-[13px] text-danger mb-1">
                     ⚠ {pendingFeedback} {pendingFeedback === 1 ? 'check-in czeka' : 'check-iny czekają'} na Twój feedback
                   </div>
                 )}

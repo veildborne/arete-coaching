@@ -8,17 +8,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg:        '#070B14',
-        surface:   '#0D1424',
-        surface2:  '#111B2E',
-        border:    'rgba(212, 181, 112, 0.18)',
-        gold:      '#D4B570',
-        'gold-muted': '#9E8650',
-        text:      '#F4EFE3',
-        'text-muted': '#8F9AAF',
-        amber:     '#C05000',
-        success:   '#47D18C',
-        danger:    '#EF6B73',
+        'bg-deep':   '#070B14',
+        'surface':   '#0D1424',
+        'surface-2': '#111B2E',
+        'gold':      '#D4B570',
+        'gold-dark': '#C09A50',
+        'muted':     '#8F9AAF',
+        'warm':      '#F4EFE3',
+        'success':   '#47D18C',
+        'danger':    '#EF6B73',
       },
       fontFamily: {
         display: ['Cormorant Garamond', 'Georgia', 'serif'],

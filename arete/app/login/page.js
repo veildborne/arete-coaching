@@ -64,97 +64,132 @@ export default function LoginPage() {
   const titles = { login: 'Zaloguj się', register: 'Utwórz konto', reset: 'Reset hasła' }
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
-      padding: '2rem', fontFamily: 'Outfit, sans-serif',
-    }}>
-      <div style={{
-        width: '100%', maxWidth: '440px',
-        background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
-        border: '1px solid rgba(184,166,119,0.25)', borderRadius: '16px',
-        padding: '2.75rem 2.25rem', position: 'relative',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(184,166,119,0.1)',
-      }}>
-        <div style={{
-          position: 'absolute', top: 0, left: '10%', right: '10%', height: '1px',
-          background: 'linear-gradient(90deg, transparent, rgba(184,166,119,0.5), transparent)',
-        }} />
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '0.7rem', letterSpacing: '0.25em', color: 'rgba(184,166,119,0.4)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>ἀρετή</div>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 600, color: '#d4c494', letterSpacing: '0.3em', margin: 0 }}>ARETÉ</h1>
-          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(184,166,119,0.3), transparent)', marginTop: '1.25rem', marginBottom: '1.25rem' }} />
-          <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '1rem', fontWeight: 500, color: '#e8e8e8', letterSpacing: '0.1em', margin: 0 }}>{titles[mode]}</h2>
+    <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] p-8 font-body">
+      <div className="w-full max-w-[440px] bg-gradient-to-br from-[#131f36] to-[#0f1a2e] border border-[rgba(184,166,119,0.25)] rounded-2xl p-11 relative shadow-[0_24px_80px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(184,166,119,0.1)]">
+        <div className="absolute top-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[rgba(184,166,119,0.5)] to-transparent" />
+        <div className="text-center mb-8">
+          <div className="font-display text-[0.7rem] tracking-[0.25em] text-[rgba(184,166,119,0.4)] uppercase mb-2">
+            ἀρετή
+          </div>
+          <h1 className="font-display text-[1.8rem] font-semibold text-gold tracking-[0.3em] m-0">
+            ARETÉ
+          </h1>
+          <div className="h-px bg-gradient-to-r from-transparent via-[rgba(184,166,119,0.3)] to-transparent mt-5 mb-5" />
+          <h2 className="font-body text-base font-medium text-warm tracking-[0.1em] m-0">
+            {titles[mode]}
+          </h2>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {mode === 'register' && (
             <div>
-              <label style={labelStyle}>Imię i nazwisko</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="np. Jan Kowalski" required style={inputStyle}
-                onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'} />
+              <label className="block mb-[0.4rem] font-body text-[0.7rem] font-medium text-[rgba(184,166,119,0.7)] tracking-[0.15em] uppercase">
+                Imię i nazwisko
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="np. Jan Kowalski"
+                required
+                className="w-full py-[0.8rem] px-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(184,166,119,0.2)] rounded-lg outline-none text-warm font-body text-[0.9rem] transition-[border-color_0.2s] focus:border-[rgba(184,166,119,0.6)]"
+              />
             </div>
           )}
           <div>
-            <label style={labelStyle}>Email</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="twoj@email.com" required style={inputStyle}
-              onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'} />
+            <label className="block mb-[0.4rem] font-body text-[0.7rem] font-medium text-[rgba(184,166,119,0.7)] tracking-[0.15em] uppercase">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="twoj@email.com"
+              required
+              className="w-full py-[0.8rem] px-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(184,166,119,0.2)] rounded-lg outline-none text-warm font-body text-[0.9rem] transition-[border-color_0.2s] focus:border-[rgba(184,166,119,0.6)]"
+            />
           </div>
           {mode !== 'reset' && (
             <div>
-              <label style={labelStyle}>Hasło</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required style={inputStyle}
-                onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'} />
+              <label className="block mb-[0.4rem] font-body text-[0.7rem] font-medium text-[rgba(184,166,119,0.7)] tracking-[0.15em] uppercase">
+                Hasło
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="w-full py-[0.8rem] px-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(184,166,119,0.2)] rounded-lg outline-none text-warm font-body text-[0.9rem] transition-[border-color_0.2s] focus:border-[rgba(184,166,119,0.6)]"
+              />
             </div>
           )}
 
           {msg && (
-            <div style={{
-              padding: '0.65rem 0.9rem', borderRadius: '8px', fontSize: '0.82rem',
-              background: msg.type === 'ok' ? 'rgba(76,175,80,0.12)' : 'rgba(239,68,68,0.12)',
-              border: `1px solid ${msg.type === 'ok' ? 'rgba(76,175,80,0.3)' : 'rgba(239,68,68,0.3)'}`,
-              color: msg.type === 'ok' ? '#81c784' : '#f87171',
-            }}>{msg.text}</div>
+            <div className={`py-[0.65rem] px-[0.9rem] rounded-lg text-[0.82rem] ${
+              msg.type === 'ok'
+                ? 'bg-[rgba(76,175,80,0.12)] border border-[rgba(76,175,80,0.3)] text-[#81c784]'
+                : 'bg-[rgba(239,68,68,0.12)] border border-[rgba(239,68,68,0.3)] text-[#f87171]'
+            }`}>
+              {msg.text}
+            </div>
           )}
 
-          <button type="submit" disabled={loading} style={{
-            width: '100%', marginTop: '0.5rem', padding: '0.9rem',
-            background: loading ? 'rgba(184,166,119,0.3)' : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
-            color: loading ? 'rgba(184,166,119,0.6)' : '#0f1a2e',
-            border: 'none', borderRadius: '8px', cursor: loading ? 'not-allowed' : 'pointer',
-            fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', fontWeight: 600,
-            letterSpacing: '0.15em', textTransform: 'uppercase',
-          }}>
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full mt-2 py-[0.9rem] border-0 rounded-lg font-body text-[0.85rem] font-semibold tracking-[0.15em] uppercase ${
+              loading ? 'cursor-not-allowed' : 'cursor-pointer'
+            }`}
+            style={{
+              background: loading ? 'rgba(184,166,119,0.3)' : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
+              color: loading ? 'rgba(184,166,119,0.6)' : '#0f1a2e',
+            }}
+          >
             {loading ? '…' : mode === 'login' ? 'Zaloguj się' : mode === 'register' ? 'Utwórz konto' : 'Wyślij link'}
           </button>
         </form>
 
-        <div style={{
-          marginTop: '1.5rem', paddingTop: '1.25rem',
-          borderTop: '1px solid rgba(184,166,119,0.15)',
-          display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center',
-        }}>
+        <div className="mt-6 pt-5 border-t border-[rgba(184,166,119,0.15)] flex flex-col gap-2 items-center">
           {mode === 'login' && (<>
-            <button type="button" onClick={() => { setMode('register'); setMsg(null) }} style={linkStyle}>
-              Nie masz konta? <span style={{ color: '#b8a677' }}>Zarejestruj się</span>
+            <button
+              type="button"
+              onClick={() => { setMode('register'); setMsg(null) }}
+              className="bg-transparent border-0 cursor-pointer text-[rgba(160,160,160,0.7)] font-body text-[0.8rem] tracking-[0.02em] p-0"
+            >
+              Nie masz konta? <span className="text-[#b8a677]">Zarejestruj się</span>
             </button>
-            <button type="button" onClick={() => { setMode('reset'); setMsg(null) }} style={linkStyle}>Zapomniałeś hasła?</button>
+            <button
+              type="button"
+              onClick={() => { setMode('reset'); setMsg(null) }}
+              className="bg-transparent border-0 cursor-pointer text-[rgba(160,160,160,0.7)] font-body text-[0.8rem] tracking-[0.02em] p-0"
+            >
+              Zapomniałeś hasła?
+            </button>
           </>)}
           {mode === 'register' && (
-            <button type="button" onClick={() => { setMode('login'); setMsg(null) }} style={linkStyle}>
-              Masz już konto? <span style={{ color: '#b8a677' }}>Zaloguj się</span>
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setMsg(null) }}
+              className="bg-transparent border-0 cursor-pointer text-[rgba(160,160,160,0.7)] font-body text-[0.8rem] tracking-[0.02em] p-0"
+            >
+              Masz już konto? <span className="text-[#b8a677]">Zaloguj się</span>
             </button>
           )}
           {mode === 'reset' && (
-            <button type="button" onClick={() => { setMode('login'); setMsg(null) }} style={linkStyle}>← Wróć do logowania</button>
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setMsg(null) }}
+              className="bg-transparent border-0 cursor-pointer text-[rgba(160,160,160,0.7)] font-body text-[0.8rem] tracking-[0.02em] p-0"
+            >
+              ← Wróć do logowania
+            </button>
           )}
-          <a href="/" style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(160,160,160,0.5)', letterSpacing: '0.1em', textDecoration: 'none' }}>← Wróć na stronę główną</a>
+          <a href="/" className="mt-2 text-[0.75rem] text-[rgba(160,160,160,0.5)] tracking-[0.1em] no-underline">
+            ← Wróć na stronę główną
+          </a>
         </div>
       </div>
     </div>
   )
 }
-
-const labelStyle = { display: 'block', marginBottom: '0.4rem', fontFamily: 'Outfit, sans-serif', fontSize: '0.7rem', fontWeight: 500, color: 'rgba(184,166,119,0.7)', letterSpacing: '0.15em', textTransform: 'uppercase' }
-const inputStyle = { width: '100%', padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(184,166,119,0.2)', borderRadius: '8px', outline: 'none', color: '#e8e8e8', fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem', transition: 'border-color 0.2s' }
-const linkStyle = { background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(160,160,160,0.7)', fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', letterSpacing: '0.02em', padding: 0 }

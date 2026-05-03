@@ -70,26 +70,26 @@ function ClientCard({ client }) {
   const needsAttention = (noTrainingDays !== null && noTrainingDays > 5) || (noCheckinDays !== null && noCheckinDays > 7)
 
   return (
-    <div className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 hover:border-[#D4B570] transition cursor-pointer">
-      <div className="flex items-center gap-3 mb-4 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
-        <div className="w-10 h-10 rounded-full bg-[#111B2E] border border-[rgba(212,181,112,0.3)] flex items-center justify-center font-serif text-[#D4B570] font-bold p-0 m-0">
+    <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 hover:border-gold transition cursor-pointer">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-full bg-surface-2 border border-[rgba(212,181,112,0.3)] flex items-center justify-center font-display text-gold font-bold">
           {initials}
         </div>
-        <div className="block px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
-          <p className="font-medium">{client.full_name || 'Bez nazwy'}</p>
-          <p className="text-xs text-[#8F9AAF]">{client.email}</p>
-          {needsPlan && <p className="text-xs text-[#EF6B73]">Brak aktywnego planu</p>}
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-warm">{client.full_name || 'Bez nazwy'}</p>
+          <p className="text-xs text-muted">{client.email}</p>
+          {needsPlan && <p className="text-xs text-danger">Brak aktywnego planu</p>}
           {complianceData && (
-            <p className={`text-xs ${complianceData.compliance >= 80 ? 'text-[#47D18C]' : complianceData.compliance >= 60 ? 'text-[#E8A020]' : 'text-[#EF6B73]'}`}>
+            <p className={`text-xs ${complianceData.compliance >= 80 ? 'text-success' : complianceData.compliance >= 60 ? 'text-[#E8A020]' : 'text-danger'}`}>
               Compliance: {complianceData.compliance}%
             </p>
           )}
         </div>
-        <div className={`ml-auto w-2 h-2 rounded-full ${needsAttention ? 'bg-[#EF6B73]' : needsPlan ? 'bg-[#E8A020]' : 'bg-[#47D18C]'} block p-0 text-[#F4EFE3]`}></div>
+        <div className={`ml-auto w-2 h-2 rounded-full ${needsAttention ? 'bg-danger' : needsPlan ? 'bg-[#E8A020]' : 'bg-success'}`} />
       </div>
-      <div className="flex gap-2 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
-        <button onClick={() => router.push(`/dashboard/client/${client.id}`)} className="flex-1 text-xs border border-[rgba(212,181,112,0.3)] text-[#D4B570] py-2 rounded-lg hover:bg-[#D4B570] hover:text-[#070B14] transition">Zobacz profil</button>
-        <button onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)} className="flex-1 text-xs border border-[rgba(212,181,112,0.3)] text-[#D4B570] py-2 rounded-lg hover:bg-[#D4B570] hover:text-[#070B14] transition">Nowy plan</button>
+      <div className="flex gap-2">
+        <button onClick={() => router.push(`/dashboard/client/${client.id}`)} className="flex-1 text-xs border border-[rgba(212,181,112,0.3)] text-gold py-2 rounded-lg hover:bg-gold hover:text-bg-deep transition">Zobacz profil</button>
+        <button onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)} className="flex-1 text-xs border border-[rgba(212,181,112,0.3)] text-gold py-2 rounded-lg hover:bg-gold hover:text-bg-deep transition">Nowy plan</button>
       </div>
     </div>
   )
@@ -147,16 +147,16 @@ function InviteClientModal({ open, onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={handleClose}>
       <div
-        className="w-full max-w-md bg-[#0D1424] border border-[rgba(212,181,112,0.3)] rounded-2xl p-6"
+        className="w-full max-w-md bg-surface border border-[rgba(212,181,112,0.3)] rounded-2xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-serif text-xl text-[#D4B570]">Zaproś klienta</h3>
+          <h3 className="font-display text-xl text-gold">Zaproś klienta</h3>
           <button
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            className="text-[#8F9AAF] hover:text-[#F4EFE3] text-xl leading-none disabled:opacity-50"
+            className="text-muted hover:text-warm text-xl leading-none disabled:opacity-50"
             aria-label="Zamknij"
           >
             ×
@@ -165,13 +165,13 @@ function InviteClientModal({ open, onClose, onSuccess }) {
 
         {successMsg ? (
           <div className="space-y-4">
-            <div className="bg-[#0F2A1A] border border-[rgba(71,209,140,0.3)] text-[#47D18C] text-sm rounded-lg p-3">
+            <div className="bg-[#0F2A1A] border border-[rgba(71,209,140,0.3)] text-success text-sm rounded-lg p-3">
               {successMsg}
             </div>
             <button
               type="button"
               onClick={handleClose}
-              className="w-full bg-[#D4B570] text-[#070B14] py-2 rounded-lg font-medium hover:opacity-90 transition"
+              className="w-full bg-gold text-bg-deep py-2 rounded-lg font-medium hover:opacity-90 transition"
             >
               Zamknij
             </button>
@@ -179,7 +179,7 @@ function InviteClientModal({ open, onClose, onSuccess }) {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs text-[#8F9AAF] uppercase tracking-widest mb-1">
+              <label className="block text-xs text-muted uppercase tracking-widest mb-1">
                 Imię i nazwisko
               </label>
               <input
@@ -188,12 +188,12 @@ function InviteClientModal({ open, onClose, onSuccess }) {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 disabled={submitting}
-                className="w-full bg-[#070B14] border border-[rgba(212,181,112,0.18)] rounded-lg px-3 py-2 text-[#F4EFE3] focus:outline-none focus:border-[#D4B570] disabled:opacity-50"
+                className="w-full bg-bg-deep border border-[rgba(212,181,112,0.18)] rounded-lg px-3 py-2 text-warm focus:outline-none focus:border-gold disabled:opacity-50"
                 placeholder="Jan Kowalski"
               />
             </div>
             <div>
-              <label className="block text-xs text-[#8F9AAF] uppercase tracking-widest mb-1">
+              <label className="block text-xs text-muted uppercase tracking-widest mb-1">
                 Email
               </label>
               <input
@@ -202,13 +202,13 @@ function InviteClientModal({ open, onClose, onSuccess }) {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={submitting}
-                className="w-full bg-[#070B14] border border-[rgba(212,181,112,0.18)] rounded-lg px-3 py-2 text-[#F4EFE3] focus:outline-none focus:border-[#D4B570] disabled:opacity-50"
+                className="w-full bg-bg-deep border border-[rgba(212,181,112,0.18)] rounded-lg px-3 py-2 text-warm focus:outline-none focus:border-gold disabled:opacity-50"
                 placeholder="klient@example.com"
               />
             </div>
 
             {error && (
-              <div className="bg-[#2A1414] border border-[rgba(239,107,115,0.3)] text-[#EF6B73] text-sm rounded-lg p-3">
+              <div className="bg-[#2A1414] border border-[rgba(239,107,115,0.3)] text-danger text-sm rounded-lg p-3">
                 {error}
               </div>
             )}
@@ -218,14 +218,14 @@ function InviteClientModal({ open, onClose, onSuccess }) {
                 type="button"
                 onClick={handleClose}
                 disabled={submitting}
-                className="flex-1 border border-[rgba(212,181,112,0.3)] text-[#D4B570] py-2 rounded-lg hover:bg-[#D4B570] hover:text-[#070B14] transition disabled:opacity-50"
+                className="flex-1 border border-[rgba(212,181,112,0.3)] text-gold py-2 rounded-lg hover:bg-gold hover:text-bg-deep transition disabled:opacity-50"
               >
                 Anuluj
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 bg-[#D4B570] text-[#070B14] py-2 rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50"
+                className="flex-1 bg-gold text-bg-deep py-2 rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50"
               >
                 {submitting ? 'Wysyłanie…' : 'Wyślij zaproszenie'}
               </button>
@@ -257,20 +257,20 @@ export default function DashboardClient({ profile, clients }) {
   }, [safeClients])
 
   return (
-    <div className="dashboard-root min-h-screen bg-[#070B14] text-[#F4EFE3] font-sans">
-      <nav className="sticky top-0 z-50 bg-[#070B14]/80 backdrop-blur-md border-b border-[rgba(212,181,112,0.18)] px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4 px-0 py-0 m-0 bg-transparent text-[#F4EFE3]">
-          <span className="font-serif text-2xl text-[#D4B570] tracking-widest">ARETÉ</span>
-          <span className="text-xs text-[#8F9AAF] uppercase tracking-widest">Panel Trenera</span>
+    <div className="dashboard-root min-h-screen bg-bg-deep text-warm font-body">
+      <nav className="sticky top-0 z-50 bg-bg-deep/80 backdrop-blur-md border-b border-[rgba(212,181,112,0.18)] px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <span className="font-display text-2xl text-gold tracking-widest">ARETÉ</span>
+          <span className="text-xs text-muted uppercase tracking-widest">Panel Trenera</span>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setInviteOpen(true)}
-            className="bg-[#D4B570] text-[#070B14] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
+            className="bg-gold text-bg-deep px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
           >
             + Dodaj klienta
           </button>
-          <span className="text-sm text-[#8F9AAF]">{profile?.full_name || profile?.email}</span>
+          <span className="text-sm text-muted">{profile?.full_name || profile?.email}</span>
         </div>
       </nav>
 
@@ -281,22 +281,22 @@ export default function DashboardClient({ profile, clients }) {
       />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 p-0 bg-transparent text-[#F4EFE3]">
-          <div className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 m-0 block text-[#F4EFE3]">
-            <p className="text-xs text-[#8F9AAF] uppercase tracking-widest mb-1">Aktywni klienci</p>
-            <p className="text-3xl font-serif text-[#D4B570]">{stats.active}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+            <p className="text-xs text-muted uppercase tracking-widest mb-1">Aktywni klienci</p>
+            <p className="text-3xl font-display text-gold">{stats.active}</p>
           </div>
-          <div className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 m-0 block text-[#F4EFE3]">
-            <p className="text-xs text-[#8F9AAF] uppercase tracking-widest mb-1">Check-iny</p>
-            <p className="text-3xl font-serif text-[#D4B570]">{stats.checkinsDue}</p>
+          <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+            <p className="text-xs text-muted uppercase tracking-widest mb-1">Check-iny</p>
+            <p className="text-3xl font-display text-gold">{stats.checkinsDue}</p>
           </div>
-          <div className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 m-0 block text-[#F4EFE3]">
-            <p className="text-xs text-[#8F9AAF] uppercase tracking-widest mb-1">Treningi / tydzień</p>
-            <p className="text-3xl font-serif text-[#D4B570]">{stats.weeklyTraining}</p>
+          <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+            <p className="text-xs text-muted uppercase tracking-widest mb-1">Treningi / tydzień</p>
+            <p className="text-3xl font-display text-gold">{stats.weeklyTraining}</p>
           </div>
-          <div className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 m-0 block text-[#F4EFE3]">
-            <p className="text-xs text-[#8F9AAF] uppercase tracking-widest mb-1">Bez aktywności</p>
-            <p className="text-3xl font-serif text-[#EF6B73]">{stats.inactive}</p>
+          <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+            <p className="text-xs text-muted uppercase tracking-widest mb-1">Bez aktywności</p>
+            <p className="text-3xl font-display text-danger">{stats.inactive}</p>
           </div>
         </div>
 
@@ -311,8 +311,8 @@ export default function DashboardClient({ profile, clients }) {
           if (needsAttention.length === 0) return null
 
           return (
-            <div className="bg-[#0D1424] border border-[rgba(239,107,115,0.25)] rounded-2xl p-6 mb-6">
-              <h3 className="font-serif text-xl text-[#EF6B73] mb-4">⚠ Wymagają uwagi ({needsAttention.length})</h3>
+            <div className="bg-surface border border-[rgba(239,107,115,0.25)] rounded-2xl p-6 mb-6">
+              <h3 className="font-display text-xl text-danger mb-4">⚠ Wymagają uwagi ({needsAttention.length})</h3>
               <div className="space-y-3">
                 {needsAttention.map(client => {
                   const noTrainingDays = daysSince(client.logs?.[0]?.session_date)
@@ -335,14 +335,14 @@ export default function DashboardClient({ profile, clients }) {
                     <div
                       key={client.id}
                       onClick={() => router.push(`/dashboard/client/${client.id}`)}
-                      className="bg-[#070B14] border border-[rgba(239,107,115,0.15)] rounded-lg p-4 flex items-center gap-3 cursor-pointer hover:border-[#EF6B73] transition"
+                      className="bg-bg-deep border border-[rgba(239,107,115,0.15)] rounded-lg p-4 flex items-center gap-3 cursor-pointer hover:border-danger transition"
                     >
-                      <div className="w-8 h-8 rounded-full bg-[#111B2E] border border-[rgba(239,107,115,0.3)] flex items-center justify-center font-serif text-[#EF6B73] font-bold text-sm">
+                      <div className="w-8 h-8 rounded-full bg-surface-2 border border-[rgba(239,107,115,0.3)] flex items-center justify-center font-display text-danger font-bold text-sm">
                         {getInitials(client.full_name, client.email)}
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-[#F4EFE3] text-sm">{client.full_name || 'Bez nazwy'}</p>
-                        <p className="text-xs text-[#EF6B73]">{flags.join(' • ')}</p>
+                        <p className="font-medium text-warm text-sm">{client.full_name || 'Bez nazwy'}</p>
+                        <p className="text-xs text-danger">{flags.join(' • ')}</p>
                       </div>
                     </div>
                   )
@@ -352,13 +352,13 @@ export default function DashboardClient({ profile, clients }) {
           )
         })()}
 
-        <h2 className="font-serif text-2xl text-[#D4B570] mb-4">Klienci</h2>
+        <h2 className="font-display text-2xl text-gold mb-4">Klienci</h2>
         {safeClients.length === 0 ? (
-          <div className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 m-0 block text-[#F4EFE3]">
-            <p className="text-[#8F9AAF] text-sm">Brak klientów. Lista pojawi się po dodaniu profili klienta.</p>
+          <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6">
+            <p className="text-muted text-sm">Brak klientów. Lista pojawi się po dodaniu profili klienta.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-0 m-0 bg-transparent text-[#F4EFE3]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {safeClients.map(client => (
               <ClientCard key={client.id} client={client} />
             ))}

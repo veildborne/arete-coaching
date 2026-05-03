@@ -43,65 +43,54 @@ function RestTimer({ onDismiss }) {
   const done = seconds >= target
 
   return (
-    <div style={{
-      position: 'fixed', bottom: '5.5rem', right: '1rem', zIndex: 100,
-      background: 'rgba(10,14,26,0.97)',
+    <div className="fixed bottom-[5.5rem] right-4 z-[100] bg-[rgba(10,14,26,0.97)] rounded-[14px] p-[0.9rem_1rem] min-w-[160px] shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl" style={{
       border: `1px solid ${done ? '#47D18C' : 'rgba(184,166,119,0.3)'}`,
-      borderRadius: '14px', padding: '0.9rem 1rem',
-      minWidth: '160px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      backdropFilter: 'blur(12px)',
     }}>
       {/* Label */}
-      <div style={{
-        fontSize: '0.6rem', color: 'rgba(160,160,160,0.6)',
-        letterSpacing: '0.15em', textTransform: 'uppercase',
-        fontFamily: 'Outfit, sans-serif', marginBottom: '0.4rem',
-      }}>Przerwa</div>
+      <div className="text-[0.6rem] text-[rgba(160,160,160,0.6)] tracking-[0.15em] uppercase font-body mb-[0.4rem]">
+        Przerwa
+      </div>
 
       {/* Time */}
-      <div style={{
-        fontFamily: 'Outfit, sans-serif', fontSize: '1.6rem',
-        fontWeight: 700, color: done ? '#47D18C' : '#e8e8e8',
-        letterSpacing: '-0.02em', marginBottom: '0.5rem',
-      }}>{fmt(seconds)}</div>
+      <div className="font-body text-[1.6rem] font-bold tracking-[-0.02em] mb-[0.5rem]" style={{
+        color: done ? '#47D18C' : '#e8e8e8',
+      }}>
+        {fmt(seconds)}
+      </div>
 
       {/* Progress bar */}
-      <div style={{
-        height: '3px', background: 'rgba(255,255,255,0.08)',
-        borderRadius: '99px', marginBottom: '0.6rem', overflow: 'hidden',
-      }}>
-        <div style={{
-          height: '100%', borderRadius: '99px',
+      <div className="h-[3px] bg-[rgba(255,255,255,0.08)] rounded-full mb-[0.6rem] overflow-hidden">
+        <div className="h-full rounded-full transition-[width_1s_linear,background_0.3s]" style={{
           width: `${pct}%`,
           background: done ? '#47D18C' : 'rgba(184,166,119,0.7)',
-          transition: 'width 1s linear, background 0.3s',
         }} />
       </div>
 
       {/* Target selector */}
-      <div style={{ display: 'flex', gap: '0.3rem', marginBottom: '0.5rem' }}>
+      <div className="flex gap-[0.3rem] mb-[0.5rem]">
         {[60, 90, 120, 180].map(t => (
-          <button key={t} onClick={() => { setTarget(t); setSeconds(0) }} style={{
-            flex: 1, padding: '0.2rem 0',
-            fontSize: '0.62rem', fontFamily: 'Outfit, sans-serif',
-            background: target === t ? 'rgba(184,166,119,0.15)' : 'transparent',
-            border: `1px solid ${target === t ? 'rgba(184,166,119,0.5)' : 'rgba(184,166,119,0.15)'}`,
-            borderRadius: '4px', cursor: 'pointer',
-            color: target === t ? '#d4c494' : 'rgba(160,160,160,0.5)',
-          }}>{t / 60 >= 1 ? `${t / 60}'` : `${t}"`}</button>
+          <button
+            key={t}
+            onClick={() => { setTarget(t); setSeconds(0) }}
+            className="flex-1 py-[0.2rem] text-[0.62rem] font-body rounded cursor-pointer"
+            style={{
+              background: target === t ? 'rgba(184,166,119,0.15)' : 'transparent',
+              border: `1px solid ${target === t ? 'rgba(184,166,119,0.5)' : 'rgba(184,166,119,0.15)'}`,
+              color: target === t ? '#d4c494' : 'rgba(160,160,160,0.5)',
+            }}
+          >
+            {t / 60 >= 1 ? `${t / 60}'` : `${t}"`}
+          </button>
         ))}
       </div>
 
       {/* Dismiss */}
-      <button onClick={onDismiss} style={{
-        width: '100%', padding: '0.4rem',
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '6px', cursor: 'pointer',
-        color: 'rgba(160,160,160,0.6)',
-        fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem',
-      }}>Zamknij</button>
+      <button
+        onClick={onDismiss}
+        className="w-full py-[0.4rem] bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] rounded-md cursor-pointer text-[rgba(160,160,160,0.6)] font-body text-[0.72rem]"
+      >
+        Zamknij
+      </button>
     </div>
   )
 }
@@ -131,88 +120,69 @@ function ExercisePicker({ exercises, onSelect, onClose }) {
   }, {})
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 999,
-      background: 'rgba(6,9,18,0.97)',
-      display: 'flex', flexDirection: 'column',
-    }}>
-      <div style={{
-        padding: '1rem 1.25rem 0.75rem',
-        background: 'rgba(10,14,26,0.9)',
-        borderBottom: '1px solid rgba(184,166,119,0.15)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-          <button onClick={onClose} style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'rgba(184,166,119,0.7)', fontSize: '1.3rem', padding: 0, lineHeight: 1,
-          }}>←</button>
-          <h2 style={{
-            fontFamily: 'Cormorant Garamond, serif', fontSize: '1.2rem',
-            fontWeight: 600, color: '#d4c494', margin: 0,
-          }}>Wybierz ćwiczenie</h2>
+    <div className="fixed inset-0 z-[999] bg-[rgba(6,9,18,0.97)] flex flex-col">
+      <div className="pt-4 px-5 pb-3 bg-[rgba(10,14,26,0.9)] border-b border-[rgba(184,166,119,0.15)]">
+        <div className="flex items-center gap-3 mb-3">
+          <button
+            onClick={onClose}
+            className="bg-transparent border-0 cursor-pointer text-[rgba(184,166,119,0.7)] text-[1.3rem] p-0 leading-none"
+          >
+            ←
+          </button>
+          <h2 className="font-display text-xl font-semibold text-gold m-0">
+            Wybierz ćwiczenie
+          </h2>
         </div>
         <input
           ref={inputRef}
-          type="text" value={search} onChange={e => setSearch(e.target.value)}
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
           placeholder="Szukaj ćwiczenia..."
-          style={{
-            width: '100%', padding: '0.7rem 1rem',
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(184,166,119,0.25)',
-            borderRadius: '8px', outline: 'none',
-            color: '#e8e8e8', fontFamily: 'Outfit, sans-serif', fontSize: '0.95rem',
-            marginBottom: '0.6rem', boxSizing: 'border-box',
-          }}
+          className="w-full py-[0.7rem] px-4 bg-[rgba(255,255,255,0.06)] border border-[rgba(184,166,119,0.25)] rounded-lg outline-none text-warm font-body text-[0.95rem] mb-[0.6rem] box-border"
         />
-        <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
+        <div className="flex gap-[0.4rem] overflow-x-auto pb-1">
           {muscles.map(m => (
-            <button key={m} onClick={() => setMuscleFilter(m)} style={{
-              padding: '0.3rem 0.75rem', borderRadius: '99px', whiteSpace: 'nowrap',
-              background: muscleFilter === m ? 'rgba(184,166,119,0.2)' : 'transparent',
-              border: `1px solid ${muscleFilter === m ? '#b8a677' : 'rgba(184,166,119,0.2)'}`,
-              color: muscleFilter === m ? '#d4c494' : 'rgba(160,160,160,0.7)',
-              fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
-            }}>
+            <button
+              key={m}
+              onClick={() => setMuscleFilter(m)}
+              className="py-[0.3rem] px-3 rounded-full whitespace-nowrap text-[0.72rem] cursor-pointer font-body"
+              style={{
+                background: muscleFilter === m ? 'rgba(184,166,119,0.2)' : 'transparent',
+                border: `1px solid ${muscleFilter === m ? '#b8a677' : 'rgba(184,166,119,0.2)'}`,
+                color: muscleFilter === m ? '#d4c494' : 'rgba(160,160,160,0.7)',
+              }}
+            >
               {m === 'all' ? 'Wszystkie' : muscleLabels[m] || m}
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0' }}>
+      <div className="flex-1 overflow-y-auto py-2">
         {Object.entries(grouped).map(([muscle, exList]) => (
           <div key={muscle}>
-            <div style={{
-              padding: '0.6rem 1.25rem 0.3rem',
-              fontSize: '0.65rem', color: 'rgba(184,166,119,0.5)',
-              letterSpacing: '0.2em', textTransform: 'uppercase',
-              fontFamily: 'Outfit, sans-serif',
-            }}>
+            <div className="py-[0.6rem_1.25rem_0.3rem] px-5 text-[0.65rem] text-[rgba(184,166,119,0.5)] tracking-[0.2em] uppercase font-body">
               {muscleLabels[muscle] || muscle}
             </div>
             {exList.map(ex => (
-              <button key={ex.id} onClick={() => onSelect(ex)} style={{
-                width: '100%', display: 'flex', alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0.85rem 1.25rem',
-                background: 'none', border: 'none',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
-                cursor: 'pointer', textAlign: 'left',
-              }}>
+              <button
+                key={ex.id}
+                onClick={() => onSelect(ex)}
+                className="w-full flex items-center justify-between py-[0.85rem] px-5 bg-transparent border-0 border-b border-[rgba(255,255,255,0.04)] cursor-pointer text-left"
+              >
                 <div>
-                  <div style={{ fontSize: '0.9rem', color: '#e8e8e8', fontFamily: 'Outfit, sans-serif', fontWeight: 500 }}>
+                  <div className="text-[0.9rem] text-warm font-body font-medium">
                     {ex.name_pl || ex.name}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'rgba(160,160,160,0.6)', marginTop: '0.15rem' }}>
+                  <div className="text-[0.72rem] text-[rgba(160,160,160,0.6)] mt-[0.15rem]">
                     {ex.name} · {ex.equipment?.join(', ')}
-                    {ex.stretch_position && <span style={{ color: 'rgba(184,166,119,0.6)', marginLeft: '0.4rem' }}>⊕ stretch</span>}
+                    {ex.stretch_position && (
+                      <span className="text-[rgba(184,166,119,0.6)] ml-[0.4rem]">⊕ stretch</span>
+                    )}
                   </div>
                 </div>
-                <div style={{
-                  fontSize: '0.7rem', color: 'rgba(184,166,119,0.6)',
-                  padding: '0.2rem 0.5rem', borderRadius: '4px',
-                  background: 'rgba(184,166,119,0.08)',
-                }}>
+                <div className="text-[0.7rem] text-[rgba(184,166,119,0.6)] py-[0.2rem] px-2 rounded bg-[rgba(184,166,119,0.08)]">
                   SFR {ex.sfr_rating}
                 </div>
               </button>
@@ -220,7 +190,7 @@ function ExercisePicker({ exercises, onSelect, onClose }) {
           </div>
         ))}
         {filtered.length === 0 && (
-          <div style={{ padding: '3rem', textAlign: 'center', color: 'rgba(160,160,160,0.5)', fontFamily: 'Outfit, sans-serif' }}>
+          <div className="p-12 text-center text-[rgba(160,160,160,0.5)] font-body">
             Brak wyników dla "{search}"
           </div>
         )}
@@ -235,81 +205,54 @@ function SetRow({ setNum, data, onChange, onRemove, onLogged, prevBest, targetRi
   const isLogged = data.logged
 
   return (
-    <div style={{
+    <div className="rounded-lg py-2 border-b border-[rgba(255,255,255,0.05)] transition-[background_0.3s]" style={{
       background: isLogged ? 'rgba(71,209,140,0.05)' : 'transparent',
-      borderRadius: '8px',
-      padding: '0.5rem 0',
-      borderBottom: '1px solid rgba(255,255,255,0.05)',
-      transition: 'background 0.3s',
     }}>
-      <div style={{
-        display: 'grid', gridTemplateColumns: '28px 1fr 1fr auto auto',
-        gap: '0.5rem', alignItems: 'center',
-      }}>
+      <div className="grid grid-cols-[28px_1fr_1fr_auto_auto] gap-2 items-center">
         {/* Set number */}
-        <div style={{
-          width: '28px', height: '28px', borderRadius: '50%',
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-[0.72rem] font-semibold font-body" style={{
           background: isLogged ? 'rgba(71,209,140,0.2)' : 'rgba(184,166,119,0.15)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '0.72rem',
           color: isLogged ? '#47D18C' : 'rgba(184,166,119,0.8)',
-          fontWeight: 600, fontFamily: 'Outfit, sans-serif',
-        }}>{isLogged ? '✓' : setNum}</div>
+        }}>
+          {isLogged ? '✓' : setNum}
+        </div>
 
         {/* Weight */}
         <div>
-          <div style={{ fontSize: '0.6rem', color: 'rgba(160,160,160,0.5)', marginBottom: '0.2rem', letterSpacing: '0.1em' }}>KG</div>
+          <div className="text-[0.6rem] text-[rgba(160,160,160,0.5)] mb-[0.2rem] tracking-[0.1em]">KG</div>
           <input
-            type="number" inputMode="decimal" value={data.weight}
+            type="number"
+            inputMode="decimal"
+            value={data.weight}
             onChange={e => onChange({ ...data, weight: e.target.value })}
             placeholder={prevBest?.weight ?? '0'}
-            style={{
-              width: '100%', padding: '0.55rem 0.5rem',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(184,166,119,0.2)',
-              borderRadius: '6px', outline: 'none',
-              color: '#e8e8e8', fontFamily: 'Outfit, sans-serif',
-              fontSize: '1rem', fontWeight: 500, textAlign: 'center', boxSizing: 'border-box',
-            }}
-            onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'}
-            onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'}
+            className="w-full py-[0.55rem] px-2 bg-[rgba(255,255,255,0.06)] border border-[rgba(184,166,119,0.2)] rounded-md outline-none text-warm font-body text-base font-medium text-center box-border focus:border-[rgba(184,166,119,0.6)]"
           />
         </div>
 
         {/* Reps */}
         <div>
-          <div style={{ fontSize: '0.6rem', color: 'rgba(160,160,160,0.5)', marginBottom: '0.2rem', letterSpacing: '0.1em' }}>POWT.</div>
+          <div className="text-[0.6rem] text-[rgba(160,160,160,0.5)] mb-[0.2rem] tracking-[0.1em]">POWT.</div>
           <input
-            type="number" inputMode="numeric" value={data.reps}
+            type="number"
+            inputMode="numeric"
+            value={data.reps}
             onChange={e => onChange({ ...data, reps: e.target.value })}
             placeholder={prevBest?.reps ?? '0'}
-            style={{
-              width: '100%', padding: '0.55rem 0.5rem',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(184,166,119,0.2)',
-              borderRadius: '6px', outline: 'none',
-              color: '#e8e8e8', fontFamily: 'Outfit, sans-serif',
-              fontSize: '1rem', fontWeight: 500, textAlign: 'center', boxSizing: 'border-box',
-            }}
-            onFocus={e => e.target.style.borderColor = 'rgba(184,166,119,0.6)'}
-            onBlur={e => e.target.style.borderColor = 'rgba(184,166,119,0.2)'}
+            className="w-full py-[0.55rem] px-2 bg-[rgba(255,255,255,0.06)] border border-[rgba(184,166,119,0.2)] rounded-md outline-none text-warm font-body text-base font-medium text-center box-border focus:border-[rgba(184,166,119,0.6)]"
           />
         </div>
 
         {/* RIR */}
         <div>
-          <div style={{ fontSize: '0.6rem', color: 'rgba(160,160,160,0.5)', marginBottom: '0.2rem', letterSpacing: '0.1em' }}>RIR</div>
+          <div className="text-[0.6rem] text-[rgba(160,160,160,0.5)] mb-[0.2rem] tracking-[0.1em]">RIR</div>
           <select
             value={data.rir}
             onChange={e => onChange({ ...data, rir: e.target.value })}
+            className="py-[0.55rem] px-[0.4rem] bg-[rgba(255,255,255,0.06)] rounded-md outline-none font-body text-[0.9rem] font-semibold cursor-pointer"
             style={{
-              padding: '0.55rem 0.4rem',
-              background: 'rgba(255,255,255,0.06)',
               border: `1px solid ${rirColors[parseInt(data.rir)] || 'rgba(184,166,119,0.2)'}`,
-              borderRadius: '6px', outline: 'none',
               color: rirColors[parseInt(data.rir)] || '#e8e8e8',
-              fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem', fontWeight: 600,
-              cursor: 'pointer',
             }}
           >
             {[0, 1, 2, 3, 4, 5].map(r => (
@@ -321,29 +264,26 @@ function SetRow({ setNum, data, onChange, onRemove, onLogged, prevBest, targetRi
         {/* Log / Remove */}
         <button
           onClick={() => isLogged ? onChange({ ...data, logged: false }) : onLogged()}
+          className="w-8 h-8 rounded-md cursor-pointer text-[0.9rem] flex items-center justify-center transition-all flex-shrink-0"
           style={{
-            width: '32px', height: '32px', borderRadius: '6px',
             background: isLogged ? 'rgba(71,209,140,0.15)' : 'rgba(255,255,255,0.05)',
             border: `1px solid ${isLogged ? 'rgba(71,209,140,0.4)' : 'rgba(255,255,255,0.12)'}`,
-            cursor: 'pointer', color: isLogged ? '#47D18C' : 'rgba(160,160,160,0.5)',
-            fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.2s', flexShrink: 0,
+            color: isLogged ? '#47D18C' : 'rgba(160,160,160,0.5)',
           }}
-        >{isLogged ? '✓' : '○'}</button>
+        >
+          {isLogged ? '✓' : '○'}
+        </button>
       </div>
 
       {/* e1RM + target RIR hint */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        paddingLeft: '36px', marginTop: '0.25rem',
-      }}>
+      <div className="flex justify-between items-center pl-9 mt-1">
         {e1rm ? (
-          <div style={{ fontSize: '0.65rem', color: 'rgba(184,166,119,0.55)' }}>
-            Est. 1RM: <span style={{ color: '#d4c494' }}>{e1rm} kg</span>
+          <div className="text-[0.65rem] text-[rgba(184,166,119,0.55)]">
+            Est. 1RM: <span className="text-gold">{e1rm} kg</span>
           </div>
         ) : <div />}
         {targetRir !== undefined && (
-          <div style={{ fontSize: '0.62rem', color: 'rgba(160,160,160,0.45)' }}>
+          <div className="text-[0.62rem] text-[rgba(160,160,160,0.45)]">
             cel: RIR <span style={{ color: rirColors[targetRir] }}>{targetRir}</span>
           </div>
         )}
@@ -358,52 +298,36 @@ function ExerciseBlock({ exercise, sets, prevPerf, targetRir, onUpdateSet, onAdd
     (s.weight_kg > (best?.weight_kg ?? 0) ? s : best), null)
 
   return (
-    <div style={{
-      background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
-      border: '1px solid rgba(184,166,119,0.12)',
-      borderRadius: '12px', padding: '1.25rem',
-      marginBottom: '0.75rem',
-    }}>
+    <div className="bg-gradient-to-br from-[#131f36] to-[#0f1a2e] border border-[rgba(184,166,119,0.12)] rounded-xl p-5 mb-3">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
+      <div className="flex justify-between items-start mb-[0.6rem]">
         <div>
-          <div style={{
-            fontSize: '0.62rem', color: 'rgba(184,166,119,0.5)',
-            letterSpacing: '0.15em', textTransform: 'uppercase',
-            fontFamily: 'Outfit, sans-serif', marginBottom: '0.2rem',
-          }}>
+          <div className="text-[0.62rem] text-[rgba(184,166,119,0.5)] tracking-[0.15em] uppercase font-body mb-[0.2rem]">
             {muscleLabels[exercise.muscle_group] || exercise.muscle_group}
-            {exercise.stretch_position && <span style={{ marginLeft: '0.4rem', color: 'rgba(184,166,119,0.6)' }}>· stretch ⊕</span>}
+            {exercise.stretch_position && (
+              <span className="ml-[0.4rem] text-[rgba(184,166,119,0.6)]">· stretch ⊕</span>
+            )}
           </div>
-          <div style={{
-            fontFamily: 'Cormorant Garamond, serif', fontSize: '1.15rem',
-            fontWeight: 600, color: '#e8e8e8',
-          }}>
+          <div className="font-display text-[1.15rem] font-semibold text-warm">
             {exercise.name_pl || exercise.name}
           </div>
         </div>
-        <button onClick={onRemoveExercise} style={{
-          background: 'none', border: '1px solid rgba(239,68,68,0.25)',
-          color: 'rgba(239,68,68,0.5)', borderRadius: '6px',
-          padding: '0.3rem 0.6rem', cursor: 'pointer',
-          fontSize: '0.7rem', fontFamily: 'Outfit, sans-serif',
-        }}>Usuń</button>
+        <button
+          onClick={onRemoveExercise}
+          className="bg-transparent border border-[rgba(239,68,68,0.25)] text-[rgba(239,68,68,0.5)] rounded-md py-[0.3rem] px-[0.6rem] cursor-pointer text-[0.7rem] font-body"
+        >
+          Usuń
+        </button>
       </div>
 
       {/* Previous best */}
       {prevBestSet && (
-        <div style={{
-          fontSize: '0.7rem', color: 'rgba(160,160,160,0.55)',
-          marginBottom: '0.75rem',
-          padding: '0.4rem 0.7rem',
-          background: 'rgba(184,166,119,0.05)',
-          borderRadius: '6px', borderLeft: '2px solid rgba(184,166,119,0.25)',
-        }}>
-          Ostatnio: <span style={{ color: '#d4c494', fontWeight: 600 }}>
+        <div className="text-[0.7rem] text-[rgba(160,160,160,0.55)] mb-3 py-[0.4rem] px-[0.7rem] bg-[rgba(184,166,119,0.05)] rounded-md border-l-2 border-[rgba(184,166,119,0.25)]">
+          Ostatnio: <span className="text-gold font-semibold">
             {prevBestSet.weight_kg} kg × {prevBestSet.reps}
           </span>
           {prevBestSet.rir_actual !== undefined && (
-            <span style={{ color: 'rgba(160,160,160,0.4)', marginLeft: '0.3rem' }}>
+            <span className="text-[rgba(160,160,160,0.4)] ml-[0.3rem]">
               @ RIR {prevBestSet.rir_actual}
             </span>
           )}
@@ -412,13 +336,7 @@ function ExerciseBlock({ exercise, sets, prevPerf, targetRir, onUpdateSet, onAdd
 
       {/* Column headers */}
       {sets.length > 0 && (
-        <div style={{
-          display: 'grid', gridTemplateColumns: '28px 1fr 1fr auto auto',
-          gap: '0.5rem', padding: '0 0 0.35rem',
-          fontSize: '0.58rem', color: 'rgba(160,160,160,0.4)',
-          letterSpacing: '0.15em', textTransform: 'uppercase',
-          fontFamily: 'Outfit, sans-serif',
-        }}>
+        <div className="grid grid-cols-[28px_1fr_1fr_auto_auto] gap-2 pb-[0.35rem] text-[0.58rem] text-[rgba(160,160,160,0.4)] tracking-[0.15em] uppercase font-body">
           <div>#</div><div>Ciężar</div><div>Powt.</div><div>RIR</div><div />
         </div>
       )}
@@ -438,16 +356,10 @@ function ExerciseBlock({ exercise, sets, prevPerf, targetRir, onUpdateSet, onAdd
       ))}
 
       {/* Add set */}
-      <button onClick={onAddSet} style={{
-        width: '100%', marginTop: '0.75rem',
-        padding: '0.6rem',
-        background: 'rgba(184,166,119,0.05)',
-        border: '1px dashed rgba(184,166,119,0.2)',
-        borderRadius: '8px', cursor: 'pointer',
-        color: 'rgba(184,166,119,0.6)',
-        fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem',
-        letterSpacing: '0.08em',
-      }}>
+      <button
+        onClick={onAddSet}
+        className="w-full mt-3 py-[0.6rem] bg-[rgba(184,166,119,0.05)] border border-dashed border-[rgba(184,166,119,0.2)] rounded-lg cursor-pointer text-[rgba(184,166,119,0.6)] font-body text-[0.8rem] tracking-[0.08em]"
+      >
         + Dodaj serię
       </button>
     </div>
@@ -469,76 +381,54 @@ function SessionSummary({ stats, onContinue }) {
   const xp = Math.min(200, 60 + stats.totalSets * 8 + stats.exercises * 10)
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'Outfit, sans-serif', padding: '2rem',
-    }}>
-      <div style={{ textAlign: 'center', maxWidth: '340px', width: '100%' }}>
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] flex items-center justify-center font-body p-8">
+      <div className="text-center max-w-[340px] w-full">
         {/* Icon */}
-        <div style={{
-          width: '72px', height: '72px', borderRadius: '50%',
-          background: 'rgba(71,209,140,0.15)',
-          border: '2px solid rgba(71,209,140,0.35)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 1.5rem',
-          fontSize: '2rem',
-        }}>⚡</div>
+        <div className="w-[72px] h-[72px] rounded-full bg-[rgba(71,209,140,0.15)] border-2 border-[rgba(71,209,140,0.35)] flex items-center justify-center mx-auto mb-6 text-[2rem]">
+          ⚡
+        </div>
 
-        <div style={{
-          fontFamily: 'Cormorant Garamond, serif',
-          fontSize: '2rem', color: '#d4c494', fontWeight: 600,
-          marginBottom: '0.25rem',
-        }}>Trening ukończony</div>
-        <div style={{ color: 'rgba(160,160,160,0.6)', fontSize: '0.85rem', marginBottom: '2rem' }}>
+        <div className="font-display text-[2rem] text-gold font-semibold mb-1">
+          Trening ukończony
+        </div>
+        <div className="text-[rgba(160,160,160,0.6)] text-[0.85rem] mb-8">
           Ἄσκησις — dyscyplina przynosi rezultaty
         </div>
 
         {/* Stats grid */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr',
-          gap: '0.75rem', marginBottom: '1.5rem',
-        }}>
+        <div className="grid grid-cols-2 gap-3 mb-6">
           {[
             { label: 'Czas', value: fmt(stats.duration), accent: false },
             { label: 'Serie', value: stats.totalSets, accent: false },
             { label: 'Objętość', value: `${stats.volume.toLocaleString('pl')} kg`, accent: false },
             { label: 'XP zdobyte', value: `+${xp} XP`, accent: true },
           ].map(({ label, value, accent }) => (
-            <div key={label} style={{
-              background: accent ? 'rgba(212,181,112,0.08)' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${accent ? 'rgba(212,181,112,0.2)' : 'rgba(255,255,255,0.07)'}`,
-              borderRadius: '10px', padding: '1rem',
-            }}>
-              <div style={{ fontSize: '0.62rem', color: 'rgba(160,160,160,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+            <div
+              key={label}
+              className={`${accent ? 'bg-[rgba(212,181,112,0.08)] border-[rgba(212,181,112,0.2)]' : 'bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.07)]'} border rounded-[10px] p-4`}
+            >
+              <div className="text-[0.62rem] text-[rgba(160,160,160,0.5)] tracking-[0.1em] uppercase mb-[0.3rem]">
                 {label}
               </div>
-              <div style={{
-                fontSize: '1.3rem', fontWeight: 700,
-                color: accent ? '#D4B570' : '#e8e8e8',
-              }}>{value}</div>
+              <div className={`text-[1.3rem] font-bold ${accent ? 'text-gold' : 'text-warm'}`}>
+                {value}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Top set */}
         {stats.topSet && (
-          <div style={{
-            background: 'rgba(184,166,119,0.06)',
-            border: '1px solid rgba(184,166,119,0.15)',
-            borderRadius: '10px', padding: '0.85rem',
-            marginBottom: '1.5rem', textAlign: 'left',
-          }}>
-            <div style={{ fontSize: '0.62rem', color: 'rgba(160,160,160,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+          <div className="bg-[rgba(184,166,119,0.06)] border border-[rgba(184,166,119,0.15)] rounded-[10px] p-[0.85rem] mb-6 text-left">
+            <div className="text-[0.62rem] text-[rgba(160,160,160,0.5)] tracking-[0.1em] uppercase mb-[0.3rem]">
               Najlepsza seria
             </div>
-            <div style={{ color: '#e8e8e8', fontSize: '0.9rem' }}>
-              <span style={{ color: '#d4c494', fontWeight: 600 }}>{stats.topSet.name}</span>
+            <div className="text-warm text-[0.9rem]">
+              <span className="text-gold font-semibold">{stats.topSet.name}</span>
               {' — '}
               {stats.topSet.weight} kg × {stats.topSet.reps} powt.
               {stats.topSet.e1rm && (
-                <span style={{ color: 'rgba(160,160,160,0.5)', fontSize: '0.8rem', marginLeft: '0.4rem' }}>
+                <span className="text-[rgba(160,160,160,0.5)] text-[0.8rem] ml-[0.4rem]">
                   (1RM ~{stats.topSet.e1rm} kg)
                 </span>
               )}
@@ -546,13 +436,10 @@ function SessionSummary({ stats, onContinue }) {
           </div>
         )}
 
-        <button onClick={onContinue} style={{
-          width: '100%', padding: '0.95rem',
-          background: 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
-          border: 'none', borderRadius: '10px', cursor: 'pointer',
-          color: '#0f1a2e', fontFamily: 'Outfit, sans-serif',
-          fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.08em',
-        }}>
+        <button
+          onClick={onContinue}
+          className="w-full py-[0.95rem] bg-gradient-to-br from-[#b8a677] to-gold border-0 rounded-[10px] cursor-pointer text-[#0f1a2e] font-body text-[0.9rem] font-bold tracking-[0.08em]"
+        >
           Wróć do panelu
         </button>
       </div>
@@ -730,11 +617,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
-      color: '#e8e8e8', fontFamily: 'Outfit, sans-serif',
-    }}>
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] text-warm font-body">
       {/* Exercise picker */}
       {showPicker && (
         <ExercisePicker
@@ -748,74 +631,64 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
       {showRestTimer && <RestTimer onDismiss={() => setShowRestTimer(false)} />}
 
       {/* TOP BAR */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(10,14,26,0.92)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(184,166,119,0.15)',
-        padding: '0.85rem 1.25rem',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button onClick={() => router.push('/client')} style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'rgba(184,166,119,0.6)', fontSize: '1.2rem', padding: 0,
-          }}>←</button>
+      <nav className="sticky top-0 z-50 bg-[rgba(10,14,26,0.92)] backdrop-blur-xl border-b border-[rgba(184,166,119,0.15)] py-[0.85rem] px-5 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push('/client')}
+            className="bg-transparent border-0 cursor-pointer text-[rgba(184,166,119,0.6)] text-[1.2rem] p-0"
+          >
+            ←
+          </button>
           <div>
-            <div style={{
-              fontFamily: 'Cormorant Garamond, serif', fontSize: '1.1rem',
-              color: '#d4c494', fontWeight: 600, letterSpacing: '0.05em',
-            }}>Sesja {dayLabel}</div>
-            <div style={{ fontSize: '0.7rem', color: 'rgba(160,160,160,0.5)' }}>
+            <div className="font-display text-[1.1rem] text-gold font-semibold tracking-[0.05em]">
+              Sesja {dayLabel}
+            </div>
+            <div className="text-[0.7rem] text-[rgba(160,160,160,0.5)]">
               <Timer startTime={startTime} /> · {totalSets} serii
             </div>
           </div>
         </div>
 
         {/* Day selector */}
-        <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+        <div className="flex gap-[0.3rem] items-center">
           {['A', 'B', 'C', 'D', 'E', 'F'].map(d => (
-            <button key={d} onClick={() => setDayLabel(d)} style={{
-              width: '30px', height: '30px', borderRadius: '6px',
-              background: dayLabel === d ? 'rgba(184,166,119,0.2)' : 'transparent',
-              border: `1px solid ${dayLabel === d ? '#b8a677' : 'rgba(184,166,119,0.18)'}`,
-              color: dayLabel === d ? '#d4c494' : 'rgba(160,160,160,0.45)',
-              cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
-              fontFamily: 'Outfit, sans-serif',
-            }}>{d}</button>
+            <button
+              key={d}
+              onClick={() => setDayLabel(d)}
+              className="w-[30px] h-[30px] rounded-md cursor-pointer text-[0.75rem] font-semibold font-body"
+              style={{
+                background: dayLabel === d ? 'rgba(184,166,119,0.2)' : 'transparent',
+                border: `1px solid ${dayLabel === d ? '#b8a677' : 'rgba(184,166,119,0.18)'}`,
+                color: dayLabel === d ? '#d4c494' : 'rgba(160,160,160,0.45)',
+              }}
+            >
+              {d}
+            </button>
           ))}
         </div>
       </nav>
 
       {/* MAIN */}
-      <main style={{ maxWidth: '680px', margin: '0 auto', padding: '1.5rem 1rem 8rem' }}>
-
+      <main className="max-w-[680px] mx-auto py-6 px-4 pb-32">
         {/* RIR target hint */}
         {targetRir !== undefined && sessionExercises.length > 0 && (
-          <div style={{
-            fontSize: '0.72rem', color: 'rgba(160,160,160,0.5)',
-            marginBottom: '1rem', padding: '0.5rem 0.75rem',
-            background: 'rgba(184,166,119,0.05)',
-            borderRadius: '8px', borderLeft: `3px solid ${rirColors[targetRir]}`,
+          <div className="text-[0.72rem] text-[rgba(160,160,160,0.5)] mb-4 py-2 px-3 bg-[rgba(184,166,119,0.05)] rounded-lg" style={{
+            borderLeft: `3px solid ${rirColors[targetRir]}`,
           }}>
-            Plan: celuj w <span style={{ color: rirColors[targetRir], fontWeight: 600 }}>RIR {targetRir}</span> w tej sesji
+            Plan: celuj w <span style={{ color: rirColors[targetRir] }} className="font-semibold">RIR {targetRir}</span> w tej sesji
           </div>
         )}
 
         {/* Empty state */}
         {sessionExercises.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'rgba(160,160,160,0.5)' }}>
-            <div style={{
-              fontFamily: 'Cormorant Garamond, serif',
-              fontSize: '4rem', color: 'rgba(184,166,119,0.2)',
-              lineHeight: 1, marginBottom: '1rem',
-            }}>⚡</div>
-            <div style={{
-              fontFamily: 'Cormorant Garamond, serif',
-              fontSize: '1.3rem', color: 'rgba(184,166,119,0.5)',
-              marginBottom: '0.5rem',
-            }}>Zacznij logować trening</div>
-            <div style={{ fontSize: '0.85rem' }}>
+          <div className="text-center py-16 px-8 text-[rgba(160,160,160,0.5)]">
+            <div className="font-display text-[4rem] text-[rgba(184,166,119,0.2)] leading-none mb-4">
+              ⚡
+            </div>
+            <div className="font-display text-[1.3rem] text-[rgba(184,166,119,0.5)] mb-2">
+              Zacznij logować trening
+            </div>
+            <div className="text-[0.85rem]">
               Dodaj pierwsze ćwiczenie żeby rozpocząć sesję
             </div>
           </div>
@@ -840,50 +713,35 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
         {/* Notes */}
         {sessionExercises.length > 0 && (
           <textarea
-            value={notes} onChange={e => setNotes(e.target.value)}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
             placeholder="Notatki do sesji (opcjonalne)..."
             rows={3}
-            style={{
-              width: '100%', padding: '0.8rem 1rem',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(184,166,119,0.15)',
-              borderRadius: '10px', outline: 'none',
-              color: '#e8e8e8', fontFamily: 'Outfit, sans-serif',
-              fontSize: '0.85rem', resize: 'none', boxSizing: 'border-box',
-            }}
+            className="w-full py-[0.8rem] px-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(184,166,119,0.15)] rounded-[10px] outline-none text-warm font-body text-[0.85rem] resize-none box-border"
           />
         )}
       </main>
 
       {/* BOTTOM BAR */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
-        background: 'rgba(10,14,26,0.95)',
-        backdropFilter: 'blur(12px)',
-        borderTop: '1px solid rgba(184,166,119,0.15)',
-        padding: '0.85rem 1.25rem',
-        display: 'flex', gap: '0.75rem',
-      }}>
-        <button onClick={() => setShowPicker(true)} style={{
-          flex: 1, padding: '0.85rem',
-          background: 'rgba(184,166,119,0.08)',
-          border: '1px solid rgba(184,166,119,0.3)',
-          borderRadius: '10px', cursor: 'pointer',
-          color: '#b8a677', fontFamily: 'Outfit, sans-serif',
-          fontSize: '0.85rem', fontWeight: 500, letterSpacing: '0.05em',
-        }}>
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[rgba(10,14,26,0.95)] backdrop-blur-xl border-t border-[rgba(184,166,119,0.15)] py-[0.85rem] px-5 flex gap-3">
+        <button
+          onClick={() => setShowPicker(true)}
+          className="flex-1 py-[0.85rem] bg-[rgba(184,166,119,0.08)] border border-[rgba(184,166,119,0.3)] rounded-[10px] cursor-pointer text-[#b8a677] font-body text-[0.85rem] font-medium tracking-[0.05em]"
+        >
           + Ćwiczenie
         </button>
 
         {sessionExercises.length > 0 && (
-          <button onClick={saveWorkout} disabled={saving} style={{
-            flex: 1, padding: '0.85rem',
-            background: saving ? 'rgba(184,166,119,0.3)' : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
-            border: 'none', borderRadius: '10px', cursor: saving ? 'not-allowed' : 'pointer',
-            color: saving ? 'rgba(184,166,119,0.6)' : '#0f1a2e',
-            fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem',
-            fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-          }}>
+          <button
+            onClick={saveWorkout}
+            disabled={saving}
+            className="flex-1 py-[0.85rem] border-0 rounded-[10px] font-body text-[0.85rem] font-bold tracking-[0.1em] uppercase"
+            style={{
+              background: saving ? 'rgba(184,166,119,0.3)' : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              color: saving ? 'rgba(184,166,119,0.6)' : '#0f1a2e',
+            }}
+          >
             {saving ? 'Zapisuję…' : `Zakończ (${totalSets})`}
           </button>
         )}

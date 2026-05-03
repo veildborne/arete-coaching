@@ -15,11 +15,16 @@ const MUSCLE_PL = {
 
 function Badge({ children, color = '#b8a677' }) {
   return (
-    <span style={{
-      fontSize: 10, padding: '2px 8px', borderRadius: 99,
-      background: `${color}18`, border: `1px solid ${color}40`,
-      color, letterSpacing: '0.06em', fontWeight: 500,
-    }}>{children}</span>
+    <span
+      className="text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wider"
+      style={{
+        background: `${color}18`,
+        border: `1px solid ${color}40`,
+        color,
+      }}
+    >
+      {children}
+    </span>
   )
 }
 
@@ -43,81 +48,60 @@ function SwapPicker({ currentExercise, allExercises, onSelect, onClose }) {
   )
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 200,
-      background: 'rgba(6,9,18,0.96)',
-      display: 'flex', flexDirection: 'column',
-    }}>
-      <div style={{
-        padding: '1rem 1.25rem 0.75rem',
-        background: 'rgba(10,14,26,0.95)',
-        borderBottom: '1px solid rgba(184,166,119,0.15)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-          <button onClick={onClose} style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'rgba(184,166,119,0.7)', fontSize: '1.3rem', padding: 0,
-          }}>←</button>
+    <div className="fixed inset-0 z-[200] bg-[rgba(6,9,18,0.96)] flex flex-col">
+      <div className="pt-4 px-5 pb-3 bg-[rgba(10,14,26,0.95)] border-b border-gold/15">
+        <div className="flex items-center gap-3 mb-2.5">
+          <button onClick={onClose} className="bg-none border-none cursor-pointer text-gold/70 text-[1.3rem] p-0">
+            ←
+          </button>
           <div>
-            <div style={{ fontSize: 11, color: 'rgba(184,166,119,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            <div className="text-[11px] text-gold/50 uppercase tracking-widest">
               Zamień ćwiczenie
             </div>
-            <div style={{ fontSize: 14, color: '#e8e8e8', fontWeight: 500 }}>
+            <div className="text-sm text-[#e8e8e8] font-medium">
               {currentExercise.name_pl || currentExercise.name}
             </div>
           </div>
         </div>
         <input
-          type="text" value={search} onChange={e => setSearch(e.target.value)}
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
           placeholder="Szukaj zastępnika..."
           autoFocus
-          style={{
-            width: '100%', padding: '0.65rem 1rem',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(184,166,119,0.2)',
-            borderRadius: 8, outline: 'none',
-            color: '#e8e8e8', fontFamily: "'Outfit', sans-serif", fontSize: 14,
-            boxSizing: 'border-box',
-          }}
+          className="w-full py-2.5 px-4 bg-white/[0.05] border border-gold/20 rounded-lg outline-none text-[#e8e8e8] font-body text-sm box-border"
         />
         {!search && (
-          <div style={{ fontSize: 11, color: 'rgba(184,166,119,0.4)', marginTop: 6 }}>
+          <div className="text-[11px] text-gold/40 mt-1.5">
             Pokazuję ćwiczenia tej samej partii · wpisz żeby szukać globalnie
           </div>
         )}
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div className="flex-1 overflow-y-auto">
         {filtered.length === 0 && (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#555', fontSize: 13 }}>
+          <div className="p-12 text-center text-[#555] text-[13px]">
             Brak wyników
           </div>
         )}
         {filtered.map(ex => (
-          <button key={ex.id} onClick={() => onSelect(ex)} style={{
-            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '14px 20px',
-            background: 'none', border: 'none',
-            borderBottom: '1px solid rgba(255,255,255,0.04)',
-            cursor: 'pointer', textAlign: 'left',
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,166,119,0.05)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+          <button
+            key={ex.id}
+            onClick={() => onSelect(ex)}
+            className="w-full flex items-center justify-between py-3.5 px-5 bg-none border-none border-b border-white/[0.04] cursor-pointer text-left hover:bg-gold/[0.05] transition"
           >
             <div>
-              <div style={{ fontSize: 14, color: '#e8e8e8', fontWeight: 500, marginBottom: 2 }}>
+              <div className="text-sm text-[#e8e8e8] font-medium mb-0.5">
                 {ex.name_pl || ex.name}
               </div>
-              <div style={{ fontSize: 11, color: '#555' }}>
+              <div className="text-[11px] text-[#555]">
                 {MUSCLE_PL[ex.muscle_group] || ex.muscle_group}
-                {ex.stretch_position && <span style={{ color: 'rgba(82,183,136,0.7)', marginLeft: 6 }}>· stretch</span>}
+                {ex.stretch_position && <span className="text-[rgba(82,183,136,0.7)] ml-1.5">· stretch</span>}
               </div>
             </div>
-            <div style={{
-              fontSize: 11, color: 'rgba(184,166,119,0.6)',
-              padding: '2px 8px', borderRadius: 4,
-              background: 'rgba(184,166,119,0.08)',
-            }}>SFR {ex.sfr_rating}</div>
+            <div className="text-[11px] text-gold/60 px-2 py-0.5 rounded bg-gold/[0.08]">
+              SFR {ex.sfr_rating}
+            </div>
           </button>
         ))}
       </div>
@@ -131,20 +115,15 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap }) {
   const [editing, setEditing] = useState(false)
 
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.02)',
-      border: '1px solid rgba(184,166,119,0.1)',
-      borderRadius: 8, padding: '12px 14px',
-      display: 'flex', alignItems: 'flex-start', gap: 12,
-    }}>
-      <div style={{
-        width: 3, borderRadius: 99, alignSelf: 'stretch', flexShrink: 0,
-        background: ex.stretch_priority ? '#52B788' : 'rgba(184,166,119,0.4)',
-      }} />
+    <div className="bg-white/[0.02] border border-gold/10 rounded-lg p-3 flex items-start gap-3">
+      <div
+        className="w-0.5 rounded-full self-stretch shrink-0"
+        style={{ background: ex.stretch_priority ? '#52B788' : 'rgba(184,166,119,0.4)' }}
+      />
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 14, fontWeight: 500, color: '#e8e8e8' }}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+          <span className="text-sm font-medium text-[#e8e8e8]">
             {ex.name_pl || ex.name}
           </span>
           <Badge>{MUSCLE_PL[ex.muscle_group] || ex.muscle_group}</Badge>
@@ -152,33 +131,27 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap }) {
           {ex.note && ex.note.includes('★') && <Badge color="#D4AF37">★ priorytet</Badge>}
         </div>
 
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'rgba(184,166,119,0.7)' }}>
+        <div className="flex gap-4 flex-wrap text-xs text-gold/70">
           <span>{ex.sets} serie</span>
           <span>{ex.rep_range} powt.</span>
           <span>RIR {ex.rir_target}</span>
-          {ex.progression && <span style={{ color: 'rgba(160,160,160,0.4)' }}>{ex.progression}</span>}
+          {ex.progression && <span className="text-[rgba(160,160,160,0.4)]">{ex.progression}</span>}
         </div>
 
         {editing && (
-          <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="mt-2.5 flex gap-2 flex-wrap">
             {[
-              { label: 'Serie',       key: 'sets',      type: 'number', w: 48 },
-              { label: 'Zakres powt.', key: 'rep_range', type: 'text',   w: 80 },
-              { label: 'RIR',         key: 'rir_target', type: 'number', w: 48 },
+              { label: 'Serie',       key: 'sets',      type: 'number', w: 'w-12' },
+              { label: 'Zakres powt.', key: 'rep_range', type: 'text',   w: 'w-20' },
+              { label: 'RIR',         key: 'rir_target', type: 'number', w: 'w-12' },
             ].map(f => (
               <div key={f.key}>
-                <div style={{ fontSize: 9, color: '#555', marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{f.label}</div>
+                <div className="text-[9px] text-[#555] mb-0.5 uppercase tracking-widest">{f.label}</div>
                 <input
                   type={f.type}
                   value={ex[f.key]}
                   onChange={e => onUpdate(sessionKey, exIdx, f.key, f.type === 'number' ? parseInt(e.target.value) : e.target.value)}
-                  style={{
-                    width: f.w, padding: '4px 8px', borderRadius: 4,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(184,166,119,0.2)',
-                    color: '#e8e8e8', fontSize: 13,
-                    fontFamily: "'Outfit', sans-serif",
-                  }}
+                  className={`${f.w} py-1 px-2 rounded bg-white/[0.05] border border-gold/20 text-[#e8e8e8] text-[13px] font-body`}
                 />
               </div>
             ))}
@@ -186,30 +159,27 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap }) {
         )}
       </div>
 
-      <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-        <button onClick={() => onSwap(sessionKey, exIdx, ex)} style={{
-          padding: '4px 8px', borderRadius: 4, fontSize: 11,
-          background: 'transparent',
-          border: '1px solid rgba(100,181,246,0.25)',
-          color: '#64B5F6', cursor: 'pointer',
-          fontFamily: "'Outfit', sans-serif",
-        }}>⇄</button>
-        <button onClick={() => setEditing(e => !e)} style={{
-          padding: '4px 8px', borderRadius: 4, fontSize: 11,
-          background: editing ? 'rgba(184,166,119,0.15)' : 'transparent',
-          border: '1px solid rgba(184,166,119,0.2)',
-          color: '#b8a677', cursor: 'pointer',
-          fontFamily: "'Outfit', sans-serif",
-        }}>
+      <div className="flex gap-1 shrink-0">
+        <button
+          onClick={() => onSwap(sessionKey, exIdx, ex)}
+          className="py-1 px-2 rounded text-[11px] bg-transparent border border-[rgba(100,181,246,0.25)] text-[#64B5F6] cursor-pointer font-body"
+        >
+          ⇄
+        </button>
+        <button
+          onClick={() => setEditing(e => !e)}
+          className={`py-1 px-2 rounded text-[11px] border border-gold/20 text-gold cursor-pointer font-body ${
+            editing ? 'bg-gold/15' : 'bg-transparent'
+          }`}
+        >
           {editing ? 'OK' : 'Edytuj'}
         </button>
-        <button onClick={() => onRemove(sessionKey, exIdx)} style={{
-          padding: '4px 8px', borderRadius: 4, fontSize: 11,
-          background: 'transparent',
-          border: '1px solid rgba(229,115,115,0.2)',
-          color: '#E57373', cursor: 'pointer',
-          fontFamily: "'Outfit', sans-serif",
-        }}>✕</button>
+        <button
+          onClick={() => onRemove(sessionKey, exIdx)}
+          className="py-1 px-2 rounded text-[11px] bg-transparent border border-[rgba(229,115,115,0.2)] text-[#E57373] cursor-pointer font-body"
+        >
+          ✕
+        </button>
       </div>
     </div>
   )
@@ -219,42 +189,34 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap }) {
 
 function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, allExercises }) {
   return (
-    <div style={{
-      background: 'linear-gradient(145deg, #131f36 0%, #0f1a2e 100%)',
-      border: '1px solid rgba(184,166,119,0.15)',
-      borderRadius: 12, padding: '20px 18px',
-      position: 'relative', overflow: 'hidden',
-    }}>
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-        background: 'linear-gradient(90deg, transparent, rgba(212,196,148,0.3), transparent)',
-      }} />
+    <div className="bg-gradient-to-br from-[#131f36] to-[#0f1a2e] border border-gold/15 rounded-xl p-5 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(212,196,148,0.3)] to-transparent" />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 8,
-          background: 'rgba(184,166,119,0.1)',
-          border: '1px solid rgba(184,166,119,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: 18, fontWeight: 700, color: '#d4c494',
-        }}>{sessionKey}</div>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-9 h-9 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center font-display text-lg font-bold text-[#d4c494]">
+          {sessionKey}
+        </div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 500, color: '#e8e8e8' }}>
+          <div className="text-sm font-medium text-[#e8e8e8]">
             Sesja {sessionKey}
-            {session.isDeload && <span style={{ marginLeft: 8, fontSize: 11, color: '#64B5F6' }}>🔄 Deload</span>}
+            {session.isDeload && <span className="ml-2 text-[11px] text-[#64B5F6]">🔄 Deload</span>}
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(184,166,119,0.5)' }}>
+          <div className="text-[11px] text-gold/50">
             {session.exercises.length} ćwiczeń · {session.exercises.reduce((s, e) => s + (e.sets || 0), 0)} serii
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div className="flex flex-col gap-1.5">
         {session.exercises.map((ex, i) => (
           <ExerciseRow
-            key={i} ex={ex} sessionKey={sessionKey} exIdx={i}
-            onUpdate={onUpdate} onRemove={onRemove} onSwap={onSwap}
+            key={i}
+            ex={ex}
+            sessionKey={sessionKey}
+            exIdx={i}
+            onUpdate={onUpdate}
+            onRemove={onRemove}
+            onSwap={onSwap}
             allExercises={allExercises}
           />
         ))}
@@ -272,7 +234,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
   const [saving, setSaving]       = useState(false)
   const [saved, setSaved]         = useState(false)
   const [showDeload, setShowDeload] = useState(false)
-  const [swapTarget, setSwapTarget] = useState(null) // { sessionKey, exIdx, exercise }
+  const [swapTarget, setSwapTarget] = useState(null)
 
   useEffect(() => {
     if (questionnaire) {
@@ -302,12 +264,10 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
     })
   }
 
-  // Open swap picker
   function openSwap(sessionKey, exIdx, exercise) {
     setSwapTarget({ sessionKey, exIdx, exercise })
   }
 
-  // Confirm swap — replace exercise, keep sets/reps/RIR from old entry
   function confirmSwap(newExercise) {
     const { sessionKey, exIdx, exercise: oldEx } = swapTarget
     setPlan(prev => {
@@ -332,7 +292,6 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
     setSaving(true)
     const supabase = createClient()
 
-    // Deactivate previous active plans first
     await supabase
       .from('training_plans')
       .update({ is_active: false })
@@ -345,7 +304,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
       goal:       plan.goal,
       split:      plan.split_name,
       plan_data:  plan,
-      is_active:  true,          // ← CRITICAL: client portal queries is_active=true
+      is_active:  true,
       current_week: 1,
     })
 
@@ -359,30 +318,20 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
   }
 
   if (saved) return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: "'Outfit', sans-serif",
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 64, color: '#b8a677', marginBottom: 16 }}>✓</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: '#e8e8e8', margin: '0 0 8px' }}>
+    <div className="min-h-screen bg-gradient-to-b from-[#131f36] via-[#0a0f1a] to-[#060912] flex items-center justify-center font-body">
+      <div className="text-center">
+        <div className="font-display text-6xl text-gold mb-4">✓</div>
+        <h2 className="font-display text-[28px] text-[#e8e8e8] m-0 mb-2">
           Plan zapisany!
         </h2>
-        <p style={{ color: 'rgba(184,166,119,0.6)', fontSize: 14, marginBottom: 8 }}>{planName}</p>
-        <p style={{ color: '#555', fontSize: 13 }}>Wracam do klienta…</p>
+        <p className="text-gold/60 text-sm mb-2">{planName}</p>
+        <p className="text-[#555] text-[13px]">Wracam do klienta…</p>
       </div>
     </div>
   )
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'radial-gradient(ellipse at top, #131f36 0%, #0a0f1a 60%, #060912 100%)',
-      color: '#e8e8e8', fontFamily: "'Outfit', sans-serif",
-    }}>
-      {/* Swap picker overlay */}
+    <div className="min-h-screen bg-gradient-to-b from-[#131f36] via-[#0a0f1a] to-[#060912] text-[#e8e8e8] font-body">
       {swapTarget && (
         <SwapPicker
           currentExercise={swapTarget.exercise}
@@ -393,57 +342,41 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
       )}
 
       {/* Topbar */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(10,14,26,0.9)', backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(184,166,119,0.15)',
-        padding: '0 24px', height: 56,
-        display: 'flex', alignItems: 'center', gap: 16,
-      }}>
-        <button onClick={() => router.push(`/dashboard/client/${clientId}`)} style={{
-          fontSize: 13, color: 'rgba(184,166,119,0.7)', background: 'none',
-          border: 'none', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", padding: 0,
-        }}>← {client.full_name || 'Klient'}</button>
-        <div style={{ flex: 1 }} />
-        <span style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: 20, fontWeight: 600, color: '#d4c494', letterSpacing: '0.35em',
-        }}>ARETÉ</span>
+      <nav className="sticky top-0 z-50 bg-[rgba(10,14,26,0.9)] backdrop-blur-xl border-b border-gold/15 px-6 h-14 flex items-center gap-4">
+        <button
+          onClick={() => router.push(`/dashboard/client/${clientId}`)}
+          className="text-[13px] text-gold/70 bg-none border-none cursor-pointer font-body p-0 hover:text-gold transition"
+        >
+          ← {client.full_name || 'Klient'}
+        </button>
+        <div className="flex-1" />
+        <span className="font-display text-xl font-semibold text-[#d4c494] tracking-[0.35em]">
+          ARETÉ
+        </span>
       </nav>
 
-      <main style={{ maxWidth: 860, margin: '0 auto', padding: '32px 24px 80px' }}>
+      <main className="max-w-[860px] mx-auto px-6 py-8 pb-20">
 
         {/* Header */}
-        <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(184,166,119,0.15)', paddingBottom: 24 }}>
-          <p style={{ fontSize: 10, letterSpacing: '0.3em', color: 'rgba(184,166,119,0.6)', textTransform: 'uppercase', margin: '0 0 6px' }}>
+        <div className="mb-8 border-b border-gold/15 pb-6">
+          <p className="text-[10px] tracking-[0.3em] text-gold/60 uppercase m-0 mb-1.5">
             Program Builder
           </p>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 600, color: '#e8e8e8', margin: '0 0 16px' }}>
+          <h1 className="font-display text-[32px] font-semibold text-[#e8e8e8] m-0 mb-4">
             Nowy plan — {client.full_name}
           </h1>
           <input
             value={planName}
             onChange={e => setPlanName(e.target.value)}
             placeholder="Nazwa planu..."
-            style={{
-              width: '100%', padding: '10px 14px', borderRadius: 8,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(184,166,119,0.2)',
-              color: '#e8e8e8', fontSize: 15,
-              fontFamily: "'Outfit', sans-serif",
-              boxSizing: 'border-box', outline: 'none',
-            }}
+            className="w-full py-2.5 px-3.5 rounded-lg bg-white/[0.04] border border-gold/20 text-[#e8e8e8] text-[15px] font-body box-border outline-none focus:border-gold/40"
           />
         </div>
 
         {!questionnaire && (
-          <div style={{
-            border: '1px solid rgba(229,115,115,0.3)',
-            borderRadius: 10, padding: '20px 24px', marginBottom: 24,
-            background: 'rgba(229,115,115,0.05)',
-          }}>
-            <div style={{ fontSize: 14, color: '#E57373', marginBottom: 4 }}>Brak ankiety</div>
-            <div style={{ fontSize: 13, color: 'rgba(229,115,115,0.7)' }}>
+          <div className="border border-[rgba(229,115,115,0.3)] rounded-[10px] p-5 mb-6 bg-[rgba(229,115,115,0.05)]">
+            <div className="text-sm text-[#E57373] mb-1">Brak ankiety</div>
+            <div className="text-[13px] text-[rgba(229,115,115,0.7)]">
               Klient nie wypełnił jeszcze ankiety. Plan zostanie wygenerowany z domyślnymi parametrami.
             </div>
           </div>
@@ -452,7 +385,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
         {plan && (
           <>
             {/* Plan summary */}
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
+            <div className="flex gap-3 flex-wrap mb-6">
               {[
                 { label: 'Split',    value: plan.split_name },
                 { label: 'Cel',      value: plan.goal },
@@ -461,37 +394,32 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
                 { label: 'Sprzęt',   value: plan.equipment_used?.join(', ') },
                 plan.cardio_factor < 1 && { label: 'Cardio', value: `−${Math.round((1 - plan.cardio_factor) * 100)}% nogi` },
               ].filter(Boolean).map(item => (
-                <div key={item.label} style={{
-                  background: 'rgba(184,166,119,0.05)',
-                  border: '1px solid rgba(184,166,119,0.15)',
-                  borderRadius: 8, padding: '8px 14px',
-                }}>
-                  <div style={{ fontSize: 9, color: 'rgba(184,166,119,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 }}>{item.label}</div>
-                  <div style={{ fontSize: 13, color: '#e8e8e8' }}>{item.value}</div>
+                <div key={item.label} className="bg-gold/[0.05] border border-gold/15 rounded-lg py-2 px-3.5">
+                  <div className="text-[9px] text-gold/50 uppercase tracking-widest mb-0.5">{item.label}</div>
+                  <div className="text-[13px] text-[#e8e8e8]">{item.value}</div>
                 </div>
               ))}
             </div>
 
             {/* RIR progression */}
-            <div style={{
-              background: 'rgba(184,166,119,0.04)',
-              border: '1px solid rgba(184,166,119,0.12)',
-              borderRadius: 10, padding: '14px 18px', marginBottom: 24,
-            }}>
-              <div style={{ fontSize: 11, color: 'rgba(184,166,119,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>
+            <div className="bg-gold/[0.04] border border-gold/[0.12] rounded-[10px] p-4 mb-6">
+              <div className="text-[11px] text-gold/60 uppercase tracking-widest mb-2.5">
                 Progresja mezocyklu (RIR)
               </div>
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div className="flex gap-1.5">
                 {plan.weekly_progression?.map(w => (
-                  <div key={w.week} style={{
-                    flex: 1, textAlign: 'center', padding: '6px 4px', borderRadius: 6,
-                    background: w.isDeload ? 'rgba(100,181,246,0.1)' : 'rgba(184,166,119,0.08)',
-                    border: `1px solid ${w.isDeload ? 'rgba(100,181,246,0.2)' : 'rgba(184,166,119,0.15)'}`,
-                  }}>
-                    <div style={{ fontSize: 9, color: w.isDeload ? '#64B5F6' : 'rgba(184,166,119,0.5)', marginBottom: 2 }}>
+                  <div
+                    key={w.week}
+                    className={`flex-1 text-center py-1.5 px-1 rounded-md ${
+                      w.isDeload
+                        ? 'bg-[rgba(100,181,246,0.1)] border border-[rgba(100,181,246,0.2)]'
+                        : 'bg-gold/[0.08] border border-gold/15'
+                    }`}
+                  >
+                    <div className={`text-[9px] mb-0.5 ${w.isDeload ? 'text-[#64B5F6]' : 'text-gold/50'}`}>
                       {w.isDeload ? 'Deload' : `Tyg ${w.week}`}
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: w.isDeload ? '#64B5F6' : '#d4c494' }}>
+                    <div className={`text-sm font-semibold ${w.isDeload ? 'text-[#64B5F6]' : 'text-[#d4c494]'}`}>
                       {w.isDeload ? '—' : `RIR ${w.rir}`}
                     </div>
                   </div>
@@ -500,46 +428,47 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
             </div>
 
             {/* Legend */}
-            <div style={{ fontSize: 11, color: '#555', marginBottom: 16 }}>
-              <span style={{ color: '#64B5F6', marginRight: 8 }}>⇄</span> Zamień ćwiczenie
-              <span style={{ marginLeft: 16, marginRight: 8 }}>Edytuj</span> Serie / powt. / RIR
+            <div className="text-[11px] text-[#555] mb-4">
+              <span className="text-[#64B5F6] mr-2">⇄</span> Zamień ćwiczenie
+              <span className="ml-4 mr-2">Edytuj</span> Serie / powt. / RIR
             </div>
 
             {/* Toggle deload */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <button onClick={() => setShowDeload(s => !s)} style={{
-                padding: '6px 14px', borderRadius: 99, fontSize: 12,
-                background: showDeload ? 'rgba(100,181,246,0.15)' : 'transparent',
-                border: `1px solid ${showDeload ? 'rgba(100,181,246,0.3)' : 'rgba(184,166,119,0.2)'}`,
-                color: showDeload ? '#64B5F6' : 'rgba(184,166,119,0.6)',
-                cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
-              }}>
+            <div className="flex items-center gap-3 mb-5">
+              <button
+                onClick={() => setShowDeload(s => !s)}
+                className={`py-1.5 px-3.5 rounded-full text-xs cursor-pointer font-body ${
+                  showDeload
+                    ? 'bg-[rgba(100,181,246,0.15)] border border-[rgba(100,181,246,0.3)] text-[#64B5F6]'
+                    : 'bg-transparent border border-gold/20 text-gold/60'
+                }`}
+              >
                 {showDeload ? '▼ Ukryj deload' : '▶ Pokaż tydzień deload'}
               </button>
             </div>
 
             {/* Sessions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="flex flex-col gap-4">
               {Object.entries(showDeload ? plan.deload_sessions : plan.sessions).map(([key, session]) => (
                 <SessionCard
-                  key={key} sessionKey={key} session={session}
-                  onUpdate={updateExercise} onRemove={removeExercise}
-                  onSwap={openSwap} allExercises={exercises}
+                  key={key}
+                  sessionKey={key}
+                  session={session}
+                  onUpdate={updateExercise}
+                  onRemove={removeExercise}
+                  onSwap={openSwap}
+                  allExercises={exercises}
                 />
               ))}
             </div>
 
             {/* Excluded */}
             {plan.excluded_exercises?.length > 0 && (
-              <div style={{
-                marginTop: 20, padding: '12px 16px', borderRadius: 8,
-                background: 'rgba(229,115,115,0.05)',
-                border: '1px solid rgba(229,115,115,0.15)',
-              }}>
-                <div style={{ fontSize: 11, color: '#E57373', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              <div className="mt-5 py-3 px-4 rounded-lg bg-[rgba(229,115,115,0.05)] border border-[rgba(229,115,115,0.15)]">
+                <div className="text-[11px] text-[#E57373] mb-1.5 uppercase tracking-wider">
                   Wykluczone automatycznie
                 </div>
-                <div style={{ fontSize: 12, color: 'rgba(229,115,115,0.7)' }}>
+                <div className="text-xs text-[rgba(229,115,115,0.7)]">
                   {plan.excluded_exercises.join(' · ')}
                 </div>
               </div>
@@ -549,18 +478,11 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
             <button
               onClick={handleSave}
               disabled={saving}
-              style={{
-                width: '100%', padding: '16px', borderRadius: 99, marginTop: 32,
-                background: saving
-                  ? 'rgba(184,166,119,0.15)'
-                  : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
-                border: 'none',
-                color: saving ? 'rgba(184,166,119,0.5)' : '#0f1a2e',
-                fontSize: 14, fontWeight: 700,
-                cursor: saving ? 'not-allowed' : 'pointer',
-                fontFamily: "'Outfit', sans-serif",
-                letterSpacing: '0.12em', textTransform: 'uppercase',
-              }}
+              className={`w-full py-4 rounded-full mt-8 border-none text-sm font-bold font-body tracking-[0.12em] uppercase ${
+                saving
+                  ? 'bg-gold/15 text-gold/50 cursor-not-allowed'
+                  : 'bg-gradient-to-br from-[#b8a677] to-[#d4c494] text-[#0f1a2e] cursor-pointer'
+              }`}
             >
               {saving ? 'Zapisywanie...' : 'Zapisz plan i aktywuj'}
             </button>
@@ -568,15 +490,13 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
         )}
 
         {!plan && !questionnaire && (
-          <button onClick={() => {
-            const generated = generatePlan(null, exercises)
-            setPlan(generated)
-          }} style={{
-            padding: '12px 28px', borderRadius: 99,
-            background: 'transparent', border: '1px solid rgba(184,166,119,0.3)',
-            color: '#b8a677', fontSize: 13, cursor: 'pointer',
-            fontFamily: "'Outfit', sans-serif",
-          }}>
+          <button
+            onClick={() => {
+              const generated = generatePlan(null, exercises)
+              setPlan(generated)
+            }}
+            className="py-3 px-7 rounded-full bg-transparent border border-gold/30 text-gold text-[13px] cursor-pointer font-body hover:bg-gold/[0.05] transition"
+          >
             Generuj z domyślnymi parametrami
           </button>
         )}
