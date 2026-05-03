@@ -49,8 +49,9 @@ function calculateCompliance(logs, plans) {
 }
 
 function daysSince(dateStr) {
-  if (!dateStr) return Infinity
+  if (!dateStr) return null
   const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return null
   return (Date.now() - date.getTime()) / 86400000
 }
 
@@ -66,7 +67,7 @@ function ClientCard({ client }) {
   const noTrainingDays = daysSince(lastTraining)
   const noCheckinDays = daysSince(lastCheckin)
 
-  const needsAttention = noTrainingDays > 5 || noCheckinDays > 7
+  const needsAttention = (noTrainingDays !== null && noTrainingDays > 5) || (noCheckinDays !== null && noCheckinDays > 7)
 
   return (
     <div className="bg-[#0D1424] border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 hover:border-[#D4B570] transition cursor-pointer">
@@ -304,7 +305,7 @@ export default function DashboardClient({ profile, clients }) {
           const needsAttention = safeClients.filter(client => {
             const noTrainingDays = daysSince(client.logs?.[0]?.session_date)
             const noCheckinDays = daysSince(client.checkins?.[0]?.created_at)
-            return noTrainingDays > 5 || noCheckinDays > 7
+            return (noTrainingDays !== null && noTrainingDays > 5) || (noCheckinDays !== null && noCheckinDays > 7)
           })
 
           if (needsAttention.length === 0) return null
@@ -317,8 +318,18 @@ export default function DashboardClient({ profile, clients }) {
                   const noTrainingDays = daysSince(client.logs?.[0]?.session_date)
                   const noCheckinDays = daysSince(client.checkins?.[0]?.created_at)
                   const flags = []
-                  if (noTrainingDays > 5) flags.push(`Brak treningu: ${Math.floor(noTrainingDays)} dni`)
-                  if (noCheckinDays > 7) flags.push(`Brak check-inu: ${Math.floor(noCheckinDays)} dni`)
+
+                  if (noTrainingDays === null) {
+                    flags.push('Brak danych o treningu')
+                  } else if (noTrainingDays > 5) {
+                    flags.push(`Brak treningu: ${Math.floor(noTrainingDays)} dni`)
+                  }
+
+                  if (noCheckinDays === null) {
+                    flags.push('Brak check-inów')
+                  } else if (noCheckinDays > 7) {
+                    flags.push(`Brak check-inu: ${Math.floor(noCheckinDays)} dni`)
+                  }
 
                   return (
                     <div
