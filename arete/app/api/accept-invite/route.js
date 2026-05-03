@@ -15,17 +15,22 @@ export async function POST() {
     .eq('id', user.id)
     .single()
 
-  if (!isPendingProfile(profile)) {
-    return NextResponse.json({ error: 'Konto już aktywowane.' }, { status: 400 })
+  // Pozwól na ustawienie hasła nawet dla już aktywnych (invite flow zmieniony)
+  // Tylko upewnij się że profil istnieje
+  if (!profile) {
+    return NextResponse.json({ error: 'Profil nie znaleziony.' }, { status: 404 })
   }
 
-  const { error } = await supabase
-    .from('profiles')
-    .update({ status: 'active' })
-    .eq('id', user.id)
+  // Ustaw status na 'active' jeśli był inactive
+  if (isPendingProfile(profile)) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ status: 'active' })
+      .eq('id', user.id)
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
   }
 
   return NextResponse.json({ ok: true })

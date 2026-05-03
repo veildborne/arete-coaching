@@ -18,6 +18,8 @@ export default function AcceptInvitePage() {
 
     const initSession = async () => {
       try {
+        let type = 'invite' // default
+
         // 1a. Sprawdź czy jest ?code= (PKCE flow)
         const urlParams = new URLSearchParams(window.location.search)
         const code = urlParams.get('code')
@@ -32,13 +34,14 @@ export default function AcceptInvitePage() {
           }
           // Wyczyść ?code= z URL
           window.history.replaceState(null, '', window.location.pathname)
-          setAuthType('invite') // domyślnie invite dla PKCE
+          type = 'invite' // PKCE flow = invite
+          setAuthType(type)
         } else {
           // 1b. Parsuj hash (implicit flow)
           const hashParams = new URLSearchParams(window.location.hash.substring(1))
           const accessToken = hashParams.get('access_token')
           const refreshToken = hashParams.get('refresh_token')
-          const type = hashParams.get('type') || ''
+          type = hashParams.get('type') || 'invite'
 
           setAuthType(type)
 
@@ -82,19 +85,16 @@ export default function AcceptInvitePage() {
           return
         }
 
-        // 5. Jeśli coach lub już aktywny → przekieruj
+        // 5. Jeśli coach → przekieruj do dashboard
         const isCoach = profileData?.role === 'coach'
-        const isPending = profileData?.status?.toLowerCase() === 'inactive'
 
         if (isCoach) {
           router.push('/dashboard')
           return
         }
 
-        if (!isPending && type !== 'recovery') {
-          router.push('/client')
-          return
-        }
+        // Dla invite/recovery flow — zawsze pokaż formularz hasła
+        // (klient może być już 'active' z invite, ale jeszcze nie ustawił hasła)
 
         // 6. Gotowe — pokaż formularz
         setProfile(profileData)
@@ -133,13 +133,12 @@ export default function AcceptInvitePage() {
         return
       }
 
-      // 2. Flip status do 'active' (tylko dla invite flow, recovery pomija)
-      if (authType === 'invite' || profile?.status?.toLowerCase() === 'inactive') {
+      // 2. Wywołaj accept-invite API (aktywuje konto jeśli było inactive)
+      if (authType === 'invite') {
         const res = await fetch('/api/accept-invite', { method: 'POST' })
         const json = await res.json().catch(() => ({}))
-        if (!res.ok && res.status !== 400) {
-          // 400 = już aktywne, OK to zignorować
-          setMsg({ type: 'err', text: json.error || 'Nie udało się aktywować konta.' })
+        if (!res.ok && res.status !== 404) {
+          setMsg({ type: 'err', text: json.error || 'Błąd aktywacji konta.' })
           setLoading(false)
           return
         }

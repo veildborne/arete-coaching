@@ -59,7 +59,7 @@ export async function POST(request) {
         email,
         full_name,
         role: 'client',
-        status: 'inactive',
+        status: 'active', // UWAGA: klient aktywny od razu, bez czekania na ustawienie hasła
       },
       { onConflict: 'id' }
     )
