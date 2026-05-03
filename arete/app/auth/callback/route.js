@@ -6,6 +6,7 @@ import { roleRedirectPath, isCoachProfile, isPendingProfile } from '@/lib/auth-r
 export async function GET(request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const type = requestUrl.searchParams.get('type') || ''
   const next = requestUrl.searchParams.get('next') || ''
 
   if (code) {
@@ -34,6 +35,11 @@ export async function GET(request) {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
+        // Obsługa invite/recovery flow — redirect na set-password
+        if (type === 'invite' || type === 'recovery') {
+          return NextResponse.redirect(new URL('/accept-invite', requestUrl.origin))
+        }
+
         // Tylko odczyt roli/statusu — nie tworzymy profilu tutaj (trigger w bazie to robi)
         const { data: profile } = await supabase
           .from('profiles')
