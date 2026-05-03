@@ -6,8 +6,9 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl
 
   // Catch auth code on ANY page and redirect to callback
+  // EXCEPT /accept-invite (invite links should land there directly)
   const code = request.nextUrl.searchParams.get('code')
-  if (code && !pathname.startsWith('/auth/callback')) {
+  if (code && !pathname.startsWith('/auth/callback') && pathname !== '/accept-invite') {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/callback'
     url.searchParams.set('code', code)

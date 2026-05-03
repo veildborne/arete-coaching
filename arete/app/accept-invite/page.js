@@ -18,29 +18,46 @@ export default function AcceptInvitePage() {
 
     const initSession = async () => {
       try {
-        // 1. Parsuj hash (Supabase invite/recovery używa implicit flow)
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const accessToken = hashParams.get('access_token')
-        const refreshToken = hashParams.get('refresh_token')
-        const type = hashParams.get('type') || ''
+        // 1a. Sprawdź czy jest ?code= (PKCE flow)
+        const urlParams = new URLSearchParams(window.location.search)
+        const code = urlParams.get('code')
 
-        setAuthType(type)
-
-        if (accessToken && refreshToken) {
-          // 2. Ustaw sesję z tokenów z hasha
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })
-
-          if (sessionError) {
+        if (code) {
+          // Wymień kod na sesję (Supabase SDK zrobi to automatycznie przez exchangeCodeForSession)
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          if (exchangeError) {
             setMsg({ type: 'err', text: 'Link wygasł lub jest nieprawidłowy.' })
             setSessionLoading(false)
             return
           }
-
-          // Wyczyść hash z URL (estetyka)
+          // Wyczyść ?code= z URL
           window.history.replaceState(null, '', window.location.pathname)
+          setAuthType('invite') // domyślnie invite dla PKCE
+        } else {
+          // 1b. Parsuj hash (implicit flow)
+          const hashParams = new URLSearchParams(window.location.hash.substring(1))
+          const accessToken = hashParams.get('access_token')
+          const refreshToken = hashParams.get('refresh_token')
+          const type = hashParams.get('type') || ''
+
+          setAuthType(type)
+
+          if (accessToken && refreshToken) {
+            // 2. Ustaw sesję z tokenów z hasha
+            const { error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            })
+
+            if (sessionError) {
+              setMsg({ type: 'err', text: 'Link wygasł lub jest nieprawidłowy.' })
+              setSessionLoading(false)
+              return
+            }
+
+            // Wyczyść hash z URL (estetyka)
+            window.history.replaceState(null, '', window.location.pathname)
+          }
         }
 
         // 3. Pobierz aktualnego usera (może być już zalogowany z ciasteczek)
