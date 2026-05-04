@@ -452,7 +452,8 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
   const router = useRouter()
   const [showPicker, setShowPicker] = useState(false)
   const [sessionExercises, setSessionExercises] = useState([])
-  const [startTime] = useState(Date.now())
+  const [started, setStarted] = useState(false)
+  const startTimeRef = useRef(null)
   const [saving, setSaving] = useState(false)
   const [sessionStats, setSessionStats] = useState(null) // set on save → shows summary
   const [dayLabel, setDayLabel] = useState('A')
@@ -561,7 +562,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
     if (sessionExercises.length === 0) return
     setSaving(true)
 
-    const duration = Math.floor((Date.now() - startTime) / 1000)
+    const duration = Math.floor((Date.now() - (startTimeRef.current || Date.now())) / 1000)
     let totalVolume = 0
     let topSet = null
 
@@ -611,6 +612,32 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
     })
   }
 
+  // ── Start screen ──
+  if (!started) {
+    const sessionName = activePlan?.plan_data?.sessions?.find(s => s.label === dayLabel)?.name || dayLabel
+    return (
+      <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] flex items-center justify-center p-6 font-body">
+        <div className="w-full max-w-sm text-center">
+          <p className="text-[10px] text-[rgba(184,166,119,0.5)] uppercase tracking-widest mb-3">Dzisiejszy trening</p>
+          <h1 className="font-display text-4xl text-[#b8a677] mb-2">{sessionName}</h1>
+          <p className="text-sm text-[#8F9AAF] mb-8">{sessionExercises.length} ćwiczeń · RIR {activePlan?.plan_data?.rir_start ?? 2}</p>
+          <button
+            onClick={() => { startTimeRef.current = Date.now(); setStarted(true) }}
+            className="w-full bg-gradient-to-br from-[#b8a677] to-[#d4c494] text-[#0a0f1a] font-bold py-4 rounded-xl text-base tracking-wide hover:opacity-90 transition"
+          >
+            Rozpocznij sesję →
+          </button>
+          <button
+            onClick={() => router.push('/client')}
+            className="mt-4 text-sm text-[rgba(184,166,119,0.4)] hover:text-[rgba(184,166,119,0.7)] transition bg-transparent border-0 cursor-pointer font-body"
+          >
+            ← Wróć
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // ── Summary screen ──
   if (sessionStats) {
     return <SessionSummary stats={sessionStats} onContinue={() => router.push('/client')} />
@@ -644,7 +671,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
               Sesja {dayLabel}
             </div>
             <div className="text-[0.7rem] text-[rgba(160,160,160,0.5)]">
-              <Timer startTime={startTime} /> · {totalSets} serii
+              <Timer startTime={startTimeRef.current} /> · {totalSets} serii
             </div>
           </div>
         </div>
