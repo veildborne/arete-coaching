@@ -351,8 +351,8 @@ function ZeusMascot({ state = 'idle' }) {
 
   return (
     <div style={{
-      width: 80,
-      height: 80,
+      width: 120,
+      height: 120,
       overflow: 'hidden',
       imageRendering: 'pixelated',
       position: 'relative',
@@ -361,11 +361,11 @@ function ZeusMascot({ state = 'idle' }) {
         src="/mascot/zeus-sprite.png"
         alt="Zeus"
         style={{
-          width: SPRITE_WIDTH * (80 / FRAME_W),
+          width: SPRITE_WIDTH * (120 / FRAME_W),
           height: 'auto',
           imageRendering: 'pixelated',
           position: 'absolute',
-          left: offsetX * (80 / FRAME_W),
+          left: offsetX * (120 / FRAME_W),
           top: 0,
         }}
       />
@@ -415,18 +415,18 @@ function ZeusWidget({ recentLogs, checkins }) {
     <div
       style={{
         position: 'fixed',
-        bottom: `${80 + pos.y}px`,
-        right: `${16 + Math.abs(pos.x)}px`,
-        zIndex: 200,
-        transition: 'all 3s ease-in-out',
+        bottom: '100px',
+        right: '20px',
+        zIndex: 9999,
         cursor: 'pointer',
         filter: 'drop-shadow(0 4px 8px rgba(212,181,112,0.3))',
+        border: '2px solid red',
       }}
       onClick={() => {
         setFrame('happy')
         setTimeout(() => setFrame('idle'), 1500)
       }}
-      title="Zeus — twój strażnik treningu"
+      title="Zeus"
     >
       <ZeusMascot state={frame} />
     </div>
