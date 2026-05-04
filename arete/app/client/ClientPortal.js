@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
@@ -331,6 +332,107 @@ function CoachMessageCard({ coachName }) {
   )
 }
 
+function ZeusMascot({ state = 'idle' }) {
+  const SPRITE_WIDTH = 1400
+  const SPRITE_HEIGHT = 500
+  const FRAME_W = 200
+  const FRAME_H = 500
+  const frames = {
+    idle:      0,
+    idle2:     1,
+    happy:     2,
+    sleep:     3,
+    alert:     4,
+    walk1:     5,
+    walk2:     6,
+  }
+  const frame = frames[state] ?? 0
+  const offsetX = -(frame * FRAME_W)
+
+  return (
+    <div style={{
+      width: 80,
+      height: 80,
+      overflow: 'hidden',
+      imageRendering: 'pixelated',
+      position: 'relative',
+    }}>
+      <img
+        src="/mascot/zeus-sprite.png"
+        alt="Zeus"
+        style={{
+          width: SPRITE_WIDTH * (80 / FRAME_W),
+          height: 'auto',
+          imageRendering: 'pixelated',
+          position: 'absolute',
+          left: offsetX * (80 / FRAME_W),
+          top: 0,
+        }}
+      />
+    </div>
+  )
+}
+
+function ZeusWidget({ recentLogs, checkins }) {
+  const [frame, setFrame] = React.useState('idle')
+  const [pos, setPos] = React.useState({ x: 0, y: 0 })
+  const [visible, setVisible] = React.useState(true)
+
+  React.useEffect(() => {
+    const noLogs = !recentLogs || recentLogs.length === 0
+    const pendingCheckin = checkins?.some(c => !c.coach_feedback)
+    if (noLogs) setFrame('sleep')
+    else if (pendingCheckin) setFrame('alert')
+    else setFrame('idle')
+  }, [recentLogs, checkins])
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setFrame(f => {
+        if (f === 'idle') return 'idle2'
+        if (f === 'idle2') return 'idle'
+        if (f === 'walk1') return 'walk2'
+        if (f === 'walk2') return 'walk1'
+        return f
+      })
+    }, 600)
+    return () => clearInterval(interval)
+  }, [])
+
+  React.useEffect(() => {
+    const moveInterval = setInterval(() => {
+      setPos({
+        x: Math.random() * 40 - 20,
+        y: Math.random() * 20 - 10,
+      })
+    }, 3000)
+    return () => clearInterval(moveInterval)
+  }, [])
+
+  if (!visible) return null
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        bottom: `${80 + pos.y}px`,
+        right: `${16 + Math.abs(pos.x)}px`,
+        zIndex: 200,
+        transition: 'all 3s ease-in-out',
+        cursor: 'pointer',
+        filter: 'drop-shadow(0 4px 8px rgba(212,181,112,0.3))',
+      }}
+      onClick={() => {
+        setFrame('happy')
+        setTimeout(() => setFrame('idle'), 1500)
+      }}
+      title="Zeus — twój strażnik treningu"
+    >
+      <ZeusMascot state={frame} />
+    </div>
+  )
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins }) {
@@ -573,6 +675,8 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
           </button>
         ))}
       </nav>
+
+      <ZeusWidget recentLogs={safeLogs} checkins={safeCheckins} />
     </div>
   )
 }
