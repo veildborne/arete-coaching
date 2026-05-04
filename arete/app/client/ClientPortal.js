@@ -24,15 +24,6 @@ const ACHIEVEMENTS = [
   { id: 'arete_fin', label: 'Areté',    greek: 'Ἀρετή',   desc: 'Ukończony mezocykl',     icon: '⚜️', xp: 300 },
 ]
 
-const STATS = [
-  { key: 'strength',     label: 'Siła',        mock: 62 },
-  { key: 'technique',    label: 'Technika',     mock: 74 },
-  { key: 'consistency',  label: 'Regularność',  mock: 58 },
-  { key: 'recovery',     label: 'Regeneracja',  mock: 70 },
-  { key: 'hypertrophy',  label: 'Hipertrofia',  mock: 55 },
-  { key: 'conditioning', label: 'Kondycja',     mock: 40 },
-]
-
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 function getPlanPayload(activePlan) {
