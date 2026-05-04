@@ -678,7 +678,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
 
         {/* Day selector */}
         <div className="flex gap-[0.3rem] items-center">
-          {['A', 'B', 'C', 'D', 'E', 'F'].map(d => (
+          {(activePlan?.plan_data?.sessions?.map(s => s.label).filter(Boolean) || (sessionExercises.length > 0 ? [dayLabel] : ['A'])).map(d => (
             <button
               key={d}
               onClick={() => setDayLabel(d)}
