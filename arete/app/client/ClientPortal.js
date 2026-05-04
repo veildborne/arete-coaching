@@ -333,7 +333,7 @@ function CoachMessageCard({ coachName }) {
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName }) {
+export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins }) {
   const router   = useRouter()
   const [entered, setEntered] = useState(false)
   useEffect(() => setEntered(true), [])
@@ -345,6 +345,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
   }
 
   const safeLogs  = recentLogs || []
+  const safeCheckins = checkins || []
   const firstName = profile?.full_name?.split(' ')?.[0] || 'Kliencie'
 
   const planInfo = useMemo(() => {
@@ -485,6 +486,46 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
                 </div>
               )}
             </div>
+
+            {/* Historia check-inów z feedbackiem */}
+            {safeCheckins.length > 0 && (
+              <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6">
+                <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Historia check-inów</p>
+                <div className="space-y-3">
+                  {safeCheckins.map(ci => (
+                    <div key={ci.id} className="bg-bg-deep rounded-xl p-4 border border-[rgba(212,181,112,0.08)]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-display text-gold text-sm">Tydzień {ci.week_number}</span>
+                        <span className="text-[10px] text-muted">{ci.submitted_at ? new Date(ci.submitted_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }) : '—'}</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        {[
+                          { label: 'Energia', value: ci.energy_level },
+                          { label: 'Sen', value: ci.sleep_quality },
+                          { label: 'Adherencja', value: ci.adherence_pct ? `${ci.adherence_pct}%` : '—' },
+                        ].map(m => (
+                          <div key={m.label} className="text-center">
+                            <p className="text-[9px] text-muted uppercase tracking-wider mb-0.5">{m.label}</p>
+                            <p className="text-sm font-medium text-warm">{m.value ?? '—'}</p>
+                          </div>
+                        ))}
+                      </div>
+                      {ci.client_notes && (
+                        <p className="text-xs text-muted mb-2 italic">"{ci.client_notes}"</p>
+                      )}
+                      {ci.coach_feedback ? (
+                        <div className="border-l-2 border-gold/40 pl-3 mt-2">
+                          <p className="text-[10px] text-gold uppercase tracking-widest mb-1">Odpowiedź trenera</p>
+                          <p className="text-xs text-warm/80 leading-relaxed">{ci.coach_feedback}</p>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-muted/50 mt-2">Oczekuje na odpowiedź trenera...</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
 

@@ -39,6 +39,13 @@ export default async function ClientPage() {
     .eq('client_id', user.id)
     .maybeSingle()
 
+  const { data: checkins } = await supabase
+    .from('check_ins')
+    .select('id, week_number, submitted_at, body_weight, energy_level, sleep_quality, soreness_level, adherence_pct, client_notes, coach_feedback')
+    .eq('client_id', user.id)
+    .order('submitted_at', { ascending: false })
+    .limit(10)
+
   // Single-coach setup — pierwszy profil z role='coach'. Admin client bo RLS
   // może blokować czytanie cudzych profili z poziomu klienta.
   const admin = createAdminClient()
@@ -57,6 +64,7 @@ export default async function ClientPage() {
       recentLogs={recentLogs || []}
       questionnaire={questionnaire}
       coachName={coach?.full_name || null}
+      checkins={checkins || []}
     />
   )
 }
