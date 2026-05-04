@@ -78,7 +78,7 @@ function getGenderAccent(questionnaire) {
 // ─── CHARACTER CARD ───────────────────────────────────────────────────────────
 
 function CharacterCard({ profile, recentLogs, questionnaire }) {
-  const xp        = 340 // mock — replace when xp_events table exists
+  const xp = (recentLogs?.length ?? 0) * 120
   const nextXP    = 500
   const pct       = Math.min(100, Math.round((xp / nextXP) * 100))
   const archetype = getArchetype(xp)
@@ -486,19 +486,6 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
               )}
             </div>
 
-            {/* Quick actions */}
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => router.push('/client/workout')} className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 text-left hover:border-gold transition">
-                <span className="text-2xl block mb-2">⚡</span>
-                <p className="text-sm font-medium">Loguj trening</p>
-                <p className="text-xs text-muted">Nowa sesja</p>
-              </button>
-              <button onClick={() => router.push('/client/checkin')} className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 text-left hover:border-gold transition">
-                <span className="text-2xl block mb-2">◈</span>
-                <p className="text-sm font-medium">Check-in</p>
-                <p className="text-xs text-muted">Cotygodniowy</p>
-              </button>
-            </div>
           </div>
 
           {/* ── RIGHT ── */}
