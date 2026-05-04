@@ -169,8 +169,8 @@ export default function CheckinForm({ clientId, weekNumber, activePlan, lastChec
             name="soreness_level"
             value={form.soreness_level}
             onChange={set}
-            lowLabel="Brak zakwasów"
-            highLabel="Silny ból"
+            lowLabel="Silny ból"
+            highLabel="Brak zakwasów"
           />
           <SliderField
             label="Przestrzeganie diety / planu"
