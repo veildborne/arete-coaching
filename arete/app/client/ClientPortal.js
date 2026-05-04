@@ -333,26 +333,15 @@ function CoachMessageCard({ coachName }) {
 }
 
 function ZeusMascot({ state = 'idle' }) {
-  const SPRITE_WIDTH = 2172
-  const SPRITE_HEIGHT = 724
-  const FRAME_W = 310
-  const FRAME_H = 724
-  const frames = {
-    idle:      0,
-    idle2:     1,
-    happy:     2,
-    sleep:     3,
-    alert:     4,
-    walk1:     5,
-    walk2:     6,
-  }
+  const frames = { idle: 0, idle2: 1, happy: 2, sleep: 3, alert: 4, walk1: 5, walk2: 6 }
   const frame = frames[state] ?? 0
-  const offsetX = -(frame * FRAME_W)
+  const frameW = 2172 / 7
+  const offsetX = -(frame * frameW)
 
   return (
     <div style={{
-      width: 120,
-      height: 120,
+      width: '90px',
+      height: '90px',
       overflow: 'hidden',
       imageRendering: 'pixelated',
       position: 'relative',
@@ -361,12 +350,12 @@ function ZeusMascot({ state = 'idle' }) {
         src="/mascot/zeus-sprite.png"
         alt="Zeus"
         style={{
-          width: SPRITE_WIDTH * (120 / FRAME_W),
+          position: 'absolute',
+          left: `${offsetX * (90 / frameW)}px`,
+          top: '-10px',
+          width: `${2172 * (90 / frameW)}px`,
           height: 'auto',
           imageRendering: 'pixelated',
-          position: 'absolute',
-          left: offsetX * (120 / FRAME_W),
-          top: 0,
         }}
       />
     </div>
