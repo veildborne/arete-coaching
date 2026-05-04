@@ -26,15 +26,29 @@ export default function AcceptInvitePage() {
         // PKCE gubi parametr `type` — używamy własnego markera ?flow=recovery z resetPasswordForEmail
         const flow = urlParams.get('flow')
 
-        if (code) {
-          // Wymień kod na sesję (Supabase SDK zrobi to automatycznie przez exchangeCodeForSession)
+        const tokenHash = urlParams.get('token_hash')
+        const authType = urlParams.get('type')
+
+        if (tokenHash) {
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: authType === 'recovery' ? 'recovery' : 'invite',
+          })
+          if (verifyError) {
+            setMsg({ type: 'err', text: 'Link wygasł lub jest nieprawidłowy.' })
+            setSessionLoading(false)
+            return
+          }
+          window.history.replaceState(null, '', window.location.pathname)
+          type = flow === 'recovery' ? 'recovery' : 'invite'
+          setAuthType(type)
+        } else if (code) {
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
           if (exchangeError) {
             setMsg({ type: 'err', text: 'Link wygasł lub jest nieprawidłowy.' })
             setSessionLoading(false)
             return
           }
-          // Wyczyść ?code= z URL
           window.history.replaceState(null, '', window.location.pathname)
           type = flow === 'recovery' ? 'recovery' : 'invite'
           setAuthType(type)
