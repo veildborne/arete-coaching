@@ -267,7 +267,7 @@ function AchievementPreview({ recentLogs }) {
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-export default function ClientPortal({ profile, activePlan, recentLogs }) {
+export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire }) {
   const router   = useRouter()
   const [entered, setEntered] = useState(false)
   useEffect(() => setEntered(true), [])
@@ -335,6 +335,24 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
 
           {/* ── LEFT ── */}
           <div className="space-y-4">
+
+            {/* Onboarding questionnaire CTA — pokazuj dopóki ankieta nie jest wypełniona */}
+            {!questionnaire && (
+              <button
+                onClick={() => router.push('/client/questionnaire')}
+                className="w-full text-left bg-gradient-to-br from-gold/10 to-gold/[0.02] border border-gold/40 rounded-2xl p-6 relative overflow-hidden hover:border-gold transition group"
+              >
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gold/[0.06] rounded-full blur-3xl pointer-events-none" />
+                <p className="text-[10px] text-gold uppercase tracking-widest mb-3">Krok pierwszy</p>
+                <h2 className="text-2xl font-display text-warm mb-2">Wypełnij ankietę onboardingową</h2>
+                <p className="text-sm text-muted leading-relaxed mb-5 max-w-prose">
+                  Pomoże trenerowi przygotować spersonalizowany plan — cele, staż, sprzęt, kontuzje, priorytetowe partie. Zajmuje ok. 5 minut.
+                </p>
+                <span className="inline-flex items-center gap-2 bg-gold text-bg-deep font-bold py-3 px-5 rounded-xl text-sm tracking-wide group-hover:opacity-90 transition">
+                  Zacznij ankietę →
+                </span>
+              </button>
+            )}
 
             {/* Today Quest */}
             <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 relative overflow-hidden">

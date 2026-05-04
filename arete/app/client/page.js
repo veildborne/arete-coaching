@@ -32,5 +32,18 @@ export default async function ClientPage() {
     .order('session_date', { ascending: false })
     .limit(5)
 
-  return <ClientPortal profile={profile} activePlan={activePlan} recentLogs={recentLogs || []} />
+  const { data: questionnaire } = await supabase
+    .from('questionnaires')
+    .select('id')
+    .eq('client_id', user.id)
+    .maybeSingle()
+
+  return (
+    <ClientPortal
+      profile={profile}
+      activePlan={activePlan}
+      recentLogs={recentLogs || []}
+      questionnaire={questionnaire}
+    />
+  )
 }
