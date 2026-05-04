@@ -51,7 +51,7 @@ export default function LoginPage() {
 
       } else if (mode === 'reset') {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`
+          redirectTo: `${window.location.origin}/accept-invite?flow=recovery`
         })
         if (error) { setMsg({ type: 'err', text: 'Coś poszło nie tak.' }); return }
         setMsg({ type: 'ok', text: 'Link do resetu hasła wysłany na email.' })

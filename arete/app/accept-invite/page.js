@@ -23,6 +23,8 @@ export default function AcceptInvitePage() {
         // 1a. Sprawdź czy jest ?code= (PKCE flow)
         const urlParams = new URLSearchParams(window.location.search)
         const code = urlParams.get('code')
+        // PKCE gubi parametr `type` — używamy własnego markera ?flow=recovery z resetPasswordForEmail
+        const flow = urlParams.get('flow')
 
         if (code) {
           // Wymień kod na sesję (Supabase SDK zrobi to automatycznie przez exchangeCodeForSession)
@@ -34,7 +36,7 @@ export default function AcceptInvitePage() {
           }
           // Wyczyść ?code= z URL
           window.history.replaceState(null, '', window.location.pathname)
-          type = 'invite' // PKCE flow = invite
+          type = flow === 'recovery' ? 'recovery' : 'invite'
           setAuthType(type)
         } else {
           // 1b. Parsuj hash (implicit flow)
