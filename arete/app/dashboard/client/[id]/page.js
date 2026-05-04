@@ -51,7 +51,7 @@ export default async function ClientPage({ params }) {
     .from('questionnaires')
     .select('*')
     .eq('client_id', params.id)
-    .order('created_at', { ascending: false })
+    .order('submitted_at', { ascending: false })
     .limit(1)
     .maybeSingle()
 
