@@ -265,9 +265,41 @@ function AchievementPreview({ recentLogs }) {
   )
 }
 
+// ─── COACH MESSAGE CARD ───────────────────────────────────────────────────────
+
+function CoachMessageCard({ coachName }) {
+  const [msg, setMsg] = useState(null)
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('check_ins')
+      .select('coach_feedback, submitted_at')
+      .not('coach_feedback', 'is', null)
+      .order('submitted_at', { ascending: false })
+      .limit(1)
+      .single()
+      .then(({ data }) => { if (data?.coach_feedback) setMsg(data) })
+  }, [])
+  if (!msg) return null
+  const initials = coachName ? coachName.trim().split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() : 'AP'
+  const firstName = coachName?.split(' ')[0] || 'Trener'
+  return (
+    <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+      <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Wiadomość od trenera</p>
+      <div className="flex gap-3">
+        <div className="w-9 h-9 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold text-xs shrink-0">{initials}</div>
+        <div>
+          <p className="text-sm font-medium text-gold mb-1">{firstName}</p>
+          <p className="text-sm text-muted leading-relaxed">{msg.coach_feedback}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire }) {
+export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName }) {
   const router   = useRouter()
   const [entered, setEntered] = useState(false)
   useEffect(() => setEntered(true), [])
@@ -442,18 +474,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             <AchievementPreview recentLogs={safeLogs} />
 
             {/* Coach Message */}
-            <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
-              <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Wiadomość od trenera</p>
-              <div className="flex gap-3">
-                <div className="w-9 h-9 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold text-xs shrink-0">
-                  AP
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gold mb-1">Alexander</p>
-                  <p className="text-sm text-muted leading-relaxed">W tym tygodniu pilnujemy techniki w RDL.</p>
-                </div>
-              </div>
-            </div>
+            <CoachMessageCard coachName={coachName} />
 
             {/* Plan link */}
             {activePlan && (
