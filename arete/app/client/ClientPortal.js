@@ -333,10 +333,10 @@ function CoachMessageCard({ coachName }) {
 }
 
 function ZeusMascot({ state = 'idle' }) {
-  const SPRITE_WIDTH = 1400
-  const SPRITE_HEIGHT = 500
-  const FRAME_W = 200
-  const FRAME_H = 500
+  const SPRITE_WIDTH = 2172
+  const SPRITE_HEIGHT = 724
+  const FRAME_W = 310
+  const FRAME_H = 724
   const frames = {
     idle:      0,
     idle2:     1,
