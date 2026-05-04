@@ -785,6 +785,12 @@ export default function Home() {
   return (
     <>
       {authOpen && <AuthModal lang={lang} onClose={closeAuth} />}
+      {menuOpen && (
+        <div
+          onClick={() => setMenuOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 40 }}
+        />
+      )}
       <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
 
       {/* NAV */}
