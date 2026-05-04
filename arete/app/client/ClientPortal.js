@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -21,15 +22,6 @@ const ACHIEVEMENTS = [
   { id: 'askesis',   label: 'Askesis',  greek: 'Ἄσκησις', desc: '4 tygodnie bez przerwy', icon: '🔥', xp: 200 },
   { id: 'kleos',     label: 'Kleos',    greek: 'Κλέος',   desc: 'Nowy rekord osobisty',   icon: '🏆', xp: 150 },
   { id: 'arete_fin', label: 'Areté',    greek: 'Ἀρετή',   desc: 'Ukończony mezocykl',     icon: '⚜️', xp: 300 },
-]
-
-const STATS = [
-  { key: 'strength',     label: 'Siła',        mock: 62 },
-  { key: 'technique',    label: 'Technika',     mock: 74 },
-  { key: 'consistency',  label: 'Regularność',  mock: 58 },
-  { key: 'recovery',     label: 'Regeneracja',  mock: 70 },
-  { key: 'hypertrophy',  label: 'Hipertrofia',  mock: 55 },
-  { key: 'conditioning', label: 'Kondycja',     mock: 40 },
 ]
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -74,13 +66,23 @@ function getArchetype(xp) {
   return [...ARCHETYPES].reverse().find(a => xp >= a.min) ?? ARCHETYPES[0]
 }
 
+// ─── GENDER ACCENT ────────────────────────────────────────────────────────────
+
+function getGenderAccent(questionnaire) {
+  const plec = questionnaire?.data?.plec || ''
+  if (plec === 'Kobieta') return { primary: '#E8829A', secondary: '#F4A0B5', glow: '#E8829A20' }
+  if (plec === 'Mężczyzna') return { primary: '#5B8DB8', secondary: '#7EB2D9', glow: '#5B8DB820' }
+  return { primary: '#D4B570', secondary: '#E8C84A', glow: '#D4B57020' }
+}
+
 // ─── CHARACTER CARD ───────────────────────────────────────────────────────────
 
-function CharacterCard({ profile, recentLogs }) {
-  const xp        = 340 // mock — replace when xp_events table exists
+function CharacterCard({ profile, recentLogs, questionnaire }) {
+  const xp = (recentLogs?.length ?? 0) * 120
   const nextXP    = 500
   const pct       = Math.min(100, Math.round((xp / nextXP) * 100))
   const archetype = getArchetype(xp)
+  const accent    = getGenderAccent(questionnaire)
   const initials  = (profile?.full_name ?? profile?.email ?? 'AR')
     .split(' ').map(w => w[0] ?? '').join('').slice(0, 2).toUpperCase()
 
@@ -99,8 +101,8 @@ function CharacterCard({ profile, recentLogs }) {
           className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shrink-0 font-display"
           style={{
             background: 'radial-gradient(circle at 35% 35%, #1E2D45, #0A1020)',
-            border: `2px solid ${archetype.color}`,
-            boxShadow: `0 0 20px ${archetype.color}20`,
+            border: `2px solid ${accent.primary}`,
+            boxShadow: `0 0 20px ${accent.primary}20`,
             color: archetype.color,
           }}
         >
@@ -110,7 +112,7 @@ function CharacterCard({ profile, recentLogs }) {
         <div className="flex-1 min-w-0">
           <p className="text-[10px] text-muted uppercase tracking-widest mb-0.5">Twoja postać</p>
           <p className="text-lg font-semibold text-warm leading-tight">{archetype.label}</p>
-          <p className="text-sm font-medium" style={{ color: archetype.color }}>{archetype.greek}</p>
+          <p className="text-sm font-medium" style={{ color: accent.primary }}>{archetype.greek}</p>
         </div>
 
         <div className="text-right shrink-0">
@@ -129,7 +131,7 @@ function CharacterCard({ profile, recentLogs }) {
           className="h-full rounded-full transition-all duration-700"
           style={{
             width: `${pct}%`,
-            background: `linear-gradient(90deg, ${archetype.color}88, ${archetype.color})`,
+            background: `linear-gradient(90deg, ${accent.primary}88, ${accent.primary})`,
           }}
         />
       </div>
@@ -139,29 +141,61 @@ function CharacterCard({ profile, recentLogs }) {
 
 // ─── STAT GRID ────────────────────────────────────────────────────────────────
 
-function StatGrid() {
+function StatGrid({ recentLogs, questionnaire }) {
+  const logs = recentLogs ?? []
+  const accent = getGenderAccent(questionnaire)
+
+  const fourWeeksAgo = new Date()
+  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28)
+  const recentCount = logs.filter(l => new Date(l.session_date) >= fourWeeksAgo).length
+  const consistency = Math.min(100, Math.round((recentCount / 12) * 100))
+
+  const allSets = logs.flatMap(l => l.exercises ?? []).flatMap(e => e.sets ?? [])
+  const withRIR = allSets.filter(s => s.rir_actual != null).length
+  const technique = allSets.length > 0 ? Math.min(100, Math.round((withRIR / allSets.length) * 100)) : 0
+
+  const totalVolume = allSets.reduce((sum, s) => sum + (s.volume_load ?? 0), 0)
+  const hypertrophy = Math.min(100, Math.round(totalVolume / 500))
+
+  const withDuration = logs.filter(l => l.duration_minutes > 0)
+  const avgDuration = withDuration.length > 0
+    ? withDuration.reduce((sum, l) => sum + l.duration_minutes, 0) / withDuration.length
+    : 0
+  const conditioning = Math.min(100, Math.round((avgDuration / 90) * 100))
+
+  const allE1rms = logs.flatMap(l => l.exercises ?? []).flatMap(e => (e.sets ?? []).map(s => s.estimated_1rm ?? 0)).filter(Boolean)
+  const strength = allE1rms.length > 0 ? Math.min(100, Math.round(Math.max(...allE1rms) / 2)) : 0
+
+  const data = [
+    { stat: 'Siła',        value: strength },
+    { stat: 'Technika',    value: technique },
+    { stat: 'Regularność', value: consistency },
+    { stat: 'Regeneracja', value: 50 },
+    { stat: 'Hipertrofia', value: hypertrophy },
+    { stat: 'Kondycja',    value: conditioning },
+  ]
+
   return (
     <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
-      <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Statystyki postaci</p>
-      <div className="space-y-3">
-        {STATS.map(({ key, label, mock }) => (
-          <div key={key}>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-muted">{label}</span>
-              <span className="text-gold font-medium">{mock}</span>
-            </div>
-            <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-gold/60 to-gold"
-                style={{ width: `${mock}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <p className="text-[10px] text-muted/40 mt-3 text-center">
-        Dane rosną z treningami i check-inami
-      </p>
+      <p className="text-[10px] text-muted uppercase tracking-widest mb-2">Statystyki postaci</p>
+      {logs.length === 0 ? (
+        <p className="text-[10px] text-muted/40 mt-3 text-center py-8">Dane rosną z treningami i check-inami</p>
+      ) : (
+        <ResponsiveContainer width="100%" height={220}>
+          <RadarChart data={data} margin={{ top: 10, right: 20, bottom: 10, left: 20 }}>
+            <PolarGrid stroke="rgba(255,255,255,0.08)" />
+            <PolarAngleAxis dataKey="stat" tick={{ fill: '#8F9AAF', fontSize: 11, fontFamily: 'Outfit' }} />
+            <Radar
+              name="stats"
+              dataKey="value"
+              stroke={accent.primary}
+              fill={accent.primary}
+              fillOpacity={0.15}
+              strokeWidth={2}
+            />
+          </RadarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   )
 }
@@ -265,9 +299,41 @@ function AchievementPreview({ recentLogs }) {
   )
 }
 
+// ─── COACH MESSAGE CARD ───────────────────────────────────────────────────────
+
+function CoachMessageCard({ coachName }) {
+  const [msg, setMsg] = useState(null)
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('check_ins')
+      .select('coach_feedback, submitted_at')
+      .not('coach_feedback', 'is', null)
+      .order('submitted_at', { ascending: false })
+      .limit(1)
+      .single()
+      .then(({ data }) => { if (data?.coach_feedback) setMsg(data) })
+  }, [])
+  if (!msg) return null
+  const initials = coachName ? coachName.trim().split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() : 'AP'
+  const firstName = coachName?.split(' ')[0] || 'Trener'
+  return (
+    <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+      <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Wiadomość od trenera</p>
+      <div className="flex gap-3">
+        <div className="w-9 h-9 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold text-xs shrink-0">{initials}</div>
+        <div>
+          <p className="text-sm font-medium text-gold mb-1">{firstName}</p>
+          <p className="text-sm text-muted leading-relaxed">{msg.coach_feedback}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-export default function ClientPortal({ profile, activePlan, recentLogs }) {
+export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName }) {
   const router   = useRouter()
   const [entered, setEntered] = useState(false)
   useEffect(() => setEntered(true), [])
@@ -336,6 +402,24 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
           {/* ── LEFT ── */}
           <div className="space-y-4">
 
+            {/* Onboarding questionnaire CTA — pokazuj dopóki ankieta nie jest wypełniona */}
+            {!questionnaire && (
+              <button
+                onClick={() => router.push('/client/questionnaire')}
+                className="w-full text-left bg-gradient-to-br from-gold/10 to-gold/[0.02] border border-gold/40 rounded-2xl p-6 relative overflow-hidden hover:border-gold transition group"
+              >
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gold/[0.06] rounded-full blur-3xl pointer-events-none" />
+                <p className="text-[10px] text-gold uppercase tracking-widest mb-3">Krok pierwszy</p>
+                <h2 className="text-2xl font-display text-warm mb-2">Wypełnij ankietę onboardingową</h2>
+                <p className="text-sm text-muted leading-relaxed mb-5 max-w-prose">
+                  Pomoże trenerowi przygotować spersonalizowany plan — cele, staż, sprzęt, kontuzje, priorytetowe partie. Zajmuje ok. 5 minut.
+                </p>
+                <span className="inline-flex items-center gap-2 bg-gold text-bg-deep font-bold py-3 px-5 rounded-xl text-sm tracking-wide group-hover:opacity-90 transition">
+                  Zacznij ankietę →
+                </span>
+              </button>
+            )}
+
             {/* Today Quest */}
             <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-gold/[0.04] rounded-full blur-3xl pointer-events-none" />
@@ -402,40 +486,16 @@ export default function ClientPortal({ profile, activePlan, recentLogs }) {
               )}
             </div>
 
-            {/* Quick actions */}
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => router.push('/client/workout')} className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 text-left hover:border-gold transition">
-                <span className="text-2xl block mb-2">⚡</span>
-                <p className="text-sm font-medium">Loguj trening</p>
-                <p className="text-xs text-muted">Nowa sesja</p>
-              </button>
-              <button onClick={() => router.push('/client/checkin')} className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 text-left hover:border-gold transition">
-                <span className="text-2xl block mb-2">◈</span>
-                <p className="text-sm font-medium">Check-in</p>
-                <p className="text-xs text-muted">Cotygodniowy</p>
-              </button>
-            </div>
           </div>
 
           {/* ── RIGHT ── */}
           <div className="space-y-4">
-            <CharacterCard profile={profile} recentLogs={safeLogs} />
-            <StatGrid />
+            <CharacterCard profile={profile} recentLogs={safeLogs} questionnaire={questionnaire} />
+            <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
             <AchievementPreview recentLogs={safeLogs} />
 
             {/* Coach Message */}
-            <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
-              <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Wiadomość od trenera</p>
-              <div className="flex gap-3">
-                <div className="w-9 h-9 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold text-xs shrink-0">
-                  AP
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gold mb-1">Alexander</p>
-                  <p className="text-sm text-muted leading-relaxed">W tym tygodniu pilnujemy techniki w RDL.</p>
-                </div>
-              </div>
-            </div>
+            <CoachMessageCard coachName={coachName} />
 
             {/* Plan link */}
             {activePlan && (

@@ -40,11 +40,10 @@ export default async function ClientPage({ params }) {
     .order('session_date', { ascending: false })
     .limit(20)
 
-  // FIX: Obsługa check_ins — sprawdź czy kolumna to client_id czy user_id
   const { data: checkins } = await admin
     .from('check_ins')
     .select('*')
-    .or(`client_id.eq.${params.id},user_id.eq.${params.id}`)
+    .eq('client_id', params.id)
     .order('created_at', { ascending: false })
     .limit(10)
 
@@ -52,7 +51,7 @@ export default async function ClientPage({ params }) {
     .from('questionnaires')
     .select('*')
     .eq('client_id', params.id)
-    .order('created_at', { ascending: false })
+    .order('submitted_at', { ascending: false })
     .limit(1)
     .maybeSingle()
 

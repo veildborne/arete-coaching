@@ -23,18 +23,34 @@ export default function AcceptInvitePage() {
         // 1a. Sprawdź czy jest ?code= (PKCE flow)
         const urlParams = new URLSearchParams(window.location.search)
         const code = urlParams.get('code')
+        // PKCE gubi parametr `type` — używamy własnego markera ?flow=recovery z resetPasswordForEmail
+        const flow = urlParams.get('flow')
 
-        if (code) {
-          // Wymień kod na sesję (Supabase SDK zrobi to automatycznie przez exchangeCodeForSession)
+        const tokenHash = urlParams.get('token_hash')
+        const authType = urlParams.get('type')
+
+        if (tokenHash) {
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: authType === 'recovery' ? 'recovery' : 'invite',
+          })
+          if (verifyError) {
+            setMsg({ type: 'err', text: 'Link wygasł lub jest nieprawidłowy.' })
+            setSessionLoading(false)
+            return
+          }
+          window.history.replaceState(null, '', window.location.pathname)
+          type = flow === 'recovery' ? 'recovery' : 'invite'
+          setAuthType(type)
+        } else if (code) {
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
           if (exchangeError) {
             setMsg({ type: 'err', text: 'Link wygasł lub jest nieprawidłowy.' })
             setSessionLoading(false)
             return
           }
-          // Wyczyść ?code= z URL
           window.history.replaceState(null, '', window.location.pathname)
-          type = 'invite' // PKCE flow = invite
+          type = flow === 'recovery' ? 'recovery' : 'invite'
           setAuthType(type)
         } else {
           // 1b. Parsuj hash (implicit flow)
@@ -198,7 +214,7 @@ export default function AcceptInvitePage() {
       <div className="w-full max-w-[440px] bg-gradient-to-br from-[#131f36] to-[#0f1a2e] border border-[rgba(184,166,119,0.25)] rounded-2xl p-11 relative shadow-[0_24px_80px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(184,166,119,0.1)]">
         <div className="absolute top-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[rgba(184,166,119,0.5)] to-transparent" />
         <div className="text-center mb-8">
-          <div className="font-display text-[0.7rem] tracking-[0.25em] text-[rgba(184,166,119,0.4)] uppercase mb-2">
+          <div className="font-display text-[0.7rem] tracking-[0.25em] text-[rgba(184,166,119,0.4)] mb-2">
             ἀρετή
           </div>
           <h1 className="font-display text-[1.8rem] font-semibold text-gold tracking-[0.3em] m-0">

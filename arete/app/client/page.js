@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { redirect } from 'next/navigation'
 import ClientPortal from './ClientPortal'
 import { isCoachProfile, isPendingProfile } from '@/lib/auth-roles'
@@ -32,5 +33,30 @@ export default async function ClientPage() {
     .order('session_date', { ascending: false })
     .limit(5)
 
-  return <ClientPortal profile={profile} activePlan={activePlan} recentLogs={recentLogs || []} />
+  const { data: questionnaire } = await supabase
+    .from('questionnaires')
+    .select('id')
+    .eq('client_id', user.id)
+    .maybeSingle()
+
+  // Single-coach setup — pierwszy profil z role='coach'. Admin client bo RLS
+  // może blokować czytanie cudzych profili z poziomu klienta.
+  const admin = createAdminClient()
+  const { data: coach } = await admin
+    .from('profiles')
+    .select('full_name')
+    .eq('role', 'coach')
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  return (
+    <ClientPortal
+      profile={profile}
+      activePlan={activePlan}
+      recentLogs={recentLogs || []}
+      questionnaire={questionnaire}
+      coachName={coach?.full_name || null}
+    />
+  )
 }

@@ -51,7 +51,7 @@ export default function LoginPage() {
 
       } else if (mode === 'reset') {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`
+          redirectTo: `${window.location.origin}/accept-invite?flow=recovery`
         })
         if (error) { setMsg({ type: 'err', text: 'Coś poszło nie tak.' }); return }
         setMsg({ type: 'ok', text: 'Link do resetu hasła wysłany na email.' })
@@ -68,7 +68,7 @@ export default function LoginPage() {
       <div className="w-full max-w-[440px] bg-gradient-to-br from-[#131f36] to-[#0f1a2e] border border-[rgba(184,166,119,0.25)] rounded-2xl p-11 relative shadow-[0_24px_80px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(184,166,119,0.1)]">
         <div className="absolute top-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[rgba(184,166,119,0.5)] to-transparent" />
         <div className="text-center mb-8">
-          <div className="font-display text-[0.7rem] tracking-[0.25em] text-[rgba(184,166,119,0.4)] uppercase mb-2">
+          <div className="font-display text-[0.7rem] tracking-[0.25em] text-[rgba(184,166,119,0.4)] mb-2">
             ἀρετή
           </div>
           <h1 className="font-display text-[1.8rem] font-semibold text-gold tracking-[0.3em] m-0">
