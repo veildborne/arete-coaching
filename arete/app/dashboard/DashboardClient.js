@@ -25,7 +25,8 @@ function calculateCompliance(logs, plans) {
   const activePlan = (plans || []).find(p => p.is_active)
   if (!activePlan) return null
   const planData = activePlan.plan_data || {}
-  const sessionsPerWeek = (planData.sessions || []).length
+  const sessions = planData.sessions || {}
+  const sessionsPerWeek = Object.keys(sessions).length
   const expectedSessions = sessionsPerWeek * 4
   if (expectedSessions === 0) return null
   const completedSessions = recentLogs.filter(log => log.completed !== false).length
@@ -108,6 +109,11 @@ function ClientCard({ client }) {
       {/* Flags */}
       <div className="min-h-[18px] mb-3">
         {!hasPlan && <p className="text-[11px] text-[#E8A020]">⚠ Brak aktywnego planu</p>}
+        {hasPlan && (
+          <p className="text-[11px] text-[#47D18C]">
+            ✓ {(client.plans || []).find(p => p.is_active)?.plan_data?.split_name || 'Plan aktywny'}
+          </p>
+        )}
         {needsAttention && hasPlan && (
           <p className="text-[11px] text-danger">
             {noTrainingDays !== null && noTrainingDays > 5 ? `⚠ Brak treningu ${Math.floor(noTrainingDays)} dni` : `⚠ Brak check-inu ${Math.floor(noCheckinDays)} dni`}
