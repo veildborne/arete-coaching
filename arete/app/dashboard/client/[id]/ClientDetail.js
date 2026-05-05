@@ -76,11 +76,13 @@ function calculateCompliance(logs, plans) {
   if (!activePlan) return null
 
   const planData = activePlan.plan_data || activePlan.plan_json || {}
-  const sessions = planData.sessions || []
-  const sessionsPerWeek = sessions.length
-  const expectedSessions = sessionsPerWeek * 4
+  const sessions = planData.sessions || {}
+  const sessionsPerWeek = typeof sessions === 'object' && !Array.isArray(sessions)
+    ? Object.keys(sessions).length
+    : (Array.isArray(sessions) ? sessions.length : 0)
+  if (!sessionsPerWeek) return null
 
-  if (expectedSessions === 0) return null
+  const expectedSessions = sessionsPerWeek * 4
 
   const completedSessions = recentLogs.filter(log => log.completed !== false).length
   const compliance = Math.round((completedSessions / expectedSessions) * 100)
