@@ -19,8 +19,8 @@ module.exports = {
         'danger':    '#EF6B73',
       },
       fontFamily: {
-        display: ['Cormorant Garamond', 'Georgia', 'serif'],
-        body:    ['Outfit', 'system-ui', 'sans-serif'],
+        display: ['var(--font-cormorant)', 'Georgia', 'serif'],
+        body:    ['var(--font-outfit)', 'system-ui', 'sans-serif'],
       },
     },
   },
