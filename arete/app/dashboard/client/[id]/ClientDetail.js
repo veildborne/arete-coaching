@@ -218,13 +218,46 @@ const BLOCK_LABELS = {
 }
 
 const BLOCKS_ORDER = [
-  { title: 'Dane podstawowe',       keys: ['imie','wiek','plec','wzrost_cm','waga_kg'] },
-  { title: 'Cel treningowy',        keys: ['cel','cel_wagowy','deadline','priorytetowe_partie'] },
-  { title: 'Historia treningowa',   keys: ['staz','aktualny_split','pr_squat','pr_bench','pr_deadlift','pr_ohp','pr_row','programy_wczesniej'] },
-  { title: 'Kontuzje i ograniczenia', keys: ['kontuzje_aktualne','kontuzje_przeszle','cwiczenia_unikane','mobilnosc'] },
-  { title: 'Dostępność i sprzęt',   keys: ['dni_tydzien','czas_sesji','miejsce_treningu','brak_sprzetu','cardio_typ','cardio_ile'] },
-  { title: 'Żywienie',              keys: ['dieta_aktualna','posilki_dziennie','dieta_doswiadczenie','alergie','suplementy'] },
-  { title: 'Styl życia',            keys: ['praca','sen','stres','dodatkowe_info'] },
+  {
+    title: 'Dane podstawowe',
+    keys: ['imie', 'wiek', 'plec', 'wzrost_cm', 'waga_kg'],
+  },
+  {
+    title: 'Cel treningowy',
+    keys: ['cel', 'cel_wagowy', 'deadline'],
+  },
+  {
+    title: 'Priorytety sylwetkowe',
+    keys: ['priority_muscles', 'avoid_growth_muscles'],
+  },
+  {
+    title: 'Doświadczenie',
+    keys: ['staz', 'knows_rir', 'aktualny_split', 'pr_squat', 'pr_bench', 'pr_deadlift', 'pr_ohp', 'pr_row'],
+  },
+  {
+    title: 'Dostępność',
+    keys: ['dni_tydzien', 'czas_sesji', 'consecutive_days'],
+  },
+  {
+    title: 'Sprzęt i preferencje',
+    keys: ['equipment', 'preference_machines', 'training_style', 'cwiczenia_unikane'],
+  },
+  {
+    title: 'Ból i kontuzje',
+    keys: ['pain_areas', 'pain_level', 'kontuzje_przeszle', 'mobilnosc'],
+  },
+  {
+    title: 'Regeneracja i styl życia',
+    keys: ['sen', 'sleep_quality', 'stress_level', 'praca', 'cardio_typ', 'cardio_ile'],
+  },
+  {
+    title: 'Żywienie',
+    keys: ['dieta_aktualna', 'alergie', 'suplementy'],
+  },
+  {
+    title: 'Dodatkowe',
+    keys: ['dodatkowe_info'],
+  },
 ]
 
 function AnkietaViewer({ questionnaire }) {
@@ -251,7 +284,7 @@ function AnkietaViewer({ questionnaire }) {
       {BLOCKS_ORDER.map(block => {
         const entries = block.keys
           .map(k => ({ label: BLOCK_LABELS[k] || k, value: data[k] }))
-          .filter(e => e.value)
+          .filter(e => e.value !== undefined && e.value !== '' && !(Array.isArray(e.value) && e.value.length === 0))
         if (entries.length === 0) return null
         return (
           <div key={block.title} className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4 mb-2.5">
