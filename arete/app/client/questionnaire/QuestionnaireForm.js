@@ -173,7 +173,7 @@ function Block({ title, subtitle, children }) {
 
 // ─── GŁÓWNY KOMPONENT ─────────────────────────────────────────────────────────
 
-export default function QuestionnaireForm({ clientId, existing }) {
+export default function QuestionnaireForm({ clientId, existing, allQuestionnaires, isNew }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(false)
@@ -262,10 +262,17 @@ export default function QuestionnaireForm({ clientId, existing }) {
         padding: '0 24px', height: 56,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <button onClick={() => router.push('/client')} style={{
-          fontSize: 13, color: 'rgba(184,166,119,0.7)', background: 'none',
-          border: 'none', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", padding: 0,
-        }}>← Powrót</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button onClick={() => router.push('/client')} style={{
+            fontSize: 13, color: 'rgba(184,166,119,0.7)', background: 'none',
+            border: 'none', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", padding: 0,
+          }}>← Powrót</button>
+          {allQuestionnaires?.length > 0 && !isNew && (
+            <span style={{ fontSize: 12, color: 'rgba(184,166,119,0.5)' }}>
+              {allQuestionnaires.length} {allQuestionnaires.length === 1 ? 'ankieta' : 'ankiety'} w historii
+            </span>
+          )}
+        </div>
         <span style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontSize: 20, fontWeight: 600, color: '#d4c494', letterSpacing: '0.35em',
@@ -275,11 +282,42 @@ export default function QuestionnaireForm({ clientId, existing }) {
       <main style={{ maxWidth: 680, margin: '0 auto', padding: '40px 24px 80px' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <p style={{ fontSize: 10, letterSpacing: '0.3em', color: 'rgba(184,166,119,0.6)', textTransform: 'uppercase', margin: '0 0 10px' }}>Onboarding</p>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 600, color: '#e8e8e8', margin: '0 0 10px' }}>Ankieta onboardingowa</h1>
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 600, color: '#e8e8e8', margin: '0 0 10px' }}>
+            {isNew ? 'Nowa ankieta' : existing ? 'Zaktualizuj ankietę' : 'Ankieta onboardingowa'}
+          </h1>
+          {existing && !isNew && (
+            <p style={{ color: 'rgba(184,166,119,0.4)', fontSize: 12, marginBottom: 8 }}>
+              Ostatnia: {new Date(existing.submitted_at || existing.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          )}
           <p style={{ color: 'rgba(184,166,119,0.5)', fontSize: 14, lineHeight: 1.6 }}>
             Wypełnij dokładnie — każda odpowiedź wpływa na Twój plan treningowy.
           </p>
         </div>
+
+        {allQuestionnaires?.length > 1 && !isNew && (
+          <div style={{
+            background: 'rgba(184,166,119,0.05)',
+            border: '1px solid rgba(184,166,119,0.12)',
+            borderRadius: 12, padding: '16px 20px', marginBottom: 24,
+          }}>
+            <p style={{ fontSize: 11, color: 'rgba(184,166,119,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>
+              Historia ankiet
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {allQuestionnaires.map((q, i) => (
+                <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13 }}>
+                  <span style={{ color: i === 0 ? '#d4c494' : 'rgba(184,166,119,0.5)' }}>
+                    {i === 0 ? '★ Aktualna' : `Wersja ${allQuestionnaires.length - i}`}
+                  </span>
+                  <span style={{ color: 'rgba(184,166,119,0.4)', fontSize: 12 }}>
+                    {new Date(q.submitted_at || q.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* BLOK 1 — Dane podstawowe */}
         <Block title="Dane podstawowe">
@@ -577,17 +615,30 @@ export default function QuestionnaireForm({ clientId, existing }) {
           </div>
         </Block>
 
-        <button onClick={handleSubmit} disabled={saving} style={{
-          width: '100%', padding: '16px', borderRadius: 99,
-          background: saving ? 'rgba(184,166,119,0.15)' : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
-          border: 'none',
-          color: saving ? 'rgba(184,166,119,0.5)' : '#0f1a2e',
-          fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
-          fontFamily: "'Outfit', sans-serif", letterSpacing: '0.12em',
-          textTransform: 'uppercase', transition: 'all 0.2s', marginTop: 8,
-        }}>
-          {saving ? 'Zapisywanie...' : existing ? 'Zaktualizuj ankietę' : 'Wyślij ankietę'}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
+          <button onClick={handleSubmit} disabled={saving} style={{
+            width: '100%', padding: '16px', borderRadius: 99,
+            background: saving ? 'rgba(184,166,119,0.15)' : 'linear-gradient(135deg, #b8a677 0%, #d4c494 100%)',
+            border: 'none', color: saving ? 'rgba(184,166,119,0.5)' : '#0f1a2e',
+            fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
+            fontFamily: "'Outfit', sans-serif", letterSpacing: '0.12em',
+            textTransform: 'uppercase', transition: 'all 0.2s',
+          }}>
+            {saving ? 'Zapisywanie...' : isNew ? 'Wyślij nową ankietę' : existing ? 'Zaktualizuj ankietę' : 'Wyślij ankietę'}
+          </button>
+
+          {existing && !isNew && (
+            <a href="/client/questionnaire?new=1" style={{
+              display: 'block', width: '100%', padding: '14px', borderRadius: 99, textAlign: 'center',
+              background: 'transparent', border: '1px solid rgba(184,166,119,0.25)',
+              color: 'rgba(184,166,119,0.7)', fontSize: 13, fontWeight: 500,
+              fontFamily: "'Outfit', sans-serif", letterSpacing: '0.08em',
+              textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.2s',
+            }}>
+              + Wyślij nową ankietę (nowa wersja)
+            </a>
+          )}
+        </div>
         <p style={{ textAlign: 'center', marginTop: 12, fontSize: 11, color: 'rgba(184,166,119,0.3)' }}>
           Twoje dane są poufne i widoczne tylko dla trenera.
         </p>

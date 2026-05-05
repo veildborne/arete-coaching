@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import QuestionnaireForm from './QuestionnaireForm'
 
-export default async function QuestionnairePage() {
+export default async function QuestionnairePage({ searchParams }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -11,19 +11,21 @@ export default async function QuestionnairePage() {
     .from('profiles').select('*').eq('id', user.id).single()
   if (profile?.role === 'coach') redirect('/dashboard')
 
-  // Sprawdź czy już wypełnił
-  const { data: existing } = await supabase
+  const { data: allQuestionnaires } = await supabase
     .from('questionnaires')
-    .select('id, submitted_at')
+    .select('id, submitted_at, created_at, data')
     .eq('client_id', user.id)
     .order('submitted_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+
+  const latest = allQuestionnaires?.[0] || null
+  const isNew = searchParams?.new === '1'
 
   return (
     <QuestionnaireForm
       clientId={user.id}
-      existing={existing}
+      existing={isNew ? null : latest}
+      allQuestionnaires={allQuestionnaires || []}
+      isNew={isNew}
     />
   )
 }
