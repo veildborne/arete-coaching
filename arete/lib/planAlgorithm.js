@@ -488,8 +488,7 @@ export function generatePlan(questionnaire, exercises) {
         )
 
         const exCount = ['abs','calves','shoulders_rear'].includes(muscle) ? 1
-          : sets >= 8 ? 3
-          : sets >= 5 ? 2
+          : sets >= 10 ? 2
           : 1
 
         const picked = pickExercises(
