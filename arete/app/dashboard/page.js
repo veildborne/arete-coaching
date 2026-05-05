@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import DashboardClient from './DashboardClient'
 import { isCoachProfile } from '@/lib/auth-roles'
 
+export const revalidate = 0
+
 export default async function DashboardPage() {
   const supabase = createClient()
   const admin = createAdminClient()
