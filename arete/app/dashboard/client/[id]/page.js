@@ -53,7 +53,13 @@ export default async function ClientPage({ params }) {
     .eq('client_id', params.id)
     .order('submitted_at', { ascending: false })
 
-  const questionnaire = questionnaires?.[0] || null
+  const { data: questionnaire } = await admin
+    .from('questionnaires')
+    .select('*')
+    .eq('client_id', params.id)
+    .order('submitted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   return (
     <ClientDetail
