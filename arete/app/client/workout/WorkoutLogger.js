@@ -491,8 +491,9 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
   // ── Auto-load session from active plan ──
   useEffect(() => {
     if (!activePlan?.plan_data?.sessions) return
-    const sessions = activePlan.plan_data.sessions
-    const todaySession = sessions.find(s => s.label === dayLabel) ?? sessions[0]
+    const sessionsObj = activePlan.plan_data.sessions || {}
+    const sessionsArr = Object.values(sessionsObj)
+    const todaySession = sessionsArr.find(s => s.label === dayLabel) ?? sessionsArr[0]
     if (!todaySession?.exercises?.length || !exercises.length) return
 
     const loaded = todaySession.exercises
