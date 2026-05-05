@@ -595,23 +595,89 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
               <EmptyState text="Brak planów. Kliknij '+ Nowy plan' żeby dodać pierwszy." />
             ) : (
               <div className="flex flex-col gap-2">
-                {plans.map(plan => (
-                  <div
-                    key={plan.id}
-                    className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-3.5 flex items-center gap-3.5 cursor-pointer hover:border-gold/20 hover:bg-[#1e1e1e] transition"
-                  >
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-[#e8e8e8] mb-1">
-                        {plan.name || 'Plan bez nazwy'}
+                {plans.map(plan => {
+                  const isActive = plan.is_active
+                  const planData = plan.plan_data || {}
+                  const createdAt = plan.created_at
+                    ? new Date(plan.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : '—'
+                  const sessions = planData.sessions ? Object.keys(planData.sessions).length : 0
+                  const splitName = planData.split_name || plan.name || 'Plan'
+                  const rationale = planData.rationale || null
+
+                  return (
+                    <div key={plan.id} className="bg-[#1a1a1a] border rounded-[10px] p-4 transition"
+                      style={{ borderColor: isActive ? 'rgba(184,166,119,0.4)' : 'rgba(255,255,255,0.07)' }}>
+                      {/* Header */}
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-medium text-[#e8e8e8]">{splitName}</span>
+                            {isActive && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(71,209,140,0.12)] border border-[rgba(71,209,140,0.3)] text-[#47D18C]">
+                                ✓ Aktywny
+                              </span>
+                            )}
+                            {!isActive && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#555]">
+                                Archiwalny
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-[#555]">Utworzono: {createdAt}</div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="text-xs text-[#555]">{sessions} sesji · 6 tygodni</div>
+                          {planData.experience && (
+                            <div className="text-xs text-[#444] mt-0.5">{planData.experience}</div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex gap-2 flex-wrap">
-                        {plan.split && <Pill>{plan.split}</Pill>}
-                        {plan.goal  && <Pill>{plan.goal}</Pill>}
+
+                      {/* Pills */}
+                      <div className="flex gap-2 flex-wrap mb-3">
+                        {planData.goal && <Pill>{planData.goal}</Pill>}
+                        {planData.split_type && <Pill>{planData.split_type}</Pill>}
+                        {planData.priority_muscles?.map(m => <Pill key={m}>★ {m}</Pill>)}
+                        {planData.recovery_modifier && planData.recovery_modifier < 0.9 && (
+                          <Pill>⚠ niska regeneracja</Pill>
+                        )}
+                      </div>
+
+                      {/* Rationale */}
+                      {rationale && (
+                        <div className="border-l-2 border-[rgba(184,166,119,0.2)] pl-3 mb-3">
+                          <p className="text-[11px] text-[#666] leading-relaxed">{rationale}</p>
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex gap-2">
+                        {!isActive && (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation()
+                              const { createClient } = await import('@/lib/supabase-browser')
+                              const supabase = createClient()
+                              await supabase.from('training_plans').update({ is_active: false }).eq('client_id', client.id)
+                              await supabase.from('training_plans').update({ is_active: true }).eq('id', plan.id)
+                              window.location.reload()
+                            }}
+                            className="text-[11px] px-3 py-1.5 rounded-lg border border-gold/20 text-gold hover:bg-gold/10 transition cursor-pointer bg-transparent font-body"
+                          >
+                            Aktywuj
+                          </button>
+                        )}
+                        <button
+                          onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)}
+                          className="text-[11px] px-3 py-1.5 rounded-lg border border-[rgba(255,255,255,0.08)] text-[#555] hover:text-[#888] transition cursor-pointer bg-transparent font-body"
+                        >
+                          + Nowy plan
+                        </button>
                       </div>
                     </div>
-                    <span className="text-[#333] text-sm">›</span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </Section>
