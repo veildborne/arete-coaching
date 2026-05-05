@@ -30,7 +30,8 @@ export default async function DashboardPage() {
   // FAZA 6: Fetch plans, logs, check-ins dla compliance i auto-flags
   const { data: allPlans } = await admin
     .from('training_plans')
-    .select('client_id, is_active, plan_data, plan_json')
+    .select('id, client_id, is_active, name, plan_data')
+    .order('created_at', { ascending: false })
 
   const { data: allLogs } = await admin
     .from('training_logs')
@@ -51,9 +52,6 @@ export default async function DashboardPage() {
     logs: (allLogs || []).filter(l => l.client_id === client.id),
     checkins: (allCheckins || []).filter(c => c.client_id === client.id),
   }))
-
-  console.log('PLANS DEBUG:', JSON.stringify((allPlans || []).slice(0, 2), null, 2))
-  console.log('CLIENTS WITH DATA:', JSON.stringify(clientsWithData.map(c => ({ id: c.id, name: c.full_name, plansCount: c.plans?.length, hasActive: c.plans?.some(p => p.is_active) })), null, 2))
 
   return <DashboardClient profile={profile} clients={clientsWithData} />
 }
