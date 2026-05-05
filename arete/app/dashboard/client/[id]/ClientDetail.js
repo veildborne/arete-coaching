@@ -446,7 +446,7 @@ function CheckinCard({ ci, onFeedbackSaved }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName }) {
+export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires }) {
   const router = useRouter()
   const [tab, setTab] = useState('plans')
   const [checkins, setCheckins] = useState(initialCheckins)
@@ -804,6 +804,16 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
         {/* ANKIETA TAB */}
         {tab === 'questionnaire' && (
           <Section title="Ankieta onboardingowa">
+            {questionnaires && questionnaires.length > 1 && (
+              <div className="mb-4 flex gap-2 flex-wrap">
+                <p className="text-xs text-muted w-full mb-1">Historia ankiet:</p>
+                {questionnaires.map((q, i) => (
+                  <span key={q.id} className="text-[11px] px-3 py-1 rounded-full border border-[rgba(212,181,112,0.2)] text-muted">
+                    {i === 0 ? '★ Aktualna' : `Wersja ${questionnaires.length - i}`} — {new Date(q.submitted_at || q.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                ))}
+              </div>
+            )}
             <AnkietaViewer questionnaire={questionnaire} />
           </Section>
         )}

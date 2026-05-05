@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
@@ -188,6 +188,19 @@ export default function QuestionnaireForm({ clientId, existing }) {
     pain_areas: [],
   })
 
+  useEffect(() => {
+    if (!existing) return
+    const supabase = createClient()
+    supabase
+      .from('questionnaires')
+      .select('data')
+      .eq('id', existing.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.data) setForm(prev => ({ ...prev, ...data.data }))
+      })
+  }, [existing])
+
   function set(name, value) {
     setForm(prev => ({ ...prev, [name]: value }))
   }
@@ -206,10 +219,9 @@ export default function QuestionnaireForm({ clientId, existing }) {
 
     setSaving(true)
     const supabase = createClient()
-    const { error } = await supabase.from('questionnaires').insert({
-      client_id: clientId,
-      data: form,
-    })
+    const { error } = existing
+      ? await supabase.from('questionnaires').update({ data: form, submitted_at: new Date().toISOString() }).eq('id', existing.id)
+      : await supabase.from('questionnaires').insert({ client_id: clientId, data: form })
     setSaving(false)
     if (!error) setDone(true)
     else alert('Błąd zapisu: ' + error.message)
@@ -574,7 +586,7 @@ export default function QuestionnaireForm({ clientId, existing }) {
           fontFamily: "'Outfit', sans-serif", letterSpacing: '0.12em',
           textTransform: 'uppercase', transition: 'all 0.2s', marginTop: 8,
         }}>
-          {saving ? 'Wysyłanie...' : 'Wyślij ankietę'}
+          {saving ? 'Zapisywanie...' : existing ? 'Zaktualizuj ankietę' : 'Wyślij ankietę'}
         </button>
         <p style={{ textAlign: 'center', marginTop: 12, fontSize: 11, color: 'rgba(184,166,119,0.3)' }}>
           Twoje dane są poufne i widoczne tylko dla trenera.
