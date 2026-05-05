@@ -487,9 +487,10 @@ export function generatePlan(questionnaire, exercises) {
           freq, params.recoveryModifier, params.cardioFactor
         )
 
-        const exCount = ['abs','calves','shoulders_rear'].includes(muscle) ? 1
-          : sets >= 10 ? 2
-          : 1
+        // Małe partie — zawsze 1 ćwiczenie
+        // Duże partie — 1 compound + 1 isolation jeśli dużo serii
+        const isSmallMuscle = ['abs', 'calves', 'shoulders_rear', 'biceps', 'triceps'].includes(muscle)
+        const exCount = isSmallMuscle ? 1 : sets >= 8 ? 2 : 1
 
         const picked = pickExercises(
           exercises.filter(e => !usedExercises.has(e.name)),
