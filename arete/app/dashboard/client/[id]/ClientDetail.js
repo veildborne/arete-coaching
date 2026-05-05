@@ -166,22 +166,55 @@ function EmptyState({ text }) {
 // ─── Ankieta viewer ───────────────────────────────────────────────────────────
 
 const BLOCK_LABELS = {
-  imie: 'Imię i nazwisko', wiek: 'Wiek', plec: 'Płeć',
-  wzrost_cm: 'Wzrost (cm)', waga_kg: 'Waga (kg)',
-  cel: 'Główny cel', cel_wagowy: 'Cel wagowy', deadline: 'Deadline',
-  priorytetowe_partie: 'Priorytetowe partie', staz: 'Staż treningowy',
-  aktualny_split: 'Aktualny split', pr_squat: 'PR Przysiad',
-  pr_bench: 'PR Wyciskanie', pr_deadlift: 'PR Martwy ciąg',
-  pr_ohp: 'PR OHP', pr_row: 'PR Wiosłowanie',
-  programy_wczesniej: 'Programy wcześniej', kontuzje_aktualne: 'Aktualne kontuzje',
-  kontuzje_przeszle: 'Przeszłe kontuzje', cwiczenia_unikane: 'Unikane ćwiczenia',
-  mobilnosc: 'Problemy z mobilnością', dni_tydzien: 'Dni / tydzień',
-  czas_sesji: 'Czas sesji', miejsce_treningu: 'Miejsce treningu',
-  brak_sprzetu: 'Brak sprzętu', cardio_typ: 'Cardio', cardio_ile: 'Cardio ile razy',
-  dieta_aktualna: 'Dieta aktualna', posilki_dziennie: 'Posiłki / dzień',
-  dieta_doswiadczenie: 'Doświadczenie z dietą', alergie: 'Alergie',
-  suplementy: 'Suplementy', praca: 'Typ pracy', sen: 'Sen',
-  stres: 'Poziom stresu', dodatkowe_info: 'Dodatkowe info',
+  // Dane podstawowe
+  imie:                  'Imię i nazwisko',
+  wiek:                  'Wiek',
+  plec:                  'Płeć',
+  wzrost_cm:             'Wzrost (cm)',
+  waga_kg:               'Waga (kg)',
+  // Cel
+  cel:                   'Główny cel',
+  cel_wagowy:            'Cel wagowy',
+  deadline:              'Deadline',
+  // Priorytety
+  priority_muscles:      'Priorytety sylwetkowe',
+  avoid_growth_muscles:  'Partie do nierozbudowywania',
+  // Doświadczenie
+  staz:                  'Staż treningowy',
+  knows_rir:             'Znajomość RIR',
+  aktualny_split:        'Aktualny split',
+  pr_squat:              'PR Przysiad',
+  pr_bench:              'PR Wyciskanie',
+  pr_deadlift:           'PR Martwy ciąg',
+  pr_ohp:                'PR OHP',
+  pr_row:                'PR Wiosłowanie',
+  // Dostępność
+  dni_tydzien:           'Dni / tydzień',
+  czas_sesji:            'Czas sesji',
+  consecutive_days:      'Dni z rzędu',
+  // Sprzęt
+  equipment:             'Dostępny sprzęt',
+  preference_machines:   'Preferencja sprzętu',
+  training_style:        'Styl treningu',
+  cwiczenia_unikane:     'Ćwiczenia unikane',
+  // Ból
+  pain_areas:            'Obszary bólu',
+  pain_level:            'Poziom bólu',
+  kontuzje_przeszle:     'Przeszłe kontuzje',
+  mobilnosc:             'Mobilność',
+  // Regeneracja
+  sen:                   'Sen',
+  sleep_quality:         'Jakość snu',
+  stress_level:          'Poziom stresu',
+  praca:                 'Typ pracy',
+  cardio_typ:            'Cardio',
+  cardio_ile:            'Cardio ile razy',
+  // Żywienie
+  dieta_aktualna:        'Dieta aktualna',
+  alergie:               'Alergie',
+  suplementy:            'Suplementy',
+  // Inne
+  dodatkowe_info:        'Dodatkowe info',
 }
 
 const BLOCKS_ORDER = [
@@ -204,6 +237,12 @@ function AnkietaViewer({ questionnaire }) {
 
   const data = questionnaire.data || {}
 
+  const formatValue = (val) => {
+    if (Array.isArray(val)) return val.join(', ')
+    if (typeof val === 'boolean') return val ? 'Tak' : 'Nie'
+    return val
+  }
+
   return (
     <div>
       <div className="text-[11px] text-[rgba(184,166,119,0.5)] mb-4 tracking-wider">
@@ -223,7 +262,7 @@ function AnkietaViewer({ questionnaire }) {
               {entries.map(({ label, value }) => (
                 <div key={label} className="bg-white/[0.03] rounded-md p-2">
                   <div className="text-[10px] text-[#555] mb-1 uppercase tracking-widest">{label}</div>
-                  <div className="text-[13px] text-[#e8e8e8] leading-snug">{String(value)}</div>
+                  <div className="text-[13px] text-[#e8e8e8] leading-snug">{formatValue(value)}</div>
                 </div>
               ))}
             </div>
