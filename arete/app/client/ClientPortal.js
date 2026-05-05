@@ -332,6 +332,104 @@ function CoachMessageCard({ coachName }) {
   )
 }
 
+function WeightLog() {
+  const [weight, setWeight] = useState('')
+  const [logs, setLogs] = useState([])
+  const [saving, setSaving] = useState(false)
+  const [todayLogged, setTodayLogged] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('weight_logs')
+      .select('weight_kg, logged_at, notes')
+      .order('logged_at', { ascending: false })
+      .limit(14)
+      .then(({ data }) => {
+        if (data) {
+          setLogs(data)
+          const today = new Date().toISOString().split('T')[0]
+          setTodayLogged(data.some(l => l.logged_at === today))
+          if (data[0] && data[0].logged_at === today) {
+            setWeight(String(data[0].weight_kg))
+          }
+        }
+      })
+  }, [])
+
+  const avg7 = logs.slice(0, 7).length > 0
+    ? (logs.slice(0, 7).reduce((sum, l) => sum + parseFloat(l.weight_kg), 0) / logs.slice(0, 7).length).toFixed(1)
+    : null
+
+  const handleSave = async () => {
+    const w = parseFloat(weight)
+    if (!w || w < 30 || w > 300) return
+    setSaving(true)
+    const supabase = createClient()
+    const today = new Date().toISOString().split('T')[0]
+    await supabase.from('weight_logs').upsert({
+      weight_kg: w,
+      logged_at: today,
+    }, { onConflict: 'client_id,logged_at' })
+    setSaving(false)
+    setTodayLogged(true)
+    setLogs(prev => {
+      const filtered = prev.filter(l => l.logged_at !== today)
+      return [{ weight_kg: w, logged_at: today }, ...filtered].slice(0, 14)
+    })
+  }
+
+  return (
+    <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[10px] text-muted uppercase tracking-widest">Dzienna waga</p>
+        {avg7 && (
+          <span className="text-xs text-gold border border-gold/20 px-2 py-0.5 rounded-full">
+            Śr. 7 dni: {avg7} kg
+          </span>
+        )}
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        <input
+          type="number"
+          step="0.1"
+          min="30"
+          max="300"
+          value={weight}
+          onChange={e => setWeight(e.target.value)}
+          placeholder="np. 74.5"
+          className="flex-1 bg-bg-deep border border-[rgba(212,181,112,0.2)] rounded-lg px-3 py-2 text-warm text-sm focus:outline-none focus:border-gold"
+        />
+        <button
+          onClick={handleSave}
+          disabled={saving || !weight}
+          className="px-4 py-2 bg-gold text-bg-deep text-xs font-semibold rounded-lg hover:opacity-90 transition disabled:opacity-40"
+        >
+          {saving ? '…' : todayLogged ? 'Zaktualizuj' : 'Zapisz'}
+        </button>
+      </div>
+
+      {logs.length > 0 && (
+        <div className="space-y-1.5">
+          {logs.slice(0, 7).map(log => (
+            <div key={log.logged_at} className="flex justify-between text-xs">
+              <span className="text-muted">
+                {new Date(log.logged_at).toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'short' })}
+              </span>
+              <span className="text-warm font-medium">{parseFloat(log.weight_kg).toFixed(1)} kg</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {logs.length === 0 && (
+        <p className="text-xs text-muted/50 text-center py-2">Zacznij logować wagę każdego dnia rano.</p>
+      )}
+    </div>
+  )
+}
+
 function ZeusMascot({ state = 'idle' }) {
   const frames = { idle: 0, idle2: 1, happy: 2, sleep: 3, alert: 4, walk1: 5, walk2: 6 }
   const frame = frames[state] ?? 0
@@ -625,6 +723,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             <CharacterCard profile={profile} recentLogs={safeLogs} questionnaire={questionnaire} />
             <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
             <AchievementPreview recentLogs={safeLogs} />
+            <WeightLog />
 
             {/* Coach Message */}
             <CoachMessageCard coachName={coachName} />
