@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
+import { getProgressionDecision } from '@/lib/progressionEngine'
 
 // ===== EPLEY 1RM =====
 const epley = (weight, reps) => {
@@ -293,7 +294,7 @@ function SetRow({ setNum, data, onChange, onRemove, onLogged, prevBest, targetRi
 }
 
 // ===== EXERCISE BLOCK =====
-function ExerciseBlock({ exercise, sets, prevPerf, targetRir, onUpdateSet, onAddSet, onRemoveSet, onRemoveExercise, onSetLogged }) {
+function ExerciseBlock({ exercise, sets, prevPerf, targetRir, repRange, onUpdateSet, onAddSet, onRemoveSet, onRemoveExercise, onSetLogged }) {
   const prevBestSet = prevPerf?.sets?.reduce((best, s) =>
     (s.weight_kg > (best?.weight_kg ?? 0) ? s : best), null)
 
@@ -333,6 +334,32 @@ function ExerciseBlock({ exercise, sets, prevPerf, targetRir, onUpdateSet, onAdd
           )}
         </div>
       )}
+
+      {/* Progression suggestion */}
+      {prevBestSet && sets.some(s => s.logged) && (() => {
+        const [repMin, repMax] = (repRange || '8-12').split('-').map(Number)
+        const loggedSets = sets.filter(s => s.logged).map(s => ({
+          reps: parseInt(s.reps) || 0,
+          rir_actual: parseInt(s.rir) || targetRir,
+          weight: parseFloat(s.weight) || 0,
+          completed: true,
+        }))
+        const suggestion = getProgressionDecision({
+          sets: loggedSets,
+          targetRepMin: repMin || 8,
+          targetRepMax: repMax || 12,
+          targetRir: targetRir ?? 2,
+          loadIncrement: 2.5,
+        })
+        if (!suggestion) return null
+        return (
+          <div className="mt-2 mb-3 px-3 py-2 rounded-lg text-[11px] font-medium flex items-center gap-2"
+            style={{ background: `${suggestion.color}15`, border: `1px solid ${suggestion.color}40`, color: suggestion.color }}>
+            <span>{suggestion.label}</span>
+            <span className="text-[10px] opacity-70 font-normal">— {suggestion.reason}</span>
+          </div>
+        )
+      })()}
 
       {/* Column headers */}
       {sets.length > 0 && (
@@ -729,6 +756,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
             sets={item.sets}
             prevPerf={prevPerformance[item.exercise?.id]}
             targetRir={targetRir}
+            repRange={item.rep_range || item.sets?.[0]?.rep_range || '8-12'}
             onAddSet={() => addSet(exIdx)}
             onUpdateSet={(setIdx, updated) => updateSet(exIdx, setIdx, updated)}
             onRemoveSet={(setIdx) => removeSet(exIdx, setIdx)}
