@@ -52,5 +52,8 @@ export default async function DashboardPage() {
     checkins: (allCheckins || []).filter(c => c.client_id === client.id),
   }))
 
+  console.log('PLANS DEBUG:', JSON.stringify((allPlans || []).slice(0, 2), null, 2))
+  console.log('CLIENTS WITH DATA:', JSON.stringify(clientsWithData.map(c => ({ id: c.id, name: c.full_name, plansCount: c.plans?.length, hasActive: c.plans?.some(p => p.is_active) })), null, 2))
+
   return <DashboardClient profile={profile} clients={clientsWithData} />
 }
