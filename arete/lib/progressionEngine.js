@@ -129,3 +129,104 @@ export function getClientAlerts({ missedCheckins, adherencePct, avgSleepHours, m
   const statusMap = { green: 'On Track', yellow: 'Monitor', orange: 'Needs Attention', red: 'Critical' }
   return { severity, alerts, status: statusMap[severity] }
 }
+
+/**
+ * Henselmans — frequency optimization
+ * Ile razy w tygodniu trenować daną partię
+ */
+export function getOptimalFrequency({ weeklyVolume, recoveryCapacity, experience }) {
+  // Im więcej serii tygodniowo, tym więcej sesji potrzeba
+  // Henselmans: max ~10 serii efektywnych per sesja per mięsień
+  const maxSetsPerSession = experience === 'beginner' ? 6 : experience === 'advanced' ? 12 : 8
+  const minFrequency = Math.ceil(weeklyVolume / maxSetsPerSession)
+
+  // Recovery modifier (Henselmans: większe mięśnie regenerują wolniej)
+  const recoveryMod = recoveryCapacity < 0.85 ? 1 : 2
+
+  return {
+    minFrequency: Math.max(1, minFrequency),
+    recommended: Math.min(minFrequency + recoveryMod, 4),
+    reason: `${weeklyVolume} serii/tydzień → min ${Math.max(1, minFrequency)} sesji dla optymalnego bodźca per sesja.`
+  }
+}
+
+/**
+ * Nuckols — load/volume trade-off
+ * Czy lepiej więcej serii z mniejszym ciężarem czy mniej z większym
+ */
+export function getLoadVolumeBalance({ goal, experience, rir }) {
+  if (goal === 'Wzrost siły') {
+    return {
+      recommendation: 'heavy',
+      repRange: '3-6',
+      sets: experience === 'advanced' ? '4-6' : '3-5',
+      rir: '2-3',
+      reason: 'Siła — wyższe obciążenie, mniej powtórzeń, długie przerwy (3-5 min).'
+    }
+  }
+
+  if (goal === 'Redukcja tkanki tłuszczowej') {
+    return {
+      recommendation: 'moderate',
+      repRange: '8-15',
+      sets: '3-4',
+      rir: '1-2',
+      reason: 'Redukcja — umiarkowane obciążenie, wyższy zakres powtórzeń, krótsze przerwy.'
+    }
+  }
+
+  // Hipertrofia — Nuckols: szeroki zakres działa (6-30 powt.) jeśli blisko upadku
+  return {
+    recommendation: 'varied',
+    repRange: experience === 'beginner' ? '8-15' : '6-20',
+    sets: experience === 'advanced' ? '4-6' : '3-4',
+    rir: rir <= 1 ? '0-2' : '1-3',
+    reason: 'Hipertrofia — szeroki zakres powtórzeń działa. Ważne: blisko upadku (RIR 0-3).'
+  }
+}
+
+/**
+ * Trexler — metabolic adaptation detection
+ * Czy klient wymaga przerwy dietowej (diet break)
+ */
+export function checkMetabolicAdaptation({ weightTrend7Days, weeksInDeficit, adherencePct, energyLevel }) {
+  const alerts = []
+  let needsDietBreak = false
+
+  // Waga stoi mimo dobrego adherence > 2 tygodnie
+  if (Math.abs(weightTrend7Days) < 0.1 && adherencePct >= 85 && weeksInDeficit >= 4) {
+    alerts.push('Waga stoi mimo dobrego adherence — możliwa adaptacja metaboliczna.')
+    needsDietBreak = weeksInDeficit >= 8
+  }
+
+  // Niska energia przez długi czas
+  if (energyLevel <= 2 && weeksInDeficit >= 6) {
+    alerts.push('Niska energia przez 6+ tygodni redukcji — rozważ przerwę dietową (2 tyg. na TDEE).')
+    needsDietBreak = true
+  }
+
+  return {
+    needsDietBreak,
+    alerts,
+    recommendation: needsDietBreak
+      ? 'Diet break 2 tygodnie na TDEE (Trexler 2014) — reset leptyny i metabolizmu.'
+      : weeksInDeficit >= 4 && adherencePct >= 85
+        ? 'Rozważ refeed day 1x/tydzień.'
+        : null
+  }
+}
+
+/**
+ * Schoenfeld — stretch-mediated hypertrophy scoring
+ * Bonus dla ćwiczeń z długą pozycją rozciągnięcia
+ */
+export function getStretchBonus({ stretchPosition, goal, muscleGroup }) {
+  if (!stretchPosition) return 0
+  if (goal === 'Wzrost siły') return 0
+
+  // Schoenfeld 2023: stretch position szczególnie ważna dla:
+  // biceps (incline curl), triceps (overhead), pecs (fly), glutes (RDL/split squat)
+  const highPriorityMuscles = ['biceps', 'triceps', 'chest', 'glutes', 'hamstrings']
+
+  return highPriorityMuscles.includes(muscleGroup) ? 10 : 5
+}
