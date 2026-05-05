@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
@@ -213,6 +213,80 @@ function InviteClientModal({ open, onClose, onSuccess }) {
   )
 }
 
+function ActivityFeed({ clients }) {
+  const events = []
+
+  clients.forEach(client => {
+    const name = client.full_name?.split(' ')?.[0] || 'Klient'
+
+    // Ostatni trening
+    if (client.logs?.[0]) {
+      events.push({
+        id: `log-${client.id}`,
+        type: 'workout',
+        icon: '⚡',
+        color: '#47D18C',
+        text: `${name} ukończył trening`,
+        date: client.logs[0].session_date || client.logs[0].created_at,
+        clientId: client.id,
+      })
+    }
+
+    // Ostatni check-in
+    if (client.checkins?.[0]) {
+      const ci = client.checkins[0]
+      const isPending = !ci.coach_feedback
+      events.push({
+        id: `ci-${client.id}`,
+        type: 'checkin',
+        icon: '◈',
+        color: isPending ? '#EF6B73' : '#D4B570',
+        text: `${name} wysłał check-in${isPending ? ' — czeka na odpowiedź' : ''}`,
+        date: ci.submitted_at || ci.created_at,
+        clientId: client.id,
+        urgent: isPending,
+      })
+    }
+  })
+
+  // Sortuj po dacie malejąco
+  events.sort((a, b) => new Date(b.date) - new Date(a.date))
+  const recent = events.slice(0, 8)
+
+  if (recent.length === 0) return null
+
+  return (
+    <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl p-6 mb-8">
+      <h3 className="font-display text-lg text-gold mb-4">Ostatnia aktywność</h3>
+      <div className="space-y-2">
+        {recent.map(event => (
+          <div
+            key={event.id}
+            onClick={() => {}}
+            className="flex items-center gap-3 py-2 border-b border-[rgba(212,181,112,0.06)] last:border-0"
+          >
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0"
+              style={{ background: `${event.color}15`, border: `1px solid ${event.color}30`, color: event.color }}
+            >
+              {event.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-warm">{event.text}</p>
+            </div>
+            <span className="text-[10px] text-muted shrink-0">
+              {new Date(event.date).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })}
+            </span>
+            {event.urgent && (
+              <span className="text-[10px] text-danger border border-danger/30 px-1.5 py-0.5 rounded-full shrink-0">!</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function DashboardClient({ profile, clients }) {
   const router = useRouter()
   const [inviteOpen, setInviteOpen] = useState(false)
@@ -294,6 +368,8 @@ export default function DashboardClient({ profile, clients }) {
             </div>
           ))}
         </div>
+
+        <ActivityFeed clients={safeClients} />
 
         {/* Needs Attention */}
         {attentionClients.length > 0 && (
