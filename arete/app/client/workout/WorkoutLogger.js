@@ -642,7 +642,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
 
   // ── Start screen ──
   if (!started) {
-    const sessionName = activePlan?.plan_data?.sessions?.find(s => s.label === dayLabel)?.name || dayLabel
+    const sessionName = Object.values(activePlan?.plan_data?.sessions || {}).find(s => s.label === dayLabel)?.name || dayLabel
     return (
       <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] flex items-center justify-center p-6 font-body">
         <div className="w-full max-w-sm text-center">
@@ -706,7 +706,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
 
         {/* Day selector */}
         <div className="flex gap-[0.3rem] items-center">
-          {(activePlan?.plan_data?.sessions?.map(s => s.label).filter(Boolean) || (sessionExercises.length > 0 ? [dayLabel] : ['A'])).map(d => (
+          {(Object.values(activePlan?.plan_data?.sessions || {}).map(s => s.label).filter(Boolean).length > 0 ? Object.values(activePlan?.plan_data?.sessions || {}).map(s => s.label).filter(Boolean) : (sessionExercises.length > 0 ? [dayLabel] : ['A'])).map(d => (
             <button
               key={d}
               onClick={() => setDayLabel(d)}
