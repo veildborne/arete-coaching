@@ -384,21 +384,101 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
 
         {plan && (
           <>
-            {/* Plan summary */}
-            <div className="flex gap-3 flex-wrap mb-6">
-              {[
-                { label: 'Split',    value: plan.split_name },
-                { label: 'Cel',      value: plan.goal },
-                { label: 'Staż',     value: plan.staz },
-                { label: 'Tygodnie', value: `${plan.mesocycle_weeks} (+ deload)` },
-                { label: 'Sprzęt',   value: plan.equipment_used?.join(', ') },
-                plan.cardio_factor < 1 && { label: 'Cardio', value: `−${Math.round((1 - plan.cardio_factor) * 100)}% nogi` },
-              ].filter(Boolean).map(item => (
-                <div key={item.label} className="bg-gold/[0.05] border border-gold/15 rounded-lg py-2 px-3.5">
-                  <div className="text-[9px] text-gold/50 uppercase tracking-widest mb-0.5">{item.label}</div>
-                  <div className="text-[13px] text-[#e8e8e8]">{item.value}</div>
+            {/* COACH SUMMARY — szczegółowe */}
+            <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 mb-4">
+              <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Analiza planu — widok trenera</p>
+
+              {/* Rationale */}
+              {plan.rationale && (
+                <div className="border-l-2 border-gold/30 pl-4 mb-5">
+                  <p className="text-sm text-warm/80 leading-relaxed">{plan.rationale}</p>
                 </div>
-              ))}
+              )}
+
+              {/* Volume per muscle */}
+              <div className="mb-5">
+                <p className="text-[11px] text-muted uppercase tracking-widest mb-3">Objętość tygodniowa per partia</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {(() => {
+                    const muscleLabels = {
+                      chest: 'Klatka', back: 'Plecy', shoulders_lat: 'Barki boczne',
+                      shoulders_rear: 'Barki tylne', biceps: 'Biceps', triceps: 'Triceps',
+                      quads: 'Czwórgłowe', hamstrings: 'Dwugłowe', glutes: 'Pośladki',
+                      calves: 'Łydki', abs: 'Brzuch',
+                    }
+                    const weeklyVolume = {}
+                    Object.values(plan.sessions || {}).forEach(session => {
+                      (session.exercises || []).forEach(ex => {
+                        const m = ex.muscle_group
+                        weeklyVolume[m] = (weeklyVolume[m] || 0) + (ex.sets || 0)
+                      })
+                    })
+                    return Object.entries(weeklyVolume).sort((a,b) => b[1]-a[1]).map(([muscle, sets]) => {
+                      const isPriority = plan.priority_muscles?.includes(muscle)
+                      return (
+                        <div key={muscle} className="bg-bg-deep rounded-lg p-2.5 flex justify-between items-center">
+                          <span className="text-xs text-muted">
+                            {muscleLabels[muscle] || muscle}
+                            {isPriority && <span className="text-gold ml-1">★</span>}
+                          </span>
+                          <span className="text-sm font-semibold text-warm">{sets} serii</span>
+                        </div>
+                      )
+                    })
+                  })()}
+                </div>
+              </div>
+
+              {/* Recovery modifier info */}
+              {plan.recovery_modifier && plan.recovery_modifier !== 1 && (
+                <div className="text-xs text-muted border border-[rgba(212,181,112,0.1)] rounded-lg p-3 mb-4">
+                  {plan.recovery_modifier < 1
+                    ? `⚠ Objętość zredukowana o ${Math.round((1 - plan.recovery_modifier) * 100)}% — niska regeneracja klienta`
+                    : `✓ Objętość zwiększona o ${Math.round((plan.recovery_modifier - 1) * 100)}% — dobra regeneracja`
+                  }
+                </div>
+              )}
+
+              {/* Session summary */}
+              <div>
+                <p className="text-[11px] text-muted uppercase tracking-widest mb-3">Podsumowanie sesji</p>
+                <div className="space-y-2">
+                  {Object.entries(plan.sessions || {}).map(([key, session]) => {
+                    const totalSets = (session.exercises || []).reduce((sum, ex) => sum + (ex.sets || 0), 0)
+                    const estTime = Math.round(totalSets * 3.5 + (session.exercises?.length || 0) * 5)
+                    return (
+                      <div key={key} className="flex items-center justify-between text-xs py-1.5 border-b border-[rgba(212,181,112,0.06)] last:border-0">
+                        <span className="text-warm font-medium">Sesja {key} — {session.name}</span>
+                        <div className="flex gap-4 text-muted">
+                          <span>{session.exercises?.length || 0} ćwiczeń</span>
+                          <span>{totalSets} serii</span>
+                          <span>~{estTime} min</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* CLIENT SUMMARY — podstawowe, do pokazania klientowi */}
+            <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl p-5 mb-4">
+              <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Info dla klienta</p>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {Object.entries(plan.sessions || {}).map(([key, session]) => {
+                  const totalSets = (session.exercises || []).reduce((sum, ex) => sum + (ex.sets || 0), 0)
+                  return (
+                    <div key={key} className="bg-bg-deep rounded-xl p-3 text-center">
+                      <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Sesja {key}</p>
+                      <p className="text-sm font-medium text-warm mb-0.5">{session.name}</p>
+                      <p className="text-xs text-muted">{session.exercises?.length} ćwiczeń · {totalSets} serii</p>
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-muted text-center">
+                Łącznie: {Object.values(plan.sessions || {}).reduce((sum, s) => sum + (s.exercises || []).reduce((s2, ex) => s2 + (ex.sets || 0), 0), 0)} serii / tydzień
+              </p>
             </div>
 
             {/* RIR progression */}
