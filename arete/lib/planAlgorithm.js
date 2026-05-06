@@ -19,6 +19,18 @@ const MEV = {
   abs:            { '0-6 miesięcy': 6,  '6-12 miesięcy': 8,  '1-2 lata': 8,  '2-3 lata': 10, '3-5 lat': 10, '5+ lat': 12 },
 }
 
+const INDIRECT_VOLUME = {
+  // Ćwiczenia na plecy dają ~50% objętości bicepsom
+  biceps:         { back: 0.5 },
+  // Ćwiczenia na klatkę dają ~50% objętości tricepsom i ~30% barkom
+  triceps:        { chest: 0.5 },
+  shoulders_lat:  { chest: 0.3 },
+  // Ćwiczenia na quady dają ~30% pośladkom i odwrotnie
+  glutes:         { quads: 0.3, hamstrings: 0.3 },
+  hamstrings:     { glutes: 0.3 },
+  quads:          { glutes: 0.3 },
+}
+
 // ─── DECISION ENGINE ──────────────────────────────────────────────────────────
 // Zamienia odpowiedzi ankiety w parametry planu
 
@@ -271,7 +283,7 @@ const SPLIT_STRUCTURES = {
 
 // ─── OBJĘTOŚĆ ─────────────────────────────────────────────────────────────────
 
-function getWeeklyVolume(muscle, staz, isPriority, isAvoid, recoveryModifier) {
+function getWeeklyVolume(muscle, staz, isPriority, isAvoid, recoveryModifier, allSessionMuscles = []) {
   const base = MEV[muscle]?.[staz] ?? 8
   let sets = base
 
@@ -281,11 +293,22 @@ function getWeeklyVolume(muscle, staz, isPriority, isAvoid, recoveryModifier) {
   // Recovery modifier
   sets = Math.round(sets * recoveryModifier)
 
+  // Odejmij indirect volume od innych partii (Israetel stimulus overlap)
+  const indirectSources = INDIRECT_VOLUME[muscle] || {}
+  let indirectSets = 0
+  allSessionMuscles.forEach(m => {
+    if (indirectSources[m]) {
+      const sourceWeekly = MEV[m]?.[staz] ?? 8
+      indirectSets += Math.round(sourceWeekly * indirectSources[m])
+    }
+  })
+  sets = Math.max(4, sets - indirectSets)
+
   return Math.max(4, sets)
 }
 
-function getSetsPerSession(muscle, staz, isPriority, isAvoid, sessionsThisWeek, recoveryModifier, cardioFactor) {
-  const weekly = getWeeklyVolume(muscle, staz, isPriority, isAvoid, recoveryModifier)
+function getSetsPerSession(muscle, staz, isPriority, isAvoid, sessionsThisWeek, recoveryModifier, cardioFactor, allMusclesInPlan = []) {
+  const weekly = getWeeklyVolume(muscle, staz, isPriority, isAvoid, recoveryModifier, allMusclesInPlan)
   let perSession = Math.max(2, Math.round(weekly / sessionsThisWeek))
   // Cap per session — max serii na partię per sesję (evidence-based)
   const maxPerSession = ['quads','hamstrings','glutes','back','chest'].includes(muscle) ? 8 : 5
@@ -475,6 +498,7 @@ export function generatePlan(questionnaire, exercises) {
 
   // Zbuduj sesje
   const sessions = {}
+  const allMusclesInPlan = Object.values(splitDef.sessions).flatMap(s => s.muscles)
   Object.entries(splitDef.sessions).forEach(([sessionKey, sessionDef]) => {
     const usedExercises = new Set()
 
@@ -487,7 +511,7 @@ export function generatePlan(questionnaire, exercises) {
         const freq = muscleFrequency[muscle] || 1
         const sets = getSetsPerSession(
           muscle, params.staz, isPriority, isAvoid,
-          freq, params.recoveryModifier, params.cardioFactor
+          freq, params.recoveryModifier, params.cardioFactor, allMusclesInPlan
         )
 
         // Małe partie — zawsze 1 ćwiczenie
