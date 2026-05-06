@@ -287,6 +287,9 @@ function getWeeklyVolume(muscle, staz, isPriority, isAvoid, recoveryModifier) {
 function getSetsPerSession(muscle, staz, isPriority, isAvoid, sessionsThisWeek, recoveryModifier, cardioFactor) {
   const weekly = getWeeklyVolume(muscle, staz, isPriority, isAvoid, recoveryModifier)
   let perSession = Math.max(2, Math.round(weekly / sessionsThisWeek))
+  // Cap per session — max serii na partię per sesję (evidence-based)
+  const maxPerSession = ['quads','hamstrings','glutes','back','chest'].includes(muscle) ? 8 : 5
+  perSession = Math.min(perSession, maxPerSession)
 
   // Cardio interference dla nóg
   if (['quads','hamstrings','glutes','calves'].includes(muscle)) {
