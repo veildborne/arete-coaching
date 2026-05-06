@@ -728,6 +728,18 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             {/* Coach Message */}
             <CoachMessageCard coachName={coachName} />
 
+            {/* New questionnaire button */}
+            <button
+              onClick={() => router.push('/client/questionnaire?new=1')}
+              className="w-full flex items-center justify-between bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4 hover:border-gold transition group"
+            >
+              <div className="text-left">
+                <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
+                <p className="text-sm font-medium">Wyślij nową ankietę</p>
+              </div>
+              <span className="text-muted group-hover:text-gold transition">→</span>
+            </button>
+
             {/* Plan link */}
             {activePlan && (
               <button
