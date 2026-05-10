@@ -19,10 +19,10 @@ const ARCHETYPES = [
 ]
 
 const ACHIEVEMENTS = [
-  { id: 'protos',    label: 'Protos',   greek: 'Πρῶτος',  desc: 'Pierwszy trening',       icon: '⚡', xp: 50  },
-  { id: 'askesis',   label: 'Askesis',  greek: 'Ἄσκησις', desc: '4 tygodnie bez przerwy', icon: '🔥', xp: 200 },
-  { id: 'kleos',     label: 'Kleos',    greek: 'Κλέος',   desc: 'Nowy rekord osobisty',   icon: '🏆', xp: 150 },
-  { id: 'arete_fin', label: 'Areté',    greek: 'Ἀρετή',   desc: 'Ukończony mezocykl',     icon: '⚜️', xp: 300 },
+  { id: 'protos',    label: 'Pierwszy krok',   desc: 'Ukończ pierwszy trening',    icon: '⚡', xp: 50  },
+  { id: 'askesis',   label: 'Żelazna wola',    desc: '4 tygodnie bez przerwy',     icon: '🔥', xp: 200 },
+  { id: 'kleos',     label: 'Nowy rekord',     desc: 'Pobij własny rekord siłowy', icon: '🏆', xp: 150 },
+  { id: 'arete_fin', label: 'Doskonałość',     desc: 'Ukończony mezocykl',         icon: '⚜️', xp: 300 },
 ]
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -152,29 +152,26 @@ function StatGrid({ recentLogs, questionnaire }) {
   const consistency = Math.min(100, Math.round((recentCount / 12) * 100))
 
   const allSets = logs.flatMap(l => l.exercises ?? []).flatMap(e => e.sets ?? [])
-  const withRIR = allSets.filter(s => s.rir_actual != null).length
-  const technique = allSets.length > 0 ? Math.min(100, Math.round((withRIR / allSets.length) * 100)) : 0
-
-  const totalVolume = allSets.reduce((sum, s) => sum + (s.volume_load ?? 0), 0)
-  const hypertrophy = Math.min(100, Math.round(totalVolume / 500))
+  const totalVolume = allSets.reduce((sum, s) => sum + ((s.weight_kg || 0) * (s.reps || 0)), 0)
+  const maxLift = allSets.reduce((max, s) => Math.max(max, s.estimated_1rm ?? 0), 0)
+  const totalSets = allSets.length
+  const avgSleep = questionnaire?.data?.sleep_quality ? parseFloat(questionnaire.data.sleep_quality) * 2 : null
 
   const withDuration = logs.filter(l => l.duration_minutes > 0)
   const avgDuration = withDuration.length > 0
     ? withDuration.reduce((sum, l) => sum + l.duration_minutes, 0) / withDuration.length
     : 0
-  const conditioning = Math.min(100, Math.round((avgDuration / 90) * 100))
 
-  const allE1rms = logs.flatMap(l => l.exercises ?? []).flatMap(e => (e.sets ?? []).map(s => s.estimated_1rm ?? 0)).filter(Boolean)
-  const strength = allE1rms.length > 0 ? Math.min(100, Math.round(Math.max(...allE1rms) / 2)) : 0
-
-  const data = [
-    { stat: 'Siła',        value: strength },
-    { stat: 'Technika',    value: technique },
-    { stat: 'Regularność', value: consistency },
-    { stat: 'Regeneracja', value: 50 },
-    { stat: 'Hipertrofia', value: hypertrophy },
-    { stat: 'Kondycja',    value: conditioning },
+  const stats = [
+    { label: 'SIŁA',          value: maxLift > 0 ? `${maxLift} kg` : '—',         sub: 'Najlepsze 1RM',         bar: Math.min(maxLift / 200, 1), color: accent.primary },
+    { label: 'OBJĘTOŚĆ',      value: totalVolume > 0 ? `${Math.round(totalVolume/1000)}k kg` : '—', sub: 'Łączna objętość', bar: Math.min(totalVolume / 500000, 1), color: accent.primary },
+    { label: 'KONSEKWENCJA',  value: totalSets > 0 ? `${totalSets} serii` : '—',  sub: 'Wszystkich serii',      bar: Math.min(totalSets / 500, 1), color: '#47D18C' },
+    { label: 'REGENERACJA',   value: avgSleep ? `${avgSleep.toFixed(1)}/10` : '—', sub: 'Jakość snu',           bar: avgSleep ? avgSleep / 10 : 0, color: '#8F9AAF' },
+    { label: 'TRENINGI',      value: recentLogs.length,                            sub: 'Łącznie sesji',         bar: Math.min(recentLogs.length / 50, 1), color: accent.secondary },
+    { label: 'AVG CZAS',      value: avgDuration > 0 ? `${Math.round(avgDuration)} min` : '—', sub: 'Czas sesji', bar: Math.min(avgDuration / 120, 1), color: accent.secondary },
   ]
+
+  const data = stats.map(s => ({ stat: s.label, value: Math.round(s.bar * 100) }))
 
   return (
     <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
@@ -507,7 +504,6 @@ function ZeusWidget({ recentLogs, checkins }) {
         zIndex: 9999,
         cursor: 'pointer',
         filter: 'drop-shadow(0 4px 8px rgba(212,181,112,0.3))',
-        border: '2px solid red',
       }}
       onClick={() => {
         setFrame('happy')
@@ -728,17 +724,19 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             {/* Coach Message */}
             <CoachMessageCard coachName={coachName} />
 
-            {/* New questionnaire button */}
-            <button
-              onClick={() => router.push('/client/questionnaire?new=1')}
-              className="w-full flex items-center justify-between bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4 hover:border-gold transition group"
-            >
-              <div className="text-left">
-                <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
-                <p className="text-sm font-medium">Wyślij nową ankietę</p>
-              </div>
-              <span className="text-muted group-hover:text-gold transition">→</span>
-            </button>
+            {/* New questionnaire button — tylko jeśli już wypełniona */}
+            {questionnaire && (
+              <button
+                onClick={() => router.push('/client/questionnaire?new=1')}
+                className="w-full flex items-center justify-between bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4 hover:border-gold transition group"
+              >
+                <div className="text-left">
+                  <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
+                  <p className="text-sm font-medium">Wyślij nową ankietę</p>
+                </div>
+                <span className="text-muted group-hover:text-gold transition">→</span>
+              </button>
+            )}
 
             {/* Plan link */}
             {activePlan && (
