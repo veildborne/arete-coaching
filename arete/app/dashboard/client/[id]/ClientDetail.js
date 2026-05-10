@@ -452,6 +452,8 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
   const router = useRouter()
   const [tab, setTab] = useState('plans')
   const [checkins, setCheckins] = useState(initialCheckins)
+  const [managing, setManaging] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const tier     = TIER_COLORS[client.package_tier?.toLowerCase()] || {}
   const status   = STATUS_COLORS[client.status] || STATUS_COLORS.lead
@@ -473,6 +475,23 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
     setCheckins(prev => prev.map(ci =>
       ci.id === checkinId ? { ...ci, coach_feedback: feedbackText } : ci
     ))
+  }
+
+  const updateClient = async (field, value) => {
+    setSaving(true)
+    const { createClient } = await import('@/lib/supabase-browser')
+    const supabase = createClient()
+    await supabase.from('profiles').update({ [field]: value }).eq('id', client.id)
+    setSaving(false)
+    window.location.reload()
+  }
+
+  const deleteClient = async () => {
+    if (!confirm(`Czy na pewno chcesz usunąć klienta ${client.full_name}? Tej operacji nie można cofnąć.`)) return
+    const { createClient } = await import('@/lib/supabase-browser')
+    const supabase = createClient()
+    await supabase.from('profiles').delete().eq('id', client.id)
+    window.location.href = '/dashboard'
   }
 
   return (
@@ -564,6 +583,42 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
             >
               📋 Wyślij ankietę
             </button>
+            <div className="relative">
+              <button
+                onClick={() => setManaging(m => !m)}
+                className="text-xs border border-[rgba(212,181,112,0.2)] text-muted px-3 py-1 rounded-full hover:text-warm transition"
+              >
+                ⚙ Zarządzaj
+              </button>
+              {managing && (
+                <div className="absolute right-0 top-8 z-50 bg-surface border border-[rgba(212,181,112,0.25)] rounded-xl p-3 w-56 shadow-xl space-y-2">
+                  <p className="text-[10px] text-muted uppercase tracking-widest mb-2">Pakiet</p>
+                  {['paideia','askesis','arete','stacjonarny'].map(tier => (
+                    <button key={tier} onClick={() => { updateClient('package_tier', tier); setManaging(false) }}
+                      className={`w-full text-left text-xs px-3 py-2 rounded-lg transition ${client.package_tier === tier ? 'bg-gold/15 text-gold' : 'text-muted hover:text-warm hover:bg-white/5'}`}>
+                      {tier === 'paideia' ? 'Paideia' : tier === 'askesis' ? 'Askesis' : tier === 'arete' ? 'Areté' : 'Stacjonarny'}
+                      {client.package_tier === tier && ' ✓'}
+                    </button>
+                  ))}
+                  <div className="border-t border-[rgba(212,181,112,0.1)] pt-2 mt-2">
+                    <p className="text-[10px] text-muted uppercase tracking-widest mb-2">Status</p>
+                    {['active','paused','lead'].map(status => (
+                      <button key={status} onClick={() => { updateClient('status', status); setManaging(false) }}
+                        className={`w-full text-left text-xs px-3 py-2 rounded-lg transition ${client.status === status ? 'bg-gold/15 text-gold' : 'text-muted hover:text-warm hover:bg-white/5'}`}>
+                        {status === 'active' ? '🟢 Aktywny' : status === 'paused' ? '🟡 Pauza' : '🔵 Lead'}
+                        {client.status === status && ' ✓'}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="border-t border-[rgba(239,107,115,0.2)] pt-2 mt-2">
+                    <button onClick={() => { setManaging(false); deleteClient() }}
+                      className="w-full text-left text-xs px-3 py-2 rounded-lg text-danger hover:bg-danger/10 transition">
+                      🗑 Usuń klienta
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
