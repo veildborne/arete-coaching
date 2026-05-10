@@ -404,8 +404,21 @@ function Timer({ startTime }) {
 }
 
 // ===== SESSION SUMMARY =====
-function SessionSummary({ stats, onContinue }) {
+function SessionSummary({ stats, onContinue, clientId, planId }) {
   const xp = Math.min(200, 60 + stats.totalSets * 8 + stats.exercises * 10)
+  const [feedback, setFeedback] = useState({ pump: 3, fatigue: 3, performance: 3 })
+  const [feedbackSaved, setFeedbackSaved] = useState(false)
+  const [savingFeedback, setSavingFeedback] = useState(false)
+
+  const saveFeedback = async () => {
+    setSavingFeedback(true)
+    const supabase = createClient()
+    await supabase.from('training_logs').update({
+      post_workout_feedback: feedback
+    }).eq('client_id', clientId).order('created_at', { ascending: false }).limit(1)
+    setFeedbackSaved(true)
+    setSavingFeedback(false)
+  }
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] flex items-center justify-center font-body p-8">
@@ -460,6 +473,39 @@ function SessionSummary({ stats, onContinue }) {
                 </span>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Post-workout feedback */}
+        {!feedbackSaved ? (
+          <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(184,166,119,0.12)] rounded-[10px] p-4 mb-4 text-left">
+            <p className="text-[10px] text-[rgba(184,166,119,0.5)] uppercase tracking-widest mb-3">Feedback po sesji</p>
+            {[
+              { key: 'pump', label: 'Pompa mięśniowa', low: 'Brak', high: 'Świetna' },
+              { key: 'fatigue', label: 'Zmęczenie', low: 'Lekkie', high: 'Totalne' },
+              { key: 'performance', label: 'Jakość treningu', low: 'Słaba', high: 'Świetna' },
+            ].map(({ key, label, low, high }) => (
+              <div key={key} className="mb-3">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-[rgba(160,160,160,0.6)]">{label}</span>
+                  <span className="text-gold font-bold">{feedback[key]}/5</span>
+                </div>
+                <input type="range" min={1} max={5} value={feedback[key]}
+                  onChange={e => setFeedback(prev => ({ ...prev, [key]: parseInt(e.target.value) }))}
+                  className="w-full accent-[#b8a677] cursor-pointer" />
+                <div className="flex justify-between text-[10px] text-[rgba(160,160,160,0.3)] mt-0.5">
+                  <span>{low}</span><span>{high}</span>
+                </div>
+              </div>
+            ))}
+            <button onClick={saveFeedback} disabled={savingFeedback}
+              className="w-full mt-2 py-2 bg-[rgba(184,166,119,0.15)] border border-[rgba(184,166,119,0.3)] rounded-lg text-gold text-xs font-medium cursor-pointer hover:bg-[rgba(184,166,119,0.25)] transition disabled:opacity-50">
+              {savingFeedback ? 'Zapisywanie...' : 'Zapisz feedback'}
+            </button>
+          </div>
+        ) : (
+          <div className="bg-[rgba(71,209,140,0.08)] border border-[rgba(71,209,140,0.2)] rounded-[10px] p-3 mb-4 text-center">
+            <p className="text-[#47D18C] text-xs">✓ Feedback zapisany — dziękuję!</p>
           </div>
         )}
 
@@ -668,7 +714,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
 
   // ── Summary screen ──
   if (sessionStats) {
-    return <SessionSummary stats={sessionStats} onContinue={() => router.push('/client')} />
+    return <SessionSummary stats={sessionStats} onContinue={() => router.push('/client')} clientId={clientId} planId={activePlan?.id} />
   }
 
   return (
