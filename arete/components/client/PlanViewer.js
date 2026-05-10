@@ -384,6 +384,7 @@ export default function PlanViewer() {
           .from('training_plans')
           .select('*')
           .eq('client_id', user.id)
+          .eq('is_active', true)
           .order('created_at', { ascending: false })
           .limit(1)
           .single()
@@ -476,12 +477,32 @@ export default function PlanViewer() {
 
   // ── parse plan_data ────────────────────────────────────────────
   const planData = plan.plan_data || {}
-  const days     = planData.days || []
-  const weeks    = planData.weeks || 6
+  const weeks    = planData.mesocycle_weeks || planData.weeks || 6
   const isDeload = activeWeek === weeks
 
-  const currentDay = days[activeDay]
-  const exercises  = currentDay?.exercises || []
+  // sessions to object {A: {...}, B: {...}} lub array
+  const rawSessions = planData.sessions || {}
+  const days = Array.isArray(rawSessions)
+    ? rawSessions
+    : Object.entries(rawSessions).map(([key, val]) => ({
+        key,
+        name: val.name || val.label || `Dzień ${key}`,
+        exercises: Array.isArray(val.exercises) ? val.exercises : [],
+        muscles: val.muscles || [],
+      }))
+
+  const currentDay = days[activeDay] || days[0]
+
+  // exercises mogą być plain lub mieć tygodniową progresję
+  const rawExercises = currentDay?.exercises || []
+  const exercises = rawExercises.map(ex => {
+    // jeśli ćwiczenie ma weeks[] — wyciągnij dane dla aktywnego tygodnia
+    if (ex.weeks && Array.isArray(ex.weeks)) {
+      const weekData = ex.weeks[activeWeek - 1] || ex.weeks[0] || {}
+      return { ...ex, ...weekData }
+    }
+    return ex
+  })
 
   // ── render ─────────────────────────────────────────────────────
   return (
