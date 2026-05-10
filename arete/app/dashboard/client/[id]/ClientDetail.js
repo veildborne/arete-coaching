@@ -549,6 +549,21 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                 <span>Dołączył: {formatDate(client.created_at)}</span>
               </div>
             </div>
+            <button
+              onClick={async () => {
+                const res = await fetch('/api/send-questionnaire', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ client_id: client.id }),
+                })
+                const json = await res.json()
+                if (json.ok) alert('Ankieta wysłana!')
+                else alert('Błąd: ' + json.error)
+              }}
+              className="text-xs border border-[rgba(212,181,112,0.3)] text-gold px-3 py-1 rounded-full hover:bg-gold/10 transition"
+            >
+              📋 Wyślij ankietę
+            </button>
           </div>
         </div>
 
