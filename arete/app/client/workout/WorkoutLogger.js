@@ -546,11 +546,15 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
       .map(ex => {
         const found = exercises.find(e => e.id === ex.exercise_id || e.name === ex.name)
         if (!found) return null
-        const setsCount = ex.sets ?? 3
+        const currentWeek = activePlan?.plan_data?.current_week ?? 1
+        const weekData = Array.isArray(ex.weeks) ? ex.weeks[currentWeek - 1] : null
+        const setsCount = weekData?.sets ?? (typeof ex.sets === 'number' ? ex.sets : 3)
+        const repRange = weekData?.rep_range ?? weekData?.reps ?? ex.rep_range ?? ex.reps ?? '8-12'
+        const weekRir = weekData?.rir ?? activePlan.plan_data.rir_start ?? 2
         return {
           exercise: found,
-          sets: Array.from({ length: setsCount }, () => ({
-            weight: '', reps: ex.rep_range ?? '', rir: String(activePlan.plan_data.rir_start ?? 2), logged: false,
+          sets: Array.from({ length: Math.min(setsCount, 6) }, () => ({
+            weight: '', reps: String(repRange), rir: String(weekRir), logged: false,
           })),
         }
       })
