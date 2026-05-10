@@ -223,8 +223,12 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
       ? await supabase.from('questionnaires').update({ data: form, submitted_at: new Date().toISOString() }).eq('id', existing.id)
       : await supabase.from('questionnaires').insert({ client_id: clientId, data: form })
     setSaving(false)
-    if (!error) setDone(true)
-    else alert('Błąd zapisu: ' + error.message)
+    if (!error) {
+      await supabase.from('profiles').update({ questionnaire_requested: false }).eq('id', clientId)
+      setDone(true)
+    } else {
+      alert('Błąd zapisu: ' + error.message)
+    }
   }
 
   if (done) return (

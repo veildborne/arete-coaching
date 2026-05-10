@@ -72,5 +72,10 @@ export async function POST(request) {
     return NextResponse.json({ error: emailError?.message || 'Błąd wysyłania.' }, { status: 500 })
   }
 
+  await admin
+    .from('profiles')
+    .update({ questionnaire_requested: true })
+    .eq('id', client_id)
+
   return NextResponse.json({ ok: true })
 }
