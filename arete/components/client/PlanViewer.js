@@ -126,9 +126,16 @@ function DayTabs({ days, active, onChange }) {
 function ExerciseCard({ exercise, weekData, weekIdx }) {
   const [expanded, setExpanded] = useState(false)
 
-  if (!weekData) return null
-
-  const { sets, reps, rir, weight_suggestion, notes } = weekData
+  // Fallback do flat exercise data jeśli weekData nie istnieje
+  const effectiveData = weekData || {
+    sets: exercise.sets,
+    reps: exercise.rep_range || exercise.reps,
+    rir: exercise.rir ?? 2,
+    weight_suggestion: exercise.weight_suggestion,
+    notes: exercise.notes,
+  }
+  if (!effectiveData.sets) return null
+  const { sets, reps, rir, weight_suggestion, notes } = effectiveData
 
   const rirColor = RIR_COLOR(rir)
 
