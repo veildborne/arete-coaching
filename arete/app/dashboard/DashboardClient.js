@@ -218,13 +218,13 @@ export default function DashboardClient({ profile, clients }) {
     <div className="min-h-screen text-warm font-body relative">
 
       {/* TOP NAV */}
-      <nav className="sticky top-0 z-50 bg-black/30 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-3 h-14 flex items-center gap-2">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="font-display text-lg text-gold tracking-widest">ARETÉ</span>
-          <span className="text-[8px] px-1 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest hidden sm:block">α 0.1</span>
-        </div>
+      <nav style={{ position:'sticky', top:0, zIndex:50, background:'rgba(0,0,0,0.3)', backdropFilter:'blur(20px)', borderBottom:'1px solid rgba(212,181,112,0.12)', height:'56px', display:'flex', alignItems:'center', padding:'0 12px', gap:'8px' }}>
 
-        <div className="flex-1 flex items-center justify-center gap-0.5 overflow-x-auto scrollbar-hide min-w-0">
+        {/* Logo */}
+        <span style={{ fontFamily:'Cormorant Garamond, serif', fontSize:'1.2rem', color:'#D4B570', letterSpacing:'0.2em', flexShrink:0 }}>ARETÉ</span>
+
+        {/* Tabs */}
+        <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:'2px', overflow:'hidden' }}>
           {[
             { id: 'overview',  label: 'Przegląd' },
             { id: 'clients',   label: 'Klienci' },
@@ -232,25 +232,31 @@ export default function DashboardClient({ profile, clients }) {
             { id: 'checkins',  label: 'Raporty', badge: stats.pendingCheckins },
           ].map(({ id, label, badge }) => (
             <button key={id} onClick={() => setActiveNav(id)}
-              className={`relative px-2.5 py-1.5 rounded-lg text-[11px] sm:text-sm transition shrink-0 ${activeNav === id ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
+              style={{
+                position:'relative', padding:'6px 10px', borderRadius:'8px', fontSize:'12px',
+                border:'none', cursor:'pointer', fontFamily:'Outfit, sans-serif', whiteSpace:'nowrap',
+                background: activeNav === id ? 'rgba(212,181,112,0.1)' : 'transparent',
+                color: activeNav === id ? '#D4B570' : '#8F9AAF',
+              }}>
               {label}
               {badge > 0 && (
-                <span className="absolute -top-1 -right-1 text-[8px] bg-danger text-white rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">{badge}</span>
+                <span style={{ position:'absolute', top:'-4px', right:'-4px', fontSize:'9px', background:'#EF6B73', color:'white', borderRadius:'50%', width:'14px', height:'14px', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'bold' }}>{badge}</span>
               )}
             </button>
           ))}
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        {/* Actions */}
+        <div style={{ display:'flex', alignItems:'center', gap:'6px', flexShrink:0 }}>
           <button onClick={() => setInviteOpen(true)}
-            className="bg-gold text-bg-deep px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:opacity-90 transition whitespace-nowrap">
+            style={{ background:'#D4B570', color:'#0f0f0f', border:'none', borderRadius:'8px', padding:'6px 10px', fontSize:'12px', fontWeight:'600', cursor:'pointer', whiteSpace:'nowrap' }}>
             + Dodaj
           </button>
-          <div className="w-7 h-7 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center font-display text-gold text-xs font-bold shrink-0">
+          <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:'rgba(212,181,112,0.15)', border:'1px solid rgba(212,181,112,0.3)', display:'flex', alignItems:'center', justifyContent:'center', color:'#D4B570', fontSize:'11px', fontWeight:'bold', fontFamily:'Cormorant Garamond, serif' }}>
             {getInitials(profile?.full_name, profile?.email)}
           </div>
           <button onClick={async () => { const s = createClient(); await s.auth.signOut(); window.location.href = '/' }}
-            className="text-[10px] text-muted hover:text-danger transition hidden sm:block">↩</button>
+            style={{ background:'none', border:'none', color:'#8F9AAF', fontSize:'14px', cursor:'pointer', padding:'4px' }}>↩</button>
         </div>
       </nav>
 
@@ -265,11 +271,11 @@ export default function DashboardClient({ profile, clients }) {
         {/* STATS */}
         <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 mb-6">
           {[
-            { label: 'Klienci',        value: stats.active,          icon: '◎', color: '#D4B570', id: 'clients' },
-            { label: 'Uwaga',          value: stats.needsAttention,  icon: '!', color: stats.needsAttention > 0 ? '#EF6B73' : '#47D18C', id: 'attention' },
-            { label: 'Bez planu',      value: stats.withoutPlan,     icon: '○', color: stats.withoutPlan > 0 ? '#E8A020' : '#47D18C', id: null },
-            { label: 'Treningi',       value: stats.totalLogs,       icon: '↑', color: '#D4B570', id: null },
-            { label: 'Raporty',        value: stats.pendingCheckins, icon: '◈', color: stats.pendingCheckins > 0 ? '#EF6B73' : '#47D18C', id: 'checkins' },
+            { label: 'Klienci',   value: stats.active,          icon: '◎', color: '#D4B570', id: 'clients' },
+            { label: 'Uwaga',     value: stats.needsAttention,  icon: '▲', color: stats.needsAttention > 0 ? '#EF6B73' : '#47D18C', id: 'attention' },
+            { label: 'Bez planu', value: stats.withoutPlan,     icon: '○', color: stats.withoutPlan > 0 ? '#E8A020' : '#47D18C', id: null },
+            { label: 'Treningi',  value: stats.totalLogs,       icon: '↑', color: '#D4B570', id: null },
+            { label: 'Raporty',   value: stats.pendingCheckins, icon: '◈', color: stats.pendingCheckins > 0 ? '#EF6B73' : '#47D18C', id: 'checkins' },
           ].map(({ label, value, icon, color, id }) => (
             <div key={label}
               onClick={() => id && setActiveNav(id)}
