@@ -55,7 +55,7 @@ function ClientCard({ client, onProfile, onNewPlan }) {
 
   return (
     <div onClick={onProfile}
-      className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl p-5 hover:border-[rgba(212,181,112,0.35)] transition cursor-pointer group">
+      className="bg-[rgba(15,20,35,0.85)] border border-[rgba(212,181,112,0.25)] rounded-2xl p-5 hover:border-[rgba(212,181,112,0.35)] transition cursor-pointer group">
       <div className="flex items-start gap-3 mb-4">
         <div className="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold text-base shrink-0"
           style={{ background: 'rgba(212,181,112,0.1)', border: `1.5px solid rgba(212,181,112,0.3)`, color: '#D4B570' }}>
@@ -138,7 +138,7 @@ function InviteClientModal({ open, onClose, onSuccess }) {
   }
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={handleClose}>
-      <div className="w-full max-w-md bg-surface border border-[rgba(212,181,112,0.3)] rounded-2xl p-6" onClick={e => e.stopPropagation()}>
+      <div className="w-full max-w-md bg-[rgba(15,20,35,0.85)] border border-[rgba(212,181,112,0.3)] rounded-2xl p-6" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-display text-xl text-gold">Zaproś klienta</h3>
           <button onClick={handleClose} className="text-muted hover:text-warm text-2xl leading-none">×</button>
@@ -248,7 +248,7 @@ export default function DashboardClient({ profile, clients }) {
             {label:'Treningi',value:stats.totalLogs,color:'#D4B570',id:null},
             {label:'Raporty',value:stats.pendingCheckins,color:stats.pendingCheckins>0?'#EF6B73':'#47D18C',id:'checkins'},
           ].map(({label,value,color,id})=>(
-            <div key={label} onClick={()=>id&&setActiveNav(id)} style={{background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,181,112,0.12)',borderRadius:'12px',padding:'10px 12px',cursor:id?'pointer':'default'}}>
+            <div key={label} onClick={()=>id&&setActiveNav(id)} style={{background:'rgba(15,20,35,0.85)',border:'1px solid rgba(212,181,112,0.25)',borderRadius:'12px',padding:'10px 12px',cursor:id?'pointer':'default'}}>
               <p style={{fontSize:'9px',color:'#8F9AAF',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:'4px'}}>{label}</p>
               <p style={{fontSize:'1.4rem',fontFamily:'Cormorant Garamond,serif',color,margin:0}}>{value}</p>
             </div>
@@ -257,7 +257,7 @@ export default function DashboardClient({ profile, clients }) {
 
         {/* NEEDS ATTENTION */}
         {(activeNav === 'overview' || activeNav === 'attention') && attentionClients.length > 0 && (
-          <div className="bg-black/30 backdrop-blur-sm border border-[rgba(239,107,115,0.2)] rounded-2xl p-5 mb-6">
+          <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.25)] rounded-2xl p-5 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-danger">⚠</span>
               <h3 className="font-display text-lg text-danger">Wymagają reakcji</h3>
@@ -290,7 +290,7 @@ export default function DashboardClient({ profile, clients }) {
 
         {/* PENDING CHECKINS */}
         {activeNav === 'checkins' && (
-          <div className="bg-black/30 backdrop-blur-sm border border-[rgba(239,107,115,0.15)] rounded-2xl p-5 mb-6">
+          <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.25)] rounded-2xl p-5 mb-6">
             <p className="text-[10px] text-danger uppercase tracking-widest mb-4">Oczekujące raporty ({stats.pendingCheckins})</p>
             {stats.pendingCheckins === 0 ? (
               <p className="text-muted text-sm text-center py-4">Wszystkie raporty obsłużone ✓</p>
@@ -326,7 +326,7 @@ export default function DashboardClient({ profile, clients }) {
                 </span>
               </div>
               {safeClients.length === 0 ? (
-                <div className="bg-black/30 border border-dashed border-[rgba(212,181,112,0.2)] rounded-2xl p-12 text-center">
+                <div className="bg-[rgba(15,20,35,0.85)] border border-dashed border-[rgba(212,181,112,0.25)] rounded-2xl p-12 text-center">
                   <p className="text-4xl mb-4 opacity-20">◎</p>
                   <p className="text-warm font-medium mb-2">Brak klientów</p>
                   <p className="text-muted text-sm mb-6">Dodaj pierwszego klienta aby zacząć.</p>
@@ -350,7 +350,7 @@ export default function DashboardClient({ profile, clients }) {
               <div className="space-y-4">
                 {/* Activity Feed */}
                 {recentEvents.length > 0 && (
-                  <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+                  <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.25)] rounded-2xl p-5">
                     <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Ostatnia aktywność</p>
                     <div className="space-y-2">
                       {recentEvents.map(event => (
@@ -377,7 +377,7 @@ export default function DashboardClient({ profile, clients }) {
                   if (withCompliance.length === 0) return null
                   const avg = Math.round(withCompliance.reduce((s, { pct }) => s + pct, 0) / withCompliance.length)
                   return (
-                    <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+                    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.25)] rounded-2xl p-5">
                       <div className="flex items-center justify-between mb-3">
                         <p className="text-[10px] text-muted uppercase tracking-widest">Realizacja — 4 tygodnie</p>
                         <span className="text-sm font-semibold" style={{ color: avg >= 80 ? '#47D18C' : avg >= 60 ? '#E8A020' : '#EF6B73' }}>śr. {avg}%</span>

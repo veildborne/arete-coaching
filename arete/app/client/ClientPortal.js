@@ -92,7 +92,7 @@ function CharacterCard({ profile, recentLogs, questionnaire, totalXP = 0 }) {
     .split(' ').map(w => w[0] ?? '').join('').slice(0, 2).toUpperCase()
 
   return (
-    <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 relative overflow-hidden">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 relative overflow-hidden">
       {/* Meander watermark */}
       <div className="absolute top-0 right-0 w-20 h-20 opacity-[0.05] pointer-events-none" aria-hidden>
         <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -131,7 +131,7 @@ function CharacterCard({ profile, recentLogs, questionnaire, totalXP = 0 }) {
         <span>{xp} XP</span>
         <span>{nextXP - xp} XP do następnego</span>
       </div>
-      <div className="h-2 bg-black/30 backdrop-blur-sm-2 rounded-full overflow-hidden">
+      <div className="h-2 bg-[rgba(15,20,35,0.85)] backdrop-blur-sm-2 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{
@@ -178,7 +178,7 @@ function StatGrid({ recentLogs, questionnaire }) {
   const data = stats.map(s => ({ stat: s.label, value: Math.round(s.bar * 100) }))
 
   return (
-    <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-2">Statystyki postaci</p>
       {logs.length === 0 ? (
         <p className="text-[10px] text-muted/40 mt-3 text-center py-8">Dane rosną z treningami i check-inami</p>
@@ -210,7 +210,7 @@ function CampaignProgress({ activePlan, planInfo }) {
   const pct = Math.round(((currentWeek - 1) / maxWeeks) * 100)
 
   return (
-    <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
       <div className="flex items-start justify-between mb-4">
         <div>
           <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Kampania</p>
@@ -222,7 +222,7 @@ function CampaignProgress({ activePlan, planInfo }) {
       </div>
 
       {/* Overall bar */}
-      <div className="h-1.5 bg-black/30 backdrop-blur-sm-2 rounded-full overflow-hidden mb-1">
+      <div className="h-1.5 bg-[rgba(15,20,35,0.85)] backdrop-blur-sm-2 rounded-full overflow-hidden mb-1">
         <div
           className="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-gold/70 to-gold"
           style={{ width: `${pct}%` }}
@@ -269,7 +269,7 @@ function AchievementPreview({ recentLogs, clientAchievements = [] }) {
   }
 
   return (
-    <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Odznaczenia</p>
       <div className="grid grid-cols-4 gap-3">
         {ACHIEVEMENTS.map(ach => {
@@ -321,7 +321,7 @@ function CoachMessageCard({ coachName }) {
   const initials = coachName ? coachName.trim().split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() : 'AP'
   const firstName = coachName?.split(' ')[0] || 'Trener'
   return (
-    <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Wiadomość od trenera</p>
       <div className="flex gap-3">
         <div className="w-9 h-9 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold text-xs shrink-0">{initials}</div>
@@ -337,7 +337,7 @@ function CoachMessageCard({ coachName }) {
 function CoachNoteCard({ note }) {
   if (!note) return null
   return (
-    <div className="bg-black/30 backdrop-blur-sm border border-gold/20 rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-gold/20 rounded-2xl p-5">
       <p className="text-[10px] text-gold uppercase tracking-widest mb-3">Notatka od trenera</p>
       <p className="text-sm text-warm/80 leading-relaxed">{note}</p>
     </div>
@@ -392,7 +392,7 @@ function WeightLog() {
   }
 
   return (
-    <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
         <p className="text-[10px] text-muted uppercase tracking-widest">Dzienna waga</p>
         {avg7 && (
@@ -665,7 +665,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
 
             {/* Ostatnia aktywność */}
-            <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+            <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
               <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Ostatnia aktywność</p>
               {safeLogs.length === 0 ? (
                 <p className="text-muted text-sm text-center py-4">Pierwszy trening otworzy historię.</p>
@@ -686,7 +686,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
 
             {/* Historia raportów */}
             {safeCheckins.length > 0 && (
-              <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+              <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-[10px] text-muted uppercase tracking-widest">Raporty tygodniowe</p>
                   <button onClick={() => router.push('/client/checkin')}
@@ -742,7 +742,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
 
             {/* Ankieta */}
             {profile?.questionnaire_requested ? (
-              <div className="bg-black/30 backdrop-blur-sm border border-gold/25 rounded-2xl px-5 py-4">
+              <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-gold/25 rounded-2xl px-5 py-4">
                 <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
                 <p className="text-sm font-medium text-gold mb-2">📋 Czeka na wypełnienie</p>
                 <button onClick={() => router.push('/client/questionnaire')}
@@ -751,7 +751,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
                 </button>
               </div>
             ) : questionnaire ? (
-              <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.1)] rounded-2xl px-5 py-4">
+              <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.1)] rounded-2xl px-5 py-4">
                 <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
                 <p className="text-sm font-medium text-success">✓ Wypełniona</p>
               </div>
@@ -760,7 +760,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             {/* Plan link */}
             {activePlan && (
               <button onClick={() => router.push('/client/plan')}
-                className="w-full flex items-center justify-between bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4 hover:border-gold/40 transition group">
+                className="w-full flex items-center justify-between bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4 hover:border-gold/40 transition group">
                 <div className="text-left">
                   <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Plan treningowy</p>
                   <p className="text-sm font-medium text-warm">{planInfo.mesocycleName}</p>
