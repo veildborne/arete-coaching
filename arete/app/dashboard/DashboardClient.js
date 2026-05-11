@@ -217,71 +217,40 @@ export default function DashboardClient({ profile, clients }) {
   return (
     <div className="min-h-screen text-warm font-body relative">
 
-      {/* TOP NAV */}
-      <nav className="sticky top-0 z-50 bg-black/30 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-6 h-14 flex items-center gap-4">
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="font-display text-xl text-gold tracking-widest">ARETÉ</span>
-          <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest">α 0.1</span>
-          <span className="text-[10px] text-muted ml-2 hidden sm:block">Panel Trenera</span>
-        </div>
-
-        <div className="flex-1 flex items-center gap-0.5 justify-center overflow-x-auto scrollbar-hide">
-          {[
-            { id: 'overview',  label: 'Przegląd' },
-            { id: 'clients',   label: 'Klienci' },
-            { id: 'attention', label: 'Uwaga',   badge: stats.needsAttention },
-            { id: 'checkins',  label: 'Raporty', badge: stats.pendingCheckins },
-          ].map(({ id, label, badge }) => (
-            <button key={id} onClick={() => setActiveNav(id)}
-              className={`relative px-3 py-1.5 rounded-lg text-xs sm:text-sm transition whitespace-nowrap ${activeNav === id ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
+      <nav style={{position:'sticky',top:0,zIndex:50,background:'rgba(0,0,0,0.4)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(212,181,112,0.12)',height:'52px',display:'flex',alignItems:'center',padding:'0 10px',gap:'6px'}}>
+        <span style={{fontFamily:'Cormorant Garamond,serif',fontSize:'1.1rem',color:'#D4B570',letterSpacing:'0.2em',flexShrink:0}}>ARETÉ</span>
+        <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:'2px'}}>
+          {[{id:'overview',label:'Przegląd'},{id:'clients',label:'Klienci'},{id:'attention',label:'Uwaga',badge:stats.needsAttention},{id:'checkins',label:'Raporty',badge:stats.pendingCheckins}].map(({id,label,badge})=>(
+            <button key={id} onClick={()=>setActiveNav(id)} style={{position:'relative',padding:'5px 8px',borderRadius:'8px',fontSize:'11px',border:'none',cursor:'pointer',fontFamily:'Outfit,sans-serif',whiteSpace:'nowrap',background:activeNav===id?'rgba(212,181,112,0.12)':'transparent',color:activeNav===id?'#D4B570':'#8F9AAF'}}>
               {label}
-              {badge > 0 && (
-                <span className="absolute -top-1 -right-1 text-[9px] bg-danger text-white rounded-full w-4 h-4 flex items-center justify-center font-bold">{badge}</span>
-              )}
+              {badge>0&&<span style={{position:'absolute',top:'-3px',right:'-3px',fontSize:'8px',background:'#EF6B73',color:'white',borderRadius:'50%',width:'13px',height:'13px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'bold'}}>{badge}</span>}
             </button>
           ))}
         </div>
-
-        <div className="flex items-center gap-3 shrink-0">
-          <button onClick={() => setInviteOpen(true)}
-            className="bg-gold text-bg-deep px-4 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition">
-            + Dodaj klienta
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center font-display text-gold text-xs font-bold">
-              {getInitials(profile?.full_name, profile?.email)}
-            </div>
-            <button onClick={async () => { const s = createClient(); await s.auth.signOut(); window.location.href = '/' }}
-              className="text-[10px] text-muted hover:text-danger transition">↩</button>
-          </div>
+        <div style={{display:'flex',alignItems:'center',gap:'5px',flexShrink:0}}>
+          <button onClick={()=>setInviteOpen(true)} style={{background:'#D4B570',color:'#0f0f0f',border:'none',borderRadius:'7px',padding:'5px 9px',fontSize:'11px',fontWeight:'700',cursor:'pointer'}}>+</button>
+          <div style={{width:'26px',height:'26px',borderRadius:'50%',background:'rgba(212,181,112,0.15)',border:'1px solid rgba(212,181,112,0.3)',display:'flex',alignItems:'center',justifyContent:'center',color:'#D4B570',fontSize:'10px',fontWeight:'bold'}}>{getInitials(profile?.full_name,profile?.email)}</div>
+          <button onClick={async()=>{const s=createClient();await s.auth.signOut();window.location.href='/'}} style={{background:'none',border:'none',color:'#8F9AAF',fontSize:'13px',cursor:'pointer'}}>↩</button>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-
-        {/* Header */}
-        <div className="mb-6">
-          <p className="text-xs text-muted mb-1 capitalize">{new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-          <h1 className="font-display text-3xl text-gold">Witaj, {firstName}</h1>
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-6">
+        <div className="mb-5">
+          <p className="text-xs text-muted mb-1 capitalize">{new Date().toLocaleDateString('pl-PL',{weekday:'long',day:'numeric',month:'long'})}</p>
+          <h1 className="font-display text-2xl text-gold">Witaj, {firstName}</h1>
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6">
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'8px',marginBottom:'20px'}}>
           {[
-            { label: 'Klienci',        value: stats.active,          icon: '👥', color: '#D4B570', id: 'clients' },
-            { label: 'Wymagają uwagi', value: stats.needsAttention,  icon: '🔔', color: stats.needsAttention > 0 ? '#EF6B73' : '#47D18C', id: 'attention' },
-            { label: 'Bez planu',      value: stats.withoutPlan,     icon: '📋', color: stats.withoutPlan > 0 ? '#E8A020' : '#47D18C', id: null },
-            { label: 'Treningi',       value: stats.totalLogs,       icon: '💪', color: '#D4B570', id: null },
-            { label: 'Raporty',        value: stats.pendingCheckins, icon: '📊', color: stats.pendingCheckins > 0 ? '#EF6B73' : '#47D18C', id: 'checkins' },
-          ].map(({ label, value, icon, color, id }) => (
-            <div key={label}
-              onClick={() => id && setActiveNav(id)}
-              className={`bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-3 sm:p-4 transition ${id ? 'cursor-pointer hover:border-gold/30' : ''}`}>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] text-muted uppercase tracking-widest">{label}</p>
-                <span style={{ color }}>{icon}</span>
-              </div>
-              <p className="text-2xl font-display" style={{ color }}>{value}</p>
+            {label:'Klienci',value:stats.active,color:'#D4B570',id:'clients'},
+            {label:'Uwaga',value:stats.needsAttention,color:stats.needsAttention>0?'#EF6B73':'#47D18C',id:'attention'},
+            {label:'Bez planu',value:stats.withoutPlan,color:stats.withoutPlan>0?'#E8A020':'#47D18C',id:null},
+            {label:'Treningi',value:stats.totalLogs,color:'#D4B570',id:null},
+            {label:'Raporty',value:stats.pendingCheckins,color:stats.pendingCheckins>0?'#EF6B73':'#47D18C',id:'checkins'},
+          ].map(({label,value,color,id})=>(
+            <div key={label} onClick={()=>id&&setActiveNav(id)} style={{background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,181,112,0.12)',borderRadius:'12px',padding:'10px 12px',cursor:id?'pointer':'default'}}>
+              <p style={{fontSize:'9px',color:'#8F9AAF',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:'4px'}}>{label}</p>
+              <p style={{fontSize:'1.4rem',fontFamily:'Cormorant Garamond,serif',color,margin:0}}>{value}</p>
             </div>
           ))}
         </div>
