@@ -297,13 +297,13 @@ const linkStyle = {
 // ===== TRANSLATIONS =====
 const t = {
   pl: {
-    nav: { about: 'O mnie', approach: 'System', packages: 'Pakiety', process: 'Proces', contact: 'Kontakt', login: 'Zaloguj się' },
+    nav: { about: 'O mnie', system: 'System', packages: 'Pakiety', process: 'Proces', contact: 'Kontakt', login: 'Zaloguj się' },
     hero: {
       tagline: 'SYSTEM COACHINGOWY',
       title1: 'Trening prowadzony ',
-      titleAccent: 'jak system',
+      titleAccent: 'jak system.',
       title2: 'Progres oparty na danych',
-      desc: 'Nie sprzedajemy PDF-a. Prowadzi Cię system — plan, analiza, feedback, korekta. Metodologia evidence-based, real-time dane, trener który wie co robi.',
+      desc: 'Nie sprzedajemy PDF-a. Prowadzi Cię system — plan treningowy, analiza danych, feedback trenera, korekta co tydzień. Metodologia evidence-based, real-time dane, prawdziwy coach.',
       cta: 'Zacznij proces',
       secondary: 'Zobacz system',
       features: [
@@ -391,15 +391,15 @@ const t = {
   },
 
   en: {
-    nav: { about: 'About', approach: 'System', packages: 'Packages', process: 'Process', contact: 'Contact', login: 'Log in' },
+    nav: { about: 'About', system: 'System', packages: 'Packages', process: 'Process', contact: 'Contact', login: 'Log in' },
     hero: {
       tagline: 'COACHING SYSTEM',
-      title1: 'Training guided ',
-      titleAccent: 'like a system',
-      title2: 'Progress backed by data',
-      desc: 'We don\'t sell a PDF. The system guides you — plan, analysis, feedback, adjustment. Evidence-based methodology, real-time data, coach who knows what he\'s doing.',
-      cta: 'Start process',
-      secondary: 'See system',
+      title1: 'Training led ',
+      titleAccent: 'like a system.',
+      title2: 'Progress built on data',
+      desc: 'We don\'t sell PDFs. A system guides you — training plan, data analysis, coach feedback, weekly adjustments. Evidence-based methodology, real-time data, real coach.',
+      cta: 'Start the process',
+      secondary: 'See the system',
       features: [
         { sym: '⚗', label: 'Evidence-based', sub: 'Peer-reviewed' },
         { sym: '◈', label: 'Individualized', sub: 'Built for you' },
@@ -799,7 +799,7 @@ export default function Home() {
           <div className="nav-brand">ARETÉ</div>
           <ul className={`nav-links ${menuOpen ? 'open' : ''}`}>
             <li><a onClick={() => scrollTo('about')}>{l.nav.about}</a></li>
-            <li><a onClick={() => scrollTo('approach')}>{l.nav.approach}</a></li>
+            <li><a onClick={() => scrollTo('approach')}>{l.nav.system}</a></li>
             <li><a onClick={() => scrollTo('packages')}>{l.nav.packages}</a></li>
             <li><a onClick={() => scrollTo('process')}>{l.nav.process}</a></li>
             <li><a onClick={() => scrollTo('contact')}>{l.nav.contact}</a></li>
@@ -912,48 +912,29 @@ export default function Home() {
       <MeanderSVG animated />
 
       {/* ARETÉ SYSTEM */}
-      <section style={{ padding: '6rem 1.5rem', maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.3em', color: 'var(--gold-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>
-            SYSTEM
-          </p>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: 'var(--gold)', marginBottom: '1rem' }}>
-            Areté System — coaching bez chaosu
-          </h2>
-          <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto', lineHeight: 1.7 }}>
-            Każdy klient ma swój panel. Trener widzi dane w czasie rzeczywistym. System analizuje, flaguje problemy, sugeruje korekty.
-          </p>
+      <section style={{padding:'5rem 1.5rem',maxWidth:'900px',margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:'3rem'}}>
+          <p style={{fontSize:'0.65rem',letterSpacing:'0.3em',color:'rgba(184,166,119,0.6)',marginBottom:'1rem',textTransform:'uppercase'}}>SYSTEM</p>
+          <h2 style={{fontFamily:'var(--font-display)',fontSize:'clamp(1.8rem,4vw,2.8rem)',color:'#D4B570',marginBottom:'1rem'}}>Areté System — coaching bez chaosu</h2>
+          <p style={{color:'rgba(200,190,170,0.7)',maxWidth:'600px',margin:'0 auto',lineHeight:1.7,fontSize:'0.95rem'}}>Każdy klient ma swój panel. Trener widzi dane w czasie rzeczywistym. System analizuje, flaguje problemy, sugeruje korekty.</p>
         </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:'1.5rem'}}>
           {[
-            { icon: '▦', title: 'Plan treningowy', desc: 'Periodyzowany 6-tygodniowy mezocykl. MEV/MRV Israetela, RIR Helmsa, dobór ćwiczeń pod Twój sprzęt i anatomię.' },
-            { icon: '◈', title: 'Raport tygodniowy', desc: 'Waga, energia, sen, realizacja planu. Trener widzi dane, odpowiada z feedbackiem. Pętla coachingowa zamknięta.' },
-            { icon: '⚡', title: 'Logger treningowy', desc: 'Logujesz trening w apce. System zapisuje objętość, e1RM, RIR. Trener widzi postęp siłowy w czasie rzeczywistym.' },
-            { icon: '⚗', title: 'System żywieniowy', desc: 'Kalorie i makro dobrane algorytmem. Plan posiłków. Trener koryguje co tydzień na podstawie danych z wagi.' },
-          ].map((item, i) => (
-            <div key={i} style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(184,166,119,0.15)',
-              borderRadius: '16px',
-              padding: '2rem',
-            }}>
-              <div style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--gold)' }}>{item.icon}</div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--gold)', marginBottom: '0.75rem' }}>{item.title}</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.7 }}>{item.desc}</p>
+            {icon:'▦',title:'Plan treningowy',desc:'Periodyzowany 6-tygodniowy cykl. MEV/MRV Israetela, RIR Helmsa, dobór ćwiczeń pod Twój sprzęt i anatomię.'},
+            {icon:'◈',title:'Raport tygodniowy',desc:'Waga, energia, sen, realizacja planu. Trener widzi dane i odpowiada z feedbackiem. Pętla coachingowa zamknięta.'},
+            {icon:'⚡',title:'Logger treningowy',desc:'Logujesz trening w apce. System zapisuje objętość, siłę, RIR. Trener widzi postęp w czasie rzeczywistym.'},
+            {icon:'⚗',title:'System żywieniowy',desc:'Kalorie i makro dobrane algorytmem. Plan posiłków. Trener koryguje co tydzień na podstawie danych z wagi.'},
+          ].map((item,i)=>(
+            <div key={i} style={{background:'rgba(255,255,255,0.02)',border:'2px solid rgba(184,166,119,0.2)',borderRadius:'16px',padding:'2rem'}}>
+              <div style={{fontSize:'1.5rem',marginBottom:'1rem',color:'#D4B570'}}>{item.icon}</div>
+              <h3 style={{fontFamily:'var(--font-display)',fontSize:'1.1rem',color:'#D4B570',marginBottom:'0.75rem'}}>{item.title}</h3>
+              <p style={{color:'rgba(200,190,170,0.7)',fontSize:'0.875rem',lineHeight:1.7,margin:0}}>{item.desc}</p>
             </div>
           ))}
         </div>
-
-        {/* Beta badge */}
-        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            background: 'rgba(212,181,112,0.08)', border: '1px solid rgba(212,181,112,0.25)',
-            borderRadius: '99px', padding: '0.5rem 1.25rem',
-            fontSize: '0.75rem', color: 'rgba(212,181,112,0.7)', letterSpacing: '0.1em',
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#47D18C', display: 'inline-block' }}/>
+        <div style={{textAlign:'center',marginTop:'3rem'}}>
+          <span style={{display:'inline-flex',alignItems:'center',gap:'0.5rem',background:'rgba(212,181,112,0.08)',border:'1px solid rgba(212,181,112,0.25)',borderRadius:'99px',padding:'0.5rem 1.25rem',fontSize:'0.75rem',color:'rgba(212,181,112,0.7)',letterSpacing:'0.1em'}}>
+            <span style={{width:6,height:6,borderRadius:'50%',background:'#47D18C',display:'inline-block'}}/>
             System w aktywnym rozwoju · Alpha 0.1 · Nowe funkcje co tydzień
           </span>
         </div>
