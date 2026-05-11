@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
 import NutritionCard from './NutritionCard'
+import CheatMealTracker from './CheatMealTracker'
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -695,6 +696,8 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
                 </div>
               </div>
             )}
+
+            <CheatMealTracker nutritionTargets={nutritionTargets} />
 
           </div>
 
