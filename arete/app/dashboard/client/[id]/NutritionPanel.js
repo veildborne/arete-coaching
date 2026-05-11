@@ -156,7 +156,7 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
   }
 
   return (
-    <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-5">
+    <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] text-muted uppercase tracking-widest">Cele żywieniowe</div>
         <div className="flex gap-2 items-center">

@@ -47,7 +47,7 @@ export default function PlanViewer() {
   return (
     <div className="space-y-6">
       {/* Header planu */}
-      <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-6">
+      <div className="bg-black/30 backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-6">
         <p className="text-[10px] text-gold/60 uppercase tracking-widest mb-1">Aktywny plan</p>
         <h2 className="font-display text-2xl text-gold mb-3">{plan.name}</h2>
         <div className="flex flex-wrap gap-4 text-sm text-muted">
@@ -72,7 +72,7 @@ export default function PlanViewer() {
 
       {/* Sesje */}
       {Object.entries(sessions).map(([key, session]) => (
-        <div key={key} className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+        <div key={key} className="bg-black/30 backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center font-display text-lg font-bold text-gold">
               {key}

@@ -22,7 +22,7 @@ export default function NutritionCard({ nutritionTargets }) {
   const { calories, protein_g, fat_g, carbs_g, notes } = nutritionTargets
 
   return (
-    <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-surface border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Twoje cele żywieniowe</p>
 
       <div className="text-center mb-4">

@@ -7,7 +7,7 @@ export default function MealPlanCard({ mealPlan }) {
   if (!mealPlan) return null
 
   return (
-    <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-surface border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Plan żywieniowy</p>
       <p className="text-sm font-semibold text-warm mb-4">{mealPlan.name}</p>
 

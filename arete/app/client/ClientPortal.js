@@ -92,7 +92,7 @@ function CharacterCard({ profile, recentLogs, questionnaire, totalXP = 0 }) {
     .split(' ').map(w => w[0] ?? '').join('').slice(0, 2).toUpperCase()
 
   return (
-    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5 relative overflow-hidden">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5 relative overflow-hidden">
       {/* Meander watermark */}
       <div className="absolute top-0 right-0 w-20 h-20 opacity-[0.05] pointer-events-none" aria-hidden>
         <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -178,7 +178,7 @@ function StatGrid({ recentLogs, questionnaire }) {
   const data = stats.map(s => ({ stat: s.label, value: Math.round(s.bar * 100) }))
 
   return (
-    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-2">Statystyki postaci</p>
       {logs.length === 0 ? (
         <p className="text-[10px] text-muted/40 mt-3 text-center py-8">Dane rosną z treningami i check-inami</p>
@@ -210,13 +210,13 @@ function CampaignProgress({ activePlan, planInfo }) {
   const pct = Math.round(((currentWeek - 1) / maxWeeks) * 100)
 
   return (
-    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
       <div className="flex items-start justify-between mb-4">
         <div>
           <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Kampania</p>
           <p className="text-base font-semibold text-warm">{mesocycleName}</p>
         </div>
-        <span className="text-xs text-muted border border-[rgba(212,181,112,0.18)] px-2 py-1 rounded-lg shrink-0 ml-2">
+        <span className="text-xs text-muted border-2 border-[rgba(212,181,112,0.35)] px-2 py-1 rounded-lg shrink-0 ml-2">
           Tyg. {currentWeek}/{maxWeeks}
         </span>
       </div>
@@ -269,7 +269,7 @@ function AchievementPreview({ recentLogs, clientAchievements = [] }) {
   }
 
   return (
-    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Odznaczenia</p>
       <div className="grid grid-cols-4 gap-3">
         {ACHIEVEMENTS.map(ach => {
@@ -321,7 +321,7 @@ function CoachMessageCard({ coachName }) {
   const initials = coachName ? coachName.trim().split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() : 'AP'
   const firstName = coachName?.split(' ')[0] || 'Trener'
   return (
-    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Wiadomość od trenera</p>
       <div className="flex gap-3">
         <div className="w-9 h-9 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold text-xs shrink-0">{initials}</div>
@@ -392,7 +392,7 @@ function WeightLog() {
   }
 
   return (
-    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
         <p className="text-[10px] text-muted uppercase tracking-widest">Dzienna waga</p>
         {avg7 && (
@@ -576,34 +576,29 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
       {!entered && <OceanLoader />}
       <div className={`relative z-10 transition-opacity duration-1000 ${entered ? 'opacity-100' : 'opacity-0'}`}>
 
-      {/* TOP NAV */}
-      <nav className="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-6 h-14 flex items-center gap-6">
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="font-display text-xl text-gold tracking-widest">ARETÉ</span>
-          <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest">α 0.1</span>
+      <nav style={{position:'sticky',top:0,zIndex:50,background:'rgba(0,0,0,0.4)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(212,181,112,0.12)',height:'52px',display:'flex',alignItems:'center',padding:'0 10px',gap:'6px'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'6px',flexShrink:0}}>
+          <span style={{fontFamily:'Cormorant Garamond,serif',fontSize:'1.1rem',color:'#D4B570',letterSpacing:'0.2em'}}>ARETÉ</span>
+          <span style={{fontSize:'8px',padding:'2px 6px',borderRadius:'4px',border:'1px solid rgba(212,181,112,0.2)',color:'rgba(212,181,112,0.4)',letterSpacing:'0.1em'}}>α 0.1</span>
         </div>
-        <div className="flex-1 flex items-center justify-center gap-1">
+        <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:'2px'}}>
           {[
-            { href: '/client',         label: 'Przegląd' },
-            { href: '/client/workout', label: 'Trening'  },
-            { href: '/client/plan',    label: 'Plan'      },
-            { href: '/client/checkin', label: 'Raport'    },
-          ].map(({ href, label }) => {
-            const active = typeof window !== 'undefined' && window.location.pathname === href
-            return (
-              <button key={href} onClick={() => router.push(href)}
-                className={`px-4 py-1.5 rounded-lg text-sm transition ${active ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
+            {href:'/client',label:'Przegląd'},
+            {href:'/client/workout',label:'Trening'},
+            {href:'/client/plan',label:'Plan'},
+            {href:'/client/checkin',label:'Raport'},
+          ].map(({href,label})=>{
+            const active=typeof window!=='undefined'&&window.location.pathname===href
+            return(
+              <button key={href} onClick={()=>router.push(href)} style={{padding:'5px 8px',borderRadius:'8px',fontSize:'11px',border:'none',cursor:'pointer',fontFamily:'Outfit,sans-serif',whiteSpace:'nowrap',background:active?'rgba(212,181,112,0.12)':'transparent',color:active?'#D4B570':'#8F9AAF'}}>
                 {label}
               </button>
             )
           })}
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="text-sm text-muted hidden sm:block">{firstName}</span>
-          <button onClick={handleLogout}
-            className="text-xs border border-[rgba(212,181,112,0.25)] text-gold/70 px-3 py-1.5 rounded-lg hover:bg-gold/10 transition">
-            Wyloguj
-          </button>
+        <div style={{display:'flex',alignItems:'center',gap:'5px',flexShrink:0}}>
+          <span style={{fontSize:'11px',color:'#8F9AAF'}}>{firstName}</span>
+          <button onClick={handleLogout} style={{background:'none',border:'none',color:'#8F9AAF',fontSize:'16px',cursor:'pointer',padding:'4px'}}>↩</button>
         </div>
       </nav>
 
@@ -665,7 +660,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
 
             {/* Ostatnia aktywność */}
-            <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+            <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
               <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Ostatnia aktywność</p>
               {safeLogs.length === 0 ? (
                 <p className="text-muted text-sm text-center py-4">Pierwszy trening otworzy historię.</p>
@@ -686,7 +681,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
 
             {/* Historia raportów */}
             {safeCheckins.length > 0 && (
-              <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+              <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-[10px] text-muted uppercase tracking-widest">Raporty tygodniowe</p>
                   <button onClick={() => router.push('/client/checkin')}
@@ -760,7 +755,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             {/* Plan link */}
             {activePlan && (
               <button onClick={() => router.push('/client/plan')}
-                className="w-full flex items-center justify-between bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4 hover:border-gold/40 transition group">
+                className="w-full flex items-center justify-between bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl px-5 py-4 hover:border-gold/40 transition group">
                 <div className="text-left">
                   <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Plan treningowy</p>
                   <p className="text-sm font-medium text-warm">{planInfo.mesocycleName}</p>

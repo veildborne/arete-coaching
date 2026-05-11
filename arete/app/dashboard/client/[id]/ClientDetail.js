@@ -349,7 +349,7 @@ function AnkietaViewer({ questionnaire }) {
           .filter(e => e.value !== undefined && e.value !== '' && !(Array.isArray(e.value) && e.value.length === 0))
         if (entries.length === 0) return null
         return (
-          <div key={block.title} className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4 mb-2.5">
+          <div key={block.title} className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4 mb-2.5">
             <div className="font-display text-sm text-gold font-semibold mb-3 pb-2 border-b border-white/[0.05]">
               {block.title}
             </div>
@@ -550,7 +550,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
               onClick={() => setSelectedIdx(i)}
               className="text-[11px] px-3 py-1 rounded-full border transition"
               style={{
-                borderColor: selectedIdx === i ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.15)',
+                borderColor: selectedIdx === i ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.35)', borderWidth: '2px',
                 color: selectedIdx === i ? '#D4B570' : '#666',
                 background: selectedIdx === i ? 'rgba(212,181,112,0.08)' : 'transparent',
               }}
@@ -706,7 +706,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
   return (
     <div className="min-h-screen text-[#e8e8e8] font-body">
       {/* Topbar */}
-      <header className="border-b border-white/[0.07] px-7 h-14 flex items-center gap-4 sticky top-0 bg-[rgba(15,20,35,0.85)] backdrop-blur-xl z-50">
+      <header className="border-b-2 border-b-[rgba(212,181,112,0.35)] px-7 h-14 flex items-center gap-4 sticky top-0 bg-[rgba(15,20,35,0.85)] backdrop-blur-xl z-50">
         <span className="font-display text-xl font-bold text-gold tracking-widest">ARETÉ</span>
         <span className="text-[10px] px-2 py-0.5 rounded-full border border-gold/30 text-[#8a7d5a] tracking-widest">α 0.1</span>
         <span className="text-white/15 text-base">|</span>
@@ -833,7 +833,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
         <CoachProfileNote clientId={client.id} initialNote={coach_profile_note} />
 
         {/* Tabs */}
-        <div className="flex gap-0.5 border-b border-white/[0.07] mb-6">
+        <div className="flex gap-0.5 border-b-2 border-b-[rgba(212,181,112,0.35)] mb-6">
           {TABS.map(t => (
             <button
               key={t.id}
@@ -976,7 +976,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
           <>
             <div className="grid grid-cols-1 gap-3 mb-6">
               {rirAdherence && (
-                <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+                <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
                   <div className="text-[10px] text-muted uppercase tracking-widest mb-2">RIR Adherence</div>
                   <div className="flex items-end gap-3 mb-2">
                     <span className="text-2xl font-semibold" style={{ color: rirAdherence.pct >= 75 ? '#47D18C' : rirAdherence.pct >= 50 ? '#E8A020' : '#EF6B73' }}>
@@ -990,7 +990,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                 </div>
               )}
               {weightTrend && (
-                <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+                <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
                   <div className="text-[10px] text-muted uppercase tracking-widest mb-2">Trend wagi (7 dni)</div>
                   <div className="flex items-center gap-4 mb-2 flex-wrap">
                     <div>
@@ -1017,7 +1017,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                 </div>
               )}
               {weeklyVolume.length > 0 && (
-                <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+                <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
                   <div className="text-[10px] text-muted uppercase tracking-widest mb-3">Objętość per partia (ostatnie 20 sesji)</div>
                   <div className="space-y-2">
                     {weeklyVolume.map(({ muscle, sets }) => (
@@ -1043,10 +1043,10 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                 return volumeData.length === 0 ? (
                   <EmptyState text="Brak danych o volume w logach." />
                 ) : (
-                  <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] overflow-hidden">
+                  <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] overflow-hidden">
                     <table className="w-full border-collapse">
                       <thead>
-                        <tr className="bg-gold/[0.05] border-b border-white/[0.07]">
+                        <tr className="bg-gold/[0.05] border-b-2 border-b-[rgba(212,181,112,0.35)]">
                           <th className="px-4 py-2.5 text-left text-[11px] text-[#888] font-semibold tracking-wider">PARTIA</th>
                           <th className="px-4 py-2.5 text-right text-[11px] text-[#888] font-semibold tracking-wider">SERIE</th>
                           <th className="px-4 py-2.5 text-right text-[11px] text-[#888] font-semibold tracking-wider">VOLUME (kg)</th>
@@ -1080,7 +1080,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                 ) : (
                   <div className="flex flex-col gap-2">
                     {trends.map((t, i) => (
-                      <div key={i} className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-3 flex items-center gap-3">
+                      <div key={i} className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-3 flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-gold/[0.08] border border-gold/15 flex items-center justify-center text-base text-gold shrink-0">
                           {t.trend}
                         </div>
@@ -1109,7 +1109,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {logs.map(log => (
-                    <div key={log.id} className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-3 flex items-center gap-4">
+                    <div key={log.id} className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-3 flex items-center gap-4">
                       <div className="w-9 h-9 rounded-lg bg-gold/[0.08] border border-gold/15 flex items-center justify-center text-[13px] font-semibold text-gold shrink-0">
                         {log.day_label || '?'}
                       </div>

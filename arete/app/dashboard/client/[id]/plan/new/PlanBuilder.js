@@ -221,7 +221,7 @@ function AddPicker({ sessionKey, allExercises, onSelect, onClose }) {
           <button
             onClick={() => setMuscleFilter('')}
             className="text-[10px] px-2.5 py-1 rounded-full border transition"
-            style={{ borderColor: !muscleFilter ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.15)', color: !muscleFilter ? '#D4B570' : '#666', background: !muscleFilter ? 'rgba(212,181,112,0.08)' : 'transparent' }}
+            style={{ borderColor: !muscleFilter ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.35)', borderWidth: '2px', color: !muscleFilter ? '#D4B570' : '#666', background: !muscleFilter ? 'rgba(212,181,112,0.08)' : 'transparent' }}
           >
             Wszystkie
           </button>
@@ -230,7 +230,7 @@ function AddPicker({ sessionKey, allExercises, onSelect, onClose }) {
               key={m}
               onClick={() => setMuscleFilter(m === muscleFilter ? '' : m)}
               className="text-[10px] px-2.5 py-1 rounded-full border transition"
-              style={{ borderColor: muscleFilter === m ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.15)', color: muscleFilter === m ? '#D4B570' : '#666', background: muscleFilter === m ? 'rgba(212,181,112,0.08)' : 'transparent' }}
+              style={{ borderColor: muscleFilter === m ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.35)', borderWidth: '2px', color: muscleFilter === m ? '#D4B570' : '#666', background: muscleFilter === m ? 'rgba(212,181,112,0.08)' : 'transparent' }}
             >
               {MUSCLE_PL[m] || m}
             </button>
@@ -528,7 +528,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
         {plan && (
           <>
             {/* COACH SUMMARY — szczegółowe */}
-            <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 mb-4">
+            <div className="bg-surface border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-6 mb-4">
               <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Analiza planu — widok trenera</p>
 
               {/* Rationale */}
@@ -616,7 +616,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
             </div>
 
             {/* CLIENT SUMMARY — podstawowe, do pokazania klientowi */}
-            <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl p-5 mb-4">
+            <div className="bg-surface border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5 mb-4">
               <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Info dla klienta</p>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {Object.entries(plan.sessions || {}).map(([key, session]) => {

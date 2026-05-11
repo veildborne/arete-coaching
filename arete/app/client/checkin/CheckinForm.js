@@ -71,7 +71,7 @@ export default function CheckinForm({ clientId, weekNumber, activePlan, lastChec
   return (
     <div className="min-h-screen text-warm font-body">
       {/* NAV */}
-      <nav className="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-6 h-14 flex items-center justify-between">
+      <nav className="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b-2 border-b-[rgba(212,181,112,0.35)] px-6 h-14 flex items-center justify-between">
         <button onClick={() => router.push('/client')}
           className="text-sm text-muted hover:text-gold transition font-body">
           ← Powrót
@@ -92,7 +92,7 @@ export default function CheckinForm({ clientId, weekNumber, activePlan, lastChec
         </div>
 
         {/* Form card */}
-        <div className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.15)] rounded-2xl p-6 mb-4 relative overflow-hidden">
+        <div className="bg-black/30 backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-6 mb-4 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"/>
 
           <div className="mb-6">

@@ -826,3 +826,8 @@ img { max-width: 100%; display: block; }
   color: #F4EFE3 !important;
   font-family: 'Outfit', system-ui, sans-serif !important;
 }
+
+/* Globalne obramówki kart */
+.card-border {
+  border: 2px solid rgba(212,181,112,0.3) !important;
+}

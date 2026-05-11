@@ -58,7 +58,7 @@ export default function CheatMealTracker({ nutritionTargets }) {
   if (!nutritionTargets) return null
 
   return (
-    <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
+    <div className="bg-surface border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
       <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Odstępstwo od diety</p>
 
       {/* Dzienny budżet */}
@@ -102,7 +102,7 @@ export default function CheatMealTracker({ nutritionTargets }) {
           value={form.description}
           onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
           placeholder="Co zjadłeś? (opcjonalnie)"
-          className="w-full py-2 px-3 rounded-lg bg-bg-deep border border-[rgba(212,181,112,0.15)] text-warm text-sm font-body outline-none focus:border-gold/40"
+          className="w-full py-2 px-3 rounded-lg bg-bg-deep border-2 border-[rgba(212,181,112,0.35)] text-warm text-sm font-body outline-none focus:border-gold/40"
         />
         <div className="flex gap-2">
           <input
@@ -110,7 +110,7 @@ export default function CheatMealTracker({ nutritionTargets }) {
             value={form.calories_est}
             onChange={e => setForm(p => ({ ...p, calories_est: e.target.value }))}
             placeholder="Szacowane kcal"
-            className="flex-1 py-2 px-3 rounded-lg bg-bg-deep border border-[rgba(212,181,112,0.15)] text-warm text-sm font-body outline-none focus:border-gold/40"
+            className="flex-1 py-2 px-3 rounded-lg bg-bg-deep border-2 border-[rgba(212,181,112,0.35)] text-warm text-sm font-body outline-none focus:border-gold/40"
           />
           <button
             onClick={handleAdd}

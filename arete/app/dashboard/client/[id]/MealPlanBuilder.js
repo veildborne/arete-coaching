@@ -148,7 +148,7 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
 
       {/* Suggested templates */}
       {suggested.length > 0 && (
-        <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+        <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
           <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Sugerowane szablony</p>
           <div className="space-y-2">
             {suggested.map(t => {
@@ -181,12 +181,12 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
         value={planName}
         onChange={e => setPlanName(e.target.value)}
         placeholder="Nazwa planu żywieniowego..."
-        className="w-full py-2.5 px-3.5 rounded-lg bg-[#1a1a1a] border border-white/[0.07] text-warm text-sm font-body outline-none focus:border-gold/40"
+        className="w-full py-2.5 px-3.5 rounded-lg bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] text-warm text-sm font-body outline-none focus:border-gold/40"
       />
 
       {/* Live macro summary */}
       {meals.length > 0 && (
-        <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+        <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] text-muted uppercase tracking-widest">Łączne makro</span>
             {targetKcal > 0 && (
@@ -206,7 +206,7 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
 
       {/* Meals */}
       {meals.map((meal, mealIdx) => (
-        <div key={mealIdx} className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+        <div key={mealIdx} className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
           <p className="text-[11px] text-gold uppercase tracking-widest mb-3">{meal.name}</p>
           <div className="space-y-2">
             {meal.items.map((item, itemIdx) => {
