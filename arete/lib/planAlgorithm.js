@@ -536,10 +536,26 @@ export function generatePlan(questionnaire, exercises) {
       return aPrio - bPrio
     })
 
+    // Ensure every muscle in sessionDef gets at least 1 exercise
+    const musclesCovered = new Set()
+    const guaranteed = []
+    const overflow = []
+
+    sortedForCap.forEach(ex => {
+      if (!musclesCovered.has(ex.muscle_group) && sessionDef.muscles.includes(ex.muscle_group)) {
+        guaranteed.push(ex)
+        musclesCovered.add(ex.muscle_group)
+      } else {
+        overflow.push(ex)
+      }
+    })
+
+    const finalList = [...guaranteed, ...overflow].slice(0, maxExercises)
+
     sessions[sessionKey] = {
       label:     sessionKey,
       name:      sessionDef.name,
-      exercises: sortedForCap.slice(0, maxExercises),
+      exercises: finalList,
     }
   })
 

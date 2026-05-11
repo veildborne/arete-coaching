@@ -356,6 +356,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
     setPlan(prev => {
       const sessions = { ...prev.sessions }
       const exs = [...sessions[sessionKey].exercises]
+      const rirStart = prev.rir_start ?? prev.weekly_progression?.[0]?.rir ?? 2
       exs.push({
         exercise_id:      exercise.id,
         name:             exercise.name,
@@ -367,7 +368,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
         unilateral:       exercise.unilateral ?? false,
         sets:             3,
         rep_range:        '8-12',
-        rir_target:       2,
+        rir_target:       rirStart,
         note:             '+ dodane ręcznie',
       })
       sessions[sessionKey] = { ...sessions[sessionKey], exercises: exs }
