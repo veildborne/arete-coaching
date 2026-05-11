@@ -297,15 +297,15 @@ const linkStyle = {
 // ===== TRANSLATIONS =====
 const t = {
   pl: {
-    nav: { about: 'O mnie', approach: 'Podejście', packages: 'Pakiety', process: 'Proces', contact: 'Kontakt', login: 'Zaloguj się' },
+    nav: { about: 'O mnie', approach: 'System', packages: 'Pakiety', process: 'Proces', contact: 'Kontakt', login: 'Zaloguj się' },
     hero: {
-      tagline: 'EVIDENCE-BASED COACHING',
-      title1: 'Trenuj z ',
-      titleAccent: 'celem',
-      title2: 'Rośnij z nauką',
-      desc: 'Periodyzowane programy treningowe oparte na badaniach naukowych. Hipertrofia, siła, rekompozycja ciała — bez bro-science, bez motywacyjnego bełkotu.',
-      cta: 'Rozpocznij',
-      secondary: 'Zobacz pakiety',
+      tagline: 'SYSTEM COACHINGOWY',
+      title1: 'Trening prowadzony ',
+      titleAccent: 'jak system',
+      title2: 'Progres oparty na danych',
+      desc: 'Nie sprzedajemy PDF-a. Prowadzi Cię system — plan, analiza, feedback, korekta. Metodologia evidence-based, real-time dane, trener który wie co robi.',
+      cta: 'Zacznij proces',
+      secondary: 'Zobacz system',
       features: [
         { sym: '⚗', label: 'Evidence-based', sub: 'Peer-reviewed' },
         { sym: '◈', label: 'Spersonalizowane', sub: 'Pod Ciebie' },
@@ -338,14 +338,14 @@ const t = {
       noItems: ['Szukasz magicznej diety na 2 tygodnie', 'Chcesz motywacyjne hasła zamiast wiedzy', 'Potrzebujesz kogoś kto krzyczy na Ciebie', 'Nie jesteś gotowy/a na feedback', 'Interesuje Cię tylko waga na wadze'],
     },
     packages: {
-      tagline: 'PAKIETY', title: 'Wybierz swój tier',
-      subtitle: 'Od samodzielnego planu po pełny coaching z trenerem',
+      tagline: 'PAKIETY', title: 'Wybierz poziom prowadzenia',
+      subtitle: 'Od planu startowego do pełnego systemu z trenerem',
       paideia: { name: 'PAIDEIA', greek: 'παιδεία — edukacja', price: 199, currency: 'PLN', suffix: 'jednorazowo',
-        features: ['Plan treningowy PDF', 'Arkusz logowania postępów', 'Dobór ćwiczeń + alternatywy', 'Periodyzacja na 24 tygodnie', 'Bez kontaktu z trenerem'] },
+        features: ['Plan treningowy na start', 'Arkusz śledzenia postępu', 'Dobór ćwiczeń + alternatywy', 'Periodyzacja 24 tygodnie', 'Bez kontaktu z trenerem'] },
       askesis: { name: 'ASKESIS', greek: 'ἄσκησις — dyscyplina', price: 279, currency: 'PLN', suffix: '/ miesiąc', discount: '249 PLN/mies. przy 3-mies. zobowiązaniu',
-        features: ['Wszystko z Paideia', 'Cele kaloryczne + białko', 'Check-in co 2 tygodnie', 'Feedback i korekty planu', 'Piramida żywieniowa Helmsa'] },
+        features: ['Wszystko z Paideia', 'Cele kaloryczne + białko', 'Raport co 2 tygodnie', 'Feedback i korekty planu', 'Piramida żywieniowa Helmsa'] },
       arete: { name: 'ARETÉ', greek: 'ἀρετή — doskonałość', badge: 'POLECANY', price: 449, currency: 'PLN', suffix: '/ miesiąc', discount: '399 PLN/mies. przy 3-mies. zobowiązaniu',
-        features: ['Wszystko z Askesis', 'Indywidualny plan żywieniowy', 'Cotygodniowy check-in', 'Dashboard trenera (9 zakładek)', 'Priorytetowy kontakt', 'Pełna analiza postępów'] },
+        features: ['Wszystko z Askesis', 'Indywidualny plan żywieniowy', 'Raport tygodniowy', 'Panel klienta Areté (pełny dostęp)', 'Priorytetowy kontakt', 'Pełna analiza postępu w systemie'] },
       inperson: {
         title: 'Trening stacjonarny',
         subtitle: 'JustGYM · ul. 1 Maja 21 · Częstochowa',
@@ -357,7 +357,7 @@ const t = {
       cta: 'Wybierz ten pakiet',
     },
     process: {
-      tagline: 'PROCES', title: 'Jak to działa?',
+      tagline: 'PROCES', title: 'Jak działa system?',
       steps: [
         { num: '01', title: 'Zgłoszenie', text: 'Wypełniasz formularz na stronie. Dostaję email z Twoimi podstawowymi danymi.' },
         { num: '02', title: 'Rozmowa', text: 'Kontaktuję się z Tobą, potwierdzamy pakiet i cele. Ustalamy szczegóły współpracy.' },
@@ -391,15 +391,15 @@ const t = {
   },
 
   en: {
-    nav: { about: 'About', approach: 'Approach', packages: 'Packages', process: 'Process', contact: 'Contact', login: 'Log in' },
+    nav: { about: 'About', approach: 'System', packages: 'Packages', process: 'Process', contact: 'Contact', login: 'Log in' },
     hero: {
-      tagline: 'EVIDENCE-BASED COACHING',
-      title1: 'Train with ',
-      titleAccent: 'purpose',
-      title2: 'Grow with science',
-      desc: 'Periodized training programs built on peer-reviewed research. Hypertrophy, strength, body recomposition — no bro-science, no motivational fluff.',
-      cta: 'Get started',
-      secondary: 'See packages',
+      tagline: 'COACHING SYSTEM',
+      title1: 'Training guided ',
+      titleAccent: 'like a system',
+      title2: 'Progress backed by data',
+      desc: 'We don\'t sell a PDF. The system guides you — plan, analysis, feedback, adjustment. Evidence-based methodology, real-time data, coach who knows what he\'s doing.',
+      cta: 'Start process',
+      secondary: 'See system',
       features: [
         { sym: '⚗', label: 'Evidence-based', sub: 'Peer-reviewed' },
         { sym: '◈', label: 'Individualized', sub: 'Built for you' },
@@ -429,14 +429,14 @@ const t = {
       noItems: ['You want a magic 2-week diet', 'You want motivational quotes instead of knowledge', 'You need someone screaming at you', 'You\'re not ready for honest feedback', 'You only care about the number on the scale'],
     },
     packages: {
-      tagline: 'PACKAGES', title: 'Choose your tier',
-      subtitle: 'From self-guided plan to full coaching with a trainer',
+      tagline: 'PACKAGES', title: 'Choose guidance level',
+      subtitle: 'From starter plan to full system with coach',
       paideia: { name: 'PAIDEIA', greek: 'παιδεία — education', price: 47, currency: 'EUR', suffix: 'one-time',
-        features: ['Training plan PDF', 'Progress tracking sheet', 'Exercise selection + alternatives', '24-week periodization', 'No trainer contact'] },
+        features: ['Training plan to start', 'Progress tracking sheet', 'Exercise selection + alternatives', '24-week periodization', 'No trainer contact'] },
       askesis: { name: 'ASKESIS', greek: 'ἄσκησις — discipline', price: 65, currency: 'EUR', suffix: '/ month', discount: '€58/mo with 3-month commitment',
-        features: ['Everything from Paideia', 'Calorie + protein targets', 'Check-in every 2 weeks', 'Feedback and plan adjustments', 'Helms nutrition pyramid'] },
+        features: ['Everything from Paideia', 'Calorie + protein targets', 'Report every 2 weeks', 'Feedback and plan adjustments', 'Helms nutrition pyramid'] },
       arete: { name: 'ARETÉ', greek: 'ἀρετή — excellence', badge: 'RECOMMENDED', price: 105, currency: 'EUR', suffix: '/ month', discount: '€94/mo with 3-month commitment',
-        features: ['Everything from Askesis', 'Individual nutrition plan', 'Weekly check-in', 'Trainer dashboard (9 tabs)', 'Priority contact', 'Full progress analysis'] },
+        features: ['Everything from Askesis', 'Individual nutrition plan', 'Weekly report', 'Areté client panel (full access)', 'Priority contact', 'Full progress analysis in system'] },
       inperson: {
         title: 'In-person training',
         subtitle: 'JustGYM · ul. 1 Maja 21 · Częstochowa',
@@ -448,7 +448,7 @@ const t = {
       cta: 'Choose this package',
     },
     process: {
-      tagline: 'PROCESS', title: 'How does it work?',
+      tagline: 'PROCESS', title: 'How does the system work?',
       steps: [
         { num: '01', title: 'Application', text: 'Fill out the form on this page. I receive an email with your basic info.' },
         { num: '02', title: 'Conversation', text: 'I reach out to you, we confirm the package and goals. We work out the details.' },
@@ -482,15 +482,15 @@ const t = {
   },
 
   el: {
-    nav: { about: 'Σχετικά', approach: 'Προσέγγιση', packages: 'Πακέτα', process: 'Διαδικασία', contact: 'Επικοινωνία', login: 'Σύνδεση' },
+    nav: { about: 'Σχετικά', approach: 'Σύστημα', packages: 'Πακέτα', process: 'Διαδικασία', contact: 'Επικοινωνία', login: 'Σύνδεση' },
     hero: {
-      tagline: 'ΕΠΙΣΤΗΜΟΝΙΚΉ ΠΡΟΠΌΝΗΣΗ',
-      title1: 'Προπονήσου με ',
-      titleAccent: 'σκοπό',
-      title2: 'Ανάπτυξη με επιστήμη',
-      desc: 'Περιοδικοποιημένα προγράμματα προπόνησης βασισμένα σε επιστημονικές έρευνες. Υπερτροφία, δύναμη, ανασύνθεση σώματος — χωρίς bro-science, χωρίς κενά λόγια.',
-      cta: 'Ξεκίνα',
-      secondary: 'Δες τα πακέτα',
+      tagline: 'ΣΎΣΤΗΜΑ COACHING',
+      title1: 'Προπόνηση καθοδηγούμενη ',
+      titleAccent: 'σαν σύστημα',
+      title2: 'Πρόοδος βασισμένη σε δεδομένα',
+      desc: 'Δεν πουλάμε PDF. Το σύστημα σε καθοδηγεί — πρόγραμμα, ανάλυση, feedback, διόρθωση. Μεθοδολογία evidence-based, δεδομένα σε πραγματικό χρόνο, προπονητής που ξέρει τι κάνει.',
+      cta: 'Ξεκίνα τη διαδικασία',
+      secondary: 'Δες το σύστημα',
       features: [
         { sym: '⚗', label: 'Επιστημονικό', sub: 'Τεκμηριωμένο' },
         { sym: '◈', label: 'Εξατομικευμένο', sub: 'Για εσένα' },
@@ -520,14 +520,14 @@ const t = {
       noItems: ['Ψάχνεις μαγική δίαιτα δύο εβδομάδων', 'Θέλεις συνθήματα αντί για γνώση', 'Χρειάζεσαι κάποιον να σου φωνάζει', 'Δεν είσαι έτοιμος/η για ειλικρινές feedback', 'Σε ενδιαφέρει μόνο το νούμερο στη ζυγαριά'],
     },
     packages: {
-      tagline: 'ΠΑΚΈΤΑ', title: 'Διάλεξε το επίπεδό σου',
-      subtitle: 'Από αυτόνομο πρόγραμμα μέχρι πλήρες coaching με προπονητή',
+      tagline: 'ΠΑΚΈΤΑ', title: 'Διάλεξε το επίπεδο καθοδήγησης',
+      subtitle: 'Από αρχικό πρόγραμμα μέχρι πλήρες σύστημα με προπονητή',
       paideia: { name: 'PAIDEIA', greek: 'παιδεία — εκπαίδευση', price: 47, currency: 'EUR', suffix: 'εφάπαξ',
-        features: ['Πρόγραμμα προπόνησης PDF', 'Φύλλο καταγραφής προόδου', 'Επιλογή ασκήσεων + εναλλακτικές', 'Περιοδικοποίηση 24 εβδομάδων', 'Χωρίς επαφή με προπονητή'] },
+        features: ['Πρόγραμμα προπόνησης για εκκίνηση', 'Φύλλο παρακολούθησης προόδου', 'Επιλογή ασκήσεων + εναλλακτικές', 'Περιοδικοποίηση 24 εβδομάδων', 'Χωρίς επαφή με προπονητή'] },
       askesis: { name: 'ASKESIS', greek: 'ἄσκησις — πειθαρχία', price: 65, currency: 'EUR', suffix: '/ μήνα', discount: '€58/μήνα με δέσμευση 3 μηνών',
-        features: ['Όλα από το Paideia', 'Στόχοι θερμίδων + πρωτεΐνης', 'Check-in κάθε 2 εβδομάδες', 'Feedback και διορθώσεις πλάνου', 'Διατροφική πυραμίδα Helms'] },
+        features: ['Όλα από το Paideia', 'Στόχοι θερμίδων + πρωτεΐνης', 'Αναφορά κάθε 2 εβδομάδες', 'Feedback και διορθώσεις πλάνου', 'Διατροφική πυραμίδα Helms'] },
       arete: { name: 'ARETÉ', greek: 'ἀρετή — τελειότητα', badge: 'ΠΡΟΤΕΙΝΌΜΕΝΟ', price: 105, currency: 'EUR', suffix: '/ μήνα', discount: '€94/μήνα με δέσμευση 3 μηνών',
-        features: ['Όλα από το Askesis', 'Εξατομικευμένο διατροφικό πλάνο', 'Εβδομαδιαίο check-in', 'Dashboard προπονητή (9 καρτέλες)', 'Προτεραιότητα επικοινωνίας', 'Πλήρης ανάλυση προόδου'] },
+        features: ['Όλα από το Askesis', 'Εξατομικευμένο διατροφικό πλάνο', 'Εβδομαδιαία αναφορά', 'Πίνακας πελάτη Areté (πλήρης πρόσβαση)', 'Προτεραιότητα επικοινωνίας', 'Πλήρης ανάλυση προόδου στο σύστημα'] },
       inperson: {
         title: 'Προπόνηση από κοντά',
         subtitle: 'JustGYM · ul. 1 Maja 21 · Częstochowa',
@@ -539,7 +539,7 @@ const t = {
       cta: 'Διάλεξε αυτό το πακέτο',
     },
     process: {
-      tagline: 'ΔΙΑΔΙΚΑΣΊΑ', title: 'Πώς λειτουργεί;',
+      tagline: 'ΔΙΑΔΙΚΑΣΊΑ', title: 'Πώς λειτουργεί το σύστημα;',
       steps: [
         { num: '01', title: 'Αίτηση', text: 'Συμπληρώνεις τη φόρμα στη σελίδα. Λαμβάνω email με τα βασικά σου στοιχεία.' },
         { num: '02', title: 'Συζήτηση', text: 'Επικοινωνώ μαζί σου, επιβεβαιώνουμε το πακέτο και τους στόχους. Συμφωνούμε τις λεπτομέρειες.' },
@@ -906,6 +906,56 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <MeanderSVG animated />
+
+      {/* ARETÉ SYSTEM */}
+      <section style={{ padding: '6rem 1.5rem', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.3em', color: 'var(--gold-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>
+            SYSTEM
+          </p>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: 'var(--gold)', marginBottom: '1rem' }}>
+            Areté System — coaching bez chaosu
+          </h2>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto', lineHeight: 1.7 }}>
+            Każdy klient ma swój panel. Trener widzi dane w czasie rzeczywistym. System analizuje, flaguje problemy, sugeruje korekty.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+          {[
+            { icon: '▦', title: 'Plan treningowy', desc: 'Periodyzowany 6-tygodniowy mezocykl. MEV/MRV Israetela, RIR Helmsa, dobór ćwiczeń pod Twój sprzęt i anatomię.' },
+            { icon: '◈', title: 'Raport tygodniowy', desc: 'Waga, energia, sen, realizacja planu. Trener widzi dane, odpowiada z feedbackiem. Pętla coachingowa zamknięta.' },
+            { icon: '⚡', title: 'Logger treningowy', desc: 'Logujesz trening w apce. System zapisuje objętość, e1RM, RIR. Trener widzi postęp siłowy w czasie rzeczywistym.' },
+            { icon: '⚗', title: 'System żywieniowy', desc: 'Kalorie i makro dobrane algorytmem. Plan posiłków. Trener koryguje co tydzień na podstawie danych z wagi.' },
+          ].map((item, i) => (
+            <div key={i} style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(184,166,119,0.15)',
+              borderRadius: '16px',
+              padding: '2rem',
+            }}>
+              <div style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--gold)' }}>{item.icon}</div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--gold)', marginBottom: '0.75rem' }}>{item.title}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.7 }}>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Beta badge */}
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            background: 'rgba(212,181,112,0.08)', border: '1px solid rgba(212,181,112,0.25)',
+            borderRadius: '99px', padding: '0.5rem 1.25rem',
+            fontSize: '0.75rem', color: 'rgba(212,181,112,0.7)', letterSpacing: '0.1em',
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#47D18C', display: 'inline-block' }}/>
+            System w aktywnym rozwoju · Alpha 0.1 · Nowe funkcje co tydzień
+          </span>
         </div>
       </section>
 
