@@ -68,6 +68,12 @@ export default async function ClientPage({ params }) {
     .order('logged_at', { ascending: false })
     .limit(14)
 
+  const { data: nutritionTargets } = await admin
+    .from('nutrition_targets')
+    .select('*')
+    .eq('client_id', params.id)
+    .maybeSingle()
+
   return (
     <ClientDetail
       client={client}
@@ -78,6 +84,7 @@ export default async function ClientPage({ params }) {
       coachName={coach?.full_name}
       questionnaires={questionnaires || []}
       weightLogs={weightLogs || []}
+      nutritionTargets={nutritionTargets || null}
     />
   )
 }

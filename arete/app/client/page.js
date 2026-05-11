@@ -66,6 +66,12 @@ export default async function ClientPage() {
     .select('achievement_id, unlocked_at')
     .eq('client_id', user.id)
 
+  const { data: nutritionTargets } = await supabase
+    .from('nutrition_targets')
+    .select('*')
+    .eq('client_id', user.id)
+    .maybeSingle()
+
   return (
     <ClientPortal
       profile={profile}
@@ -76,6 +82,7 @@ export default async function ClientPage() {
       checkins={checkins || []}
       totalXP={xpEvents ? xpEvents.reduce((s, e) => s + e.xp, 0) : 0}
       clientAchievements={clientAchievements || []}
+      nutritionTargets={nutritionTargets || null}
     />
   )
 }

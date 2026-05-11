@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import NutritionPanel from './NutritionPanel'
 
 const TIER_COLORS = {
   paideia: { color: '#a07850', bg: 'rgba(160,120,80,0.12)', border: 'rgba(160,120,80,0.3)' },
@@ -578,7 +579,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires, weightLogs = [] }) {
+export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires, weightLogs = [], nutritionTargets = null }) {
   const router = useRouter()
   const [tab, setTab] = useState('plans')
   const [checkins, setCheckins] = useState(initialCheckins)
@@ -602,6 +603,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
     { id: 'logs',          label: 'Treningi',         count: logs.length },
     { id: 'checkins',      label: 'Check-iny',        count: pendingFeedback > 0 ? pendingFeedback : checkins.length, urgent: pendingFeedback > 0 },
     { id: 'questionnaire', label: 'Ankieta',          count: questionnaire ? 1 : 0 },
+    { id: 'nutrition',     label: 'Żywienie',         count: nutritionTargets ? 1 : 0 },
   ]
 
   function handleFeedbackSaved(checkinId, feedbackText) {
@@ -1073,6 +1075,12 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
             questionnaires={questionnaires}
             clientId={client.id}
           />
+        )}
+
+        {tab === 'nutrition' && (
+          <Section title="Cele żywieniowe">
+            <NutritionPanel clientId={client.id} initialTargets={nutritionTargets} />
+          </Section>
         )}
 
       </main>
