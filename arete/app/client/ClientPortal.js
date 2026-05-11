@@ -588,24 +588,6 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
           {/* ── LEFT ── */}
           <div className="space-y-4">
 
-            {/* Onboarding questionnaire CTA — pokazuj dopóki ankieta nie jest wypełniona */}
-            {!questionnaire && (
-              <button
-                onClick={() => router.push('/client/questionnaire')}
-                className="w-full text-left bg-gradient-to-br from-gold/10 to-gold/[0.02] border border-gold/40 rounded-2xl p-6 relative overflow-hidden hover:border-gold transition group"
-              >
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gold/[0.06] rounded-full blur-3xl pointer-events-none" />
-                <p className="text-[10px] text-gold uppercase tracking-widest mb-3">Krok pierwszy</p>
-                <h2 className="text-2xl font-display text-warm mb-2">Wypełnij ankietę onboardingową</h2>
-                <p className="text-sm text-muted leading-relaxed mb-5 max-w-prose">
-                  Pomoże trenerowi przygotować spersonalizowany plan — cele, staż, sprzęt, kontuzje, priorytetowe partie. Zajmuje ok. 5 minut.
-                </p>
-                <span className="inline-flex items-center gap-2 bg-gold text-bg-deep font-bold py-3 px-5 rounded-xl text-sm tracking-wide group-hover:opacity-90 transition">
-                  Zacznij ankietę →
-                </span>
-              </button>
-            )}
-
             {/* Today Quest */}
             <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-gold/[0.04] rounded-full blur-3xl pointer-events-none" />
@@ -724,18 +706,12 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             {/* Coach Message */}
             <CoachMessageCard coachName={coachName} />
 
-            {/* New questionnaire button — tylko jeśli już wypełniona */}
+            {/* Questionnaire status badge */}
             {questionnaire && (
-              <button
-                onClick={() => router.push('/client/questionnaire?new=1')}
-                className="w-full flex items-center justify-between bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4 hover:border-gold transition group"
-              >
-                <div className="text-left">
-                  <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
-                  <p className="text-sm font-medium">Wyślij nową ankietę</p>
-                </div>
-                <span className="text-muted group-hover:text-gold transition">→</span>
-              </button>
+              <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4">
+                <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
+                <p className="text-sm font-medium text-success">✓ Wypełniona</p>
+              </div>
             )}
 
             {/* Plan link */}
