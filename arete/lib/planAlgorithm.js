@@ -129,6 +129,7 @@ function buildDecisionParams(q) {
     plec: q.plec || 'Mężczyzna',
     avoidExercises: parseAvoidedExercises(q.cwiczenia_unikane),
     preferenceMachines: q.preference_machines || 'mixed',
+    sessionMinutes: parseInt((q.czas_sesji || '').replace(/\D/g, '')) || 60,
   }
 }
 
@@ -395,22 +396,27 @@ export function generatePlan(questionnaire, exercises) {
         const freq       = muscleFrequency[muscle] || 1
 
         const musclesInSession = sessionDef.muscles.length
+        const sessionMinutes = params.sessionMinutes || 60
 
-        // Session density factor — more muscles = less sets per muscle
-        // Realistic target: 12-18 total working sets per session (60-90 min)
         const densityFactor = musclesInSession <= 2 ? 1.0
-          : musclesInSession === 3 ? 0.95
-          : musclesInSession === 4 ? 0.80
-          : 0.70
+          : musclesInSession === 3
+            ? (sessionMinutes >= 75 ? 1.0 : 0.90)
+          : musclesInSession === 4
+            ? (sessionMinutes >= 90 ? 0.90 : sessionMinutes >= 75 ? 0.82 : 0.75)
+          : (sessionMinutes >= 90 ? 0.80 : 0.70)
 
         const rawSets = computeSessionSets(
           muscle, params.experience, isPriority, isAvoid,
           freq, params.recoveryModifier, params.cardioFactor
         )
-        const sets = Math.max(2, Math.round(rawSets * densityFactor))
+
+        const sets = Math.max(2, isPriority
+          ? rawSets
+          : Math.round(rawSets * densityFactor)
+        )
 
         // 2nd exercise only when session is less dense AND enough sets
-        const exCountThreshold = musclesInSession <= 3 ? 5 : 7
+        const exCountThreshold = sessionMinutes >= 90 ? 5 : sessionMinutes >= 75 ? 6 : 8
         const isSmall = ['abs','calves','shoulders_rear','biceps','triceps'].includes(muscle)
         const exCount = isSmall ? 1 : sets >= exCountThreshold ? 2 : 1
 
@@ -419,6 +425,7 @@ export function generatePlan(questionnaire, exercises) {
           muscle, exCount, params
         )
         picked.forEach(ex => usedExercises.add(ex.name))
+        picked.sort((a, b) => (b.compound ? 1 : 0) - (a.compound ? 1 : 0))
 
         return picked.map((ex, idx) => {
           const exSets = idx === 0 ? sets : Math.max(2, Math.round(sets * 0.5))
@@ -447,6 +454,9 @@ export function generatePlan(questionnaire, exercises) {
         })
       }),
     }
+
+    const maxExercises = sessionMinutes >= 90 ? 8 : sessionMinutes >= 75 ? 6 : 5
+    sessions[sessionKey].exercises = sessions[sessionKey].exercises.slice(0, maxExercises)
   })
 
   // Plan-level weekly progression metadata
