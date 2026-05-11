@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import NutritionPanel from './NutritionPanel'
 import MealPlanBuilder from './MealPlanBuilder'
+import ClientReport from './ClientReport'
 
 const TIER_COLORS = {
   paideia: { color: '#a07850', bg: 'rgba(160,120,80,0.12)', border: 'rgba(160,120,80,0.3)' },
@@ -1040,6 +1041,10 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                 </div>
               )}
             </Section>
+
+            <div className="mt-4">
+              <ClientReport clientId={client.id} />
+            </div>
           </>
         )}
 
