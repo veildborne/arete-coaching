@@ -280,7 +280,7 @@ function SetRow({ setNum, data, onChange, onRemove, onLogged, prevBest, targetRi
       <div className="flex justify-between items-center pl-9 mt-1">
         {e1rm ? (
           <div className="text-[0.65rem] text-[rgba(184,166,119,0.55)]">
-            Est. 1RM: <span className="text-gold">{e1rm} kg</span>
+            Siła (e1RM): <span className="text-gold">{e1rm} kg</span>
           </div>
         ) : <div />}
         {targetRir !== undefined && (

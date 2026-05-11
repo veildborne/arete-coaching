@@ -11,7 +11,7 @@ import CheatMealTracker from './CheatMealTracker'
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const CAMPAIGN_STAGES = ['Fundament', 'Akumulacja', 'Wzrost', 'Próba', 'Deload', 'Review']
+const CAMPAIGN_STAGES = ['Fundament', 'Akumulacja', 'Wzrost', 'Próba', 'Regeneracja', 'Podsumowanie']
 
 const ARCHETYPES = [
   { min: 0,    label: 'Nowicjusz',  greek: 'Μαθητής',    color: '#8F9AAF' },
@@ -171,7 +171,7 @@ function StatGrid({ recentLogs, questionnaire }) {
     { label: 'KONSEKWENCJA',  value: totalSets > 0 ? `${totalSets} serii` : '—',  sub: 'Wszystkich serii',      bar: Math.min(totalSets / 500, 1), color: '#47D18C' },
     { label: 'REGENERACJA',   value: avgSleep ? `${avgSleep.toFixed(1)}/10` : '—', sub: 'Jakość snu',           bar: avgSleep ? avgSleep / 10 : 0, color: '#8F9AAF' },
     { label: 'TRENINGI',      value: recentLogs.length,                            sub: 'Łącznie sesji',         bar: Math.min(recentLogs.length / 50, 1), color: accent.secondary },
-    { label: 'AVG CZAS',      value: avgDuration > 0 ? `${Math.round(avgDuration)} min` : '—', sub: 'Czas sesji', bar: Math.min(avgDuration / 120, 1), color: accent.secondary },
+    { label: 'ŚR. CZAS',      value: avgDuration > 0 ? `${Math.round(avgDuration)} min` : '—', sub: 'Czas sesji', bar: Math.min(avgDuration / 120, 1), color: accent.secondary },
   ]
 
   const data = stats.map(s => ({ stat: s.label, value: Math.round(s.bar * 100) }))
@@ -676,7 +676,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
                         {[
                           { label: 'Energia', value: ci.energy_level },
                           { label: 'Sen', value: ci.sleep_quality },
-                          { label: 'Adherencja', value: ci.adherence_pct ? `${ci.adherence_pct}%` : '—' },
+                          { label: 'Realizacja diety', value: ci.adherence_pct ? `${ci.adherence_pct}%` : '—' },
                         ].map(m => (
                           <div key={m.label} className="text-center">
                             <p className="text-[9px] text-muted uppercase tracking-wider mb-0.5">{m.label}</p>

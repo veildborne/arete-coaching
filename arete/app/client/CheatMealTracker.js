@@ -37,7 +37,7 @@ export default function CheatMealTracker({ nutritionTargets }) {
       .from('cheat_meals')
       .insert({
         logged_at: today,
-        description: form.description || 'Cheat meal',
+        description: form.description || 'Odstępstwo',
         calories_est: parseInt(form.calories_est),
       })
       .select()
@@ -59,7 +59,7 @@ export default function CheatMealTracker({ nutritionTargets }) {
 
   return (
     <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-5">
-      <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Cheat meal / odchylenie</p>
+      <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Odstępstwo od diety</p>
 
       {/* Dzienny budżet */}
       <div className="bg-bg-deep rounded-xl p-4 mb-4">

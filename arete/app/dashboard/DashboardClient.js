@@ -80,7 +80,7 @@ function ClientCard({ client, onProfile, onNewPlan }) {
         {[
           { label: 'Treningi', value: client.logs?.length ?? 0 },
           { label: 'Ost. trening', value: noTrainingDays === null ? '—' : noTrainingDays < 1 ? 'dziś' : `${Math.floor(noTrainingDays)}d` },
-          { label: 'Compliance', value: compliance === null ? '—' : `${compliance}%`, color: compliance === null ? '#8F9AAF' : compliance >= 80 ? '#47D18C' : compliance >= 60 ? '#E8A020' : '#EF6B73' },
+          { label: 'Realizacja planu', value: compliance === null ? '—' : `${compliance}%`, color: compliance === null ? '#8F9AAF' : compliance >= 80 ? '#47D18C' : compliance >= 60 ? '#E8A020' : '#EF6B73' },
         ].map(m => (
           <div key={m.label} className="bg-bg-deep rounded-lg p-2 text-center">
             <p className="text-[10px] text-muted mb-0.5">{m.label}</p>
@@ -436,7 +436,7 @@ export default function DashboardClient({ profile, clients }) {
               return (
                 <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] text-muted uppercase tracking-widest">Compliance — 4 tygodnie</p>
+                    <p className="text-[10px] text-muted uppercase tracking-widest">Realizacja — 4 tygodnie</p>
                     <span className="text-sm font-semibold" style={{ color: avgCompliance >= 80 ? '#47D18C' : avgCompliance >= 60 ? '#E8A020' : '#EF6B73' }}>
                       śr. {avgCompliance}%
                     </span>

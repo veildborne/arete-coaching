@@ -94,10 +94,10 @@ function ClientPDF({ data }) {
           <Text style={styles.sectionTitle}>Postęp treningowy</Text>
           {[
             ['Łączne sesje', logs.length],
-            ['Compliance (4 tyg.)', compliance !== null ? `${compliance}%` : '—'],
+            ['Realizacja planu (4 tyg.)', compliance !== null ? `${compliance}%` : '—'],
             ['Łączna objętość', totalVolume > 0 ? `${Math.round(totalVolume / 1000)}k kg` : '—'],
             ['Aktywny plan', activePlan?.name || 'Brak'],
-            ['Split', activePlan?.plan_data?.split_name || '—'],
+            ['Podział tygodnia', activePlan?.plan_data?.split_name || '—'],
             ['Aktualny tydzień', activePlan?.current_week || '—'],
           ].map(([label, value]) => (
             <View key={label} style={styles.row}>
@@ -164,7 +164,7 @@ function ClientPDF({ data }) {
                     ['Waga', ci.body_weight ? `${ci.body_weight} kg` : '—'],
                     ['Energia', ci.energy_level ? `${ci.energy_level}/10` : '—'],
                     ['Sen', ci.sleep_quality ? `${ci.sleep_quality}/10` : '—'],
-                    ['Adherencja', ci.adherence_pct ? `${ci.adherence_pct}%` : '—'],
+                    ['Realizacja diety', ci.adherence_pct ? `${ci.adherence_pct}%` : '—'],
                   ].map(([label, value]) => (
                     <View key={label} style={{ flex: 1 }}>
                       <Text style={{ fontSize: 7, color: '#8F9AAF' }}>{label}</Text>
@@ -174,7 +174,7 @@ function ClientPDF({ data }) {
                 </View>
                 {ci.coach_feedback && (
                   <Text style={[styles.cardText, { marginTop: 4, color: '#D4B570' }]}>
-                    Coach: {ci.coach_feedback}
+                    Trener: {ci.coach_feedback}
                   </Text>
                 )}
               </View>
@@ -216,7 +216,7 @@ export default function ClientReport({ clientId }) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-[10px] text-muted uppercase tracking-widest">Raport PDF</p>
-          <p className="text-xs text-muted/60 mt-0.5">Pełny raport klienta do pobrania</p>
+          <p className="text-xs text-muted/60 mt-0.5">Pełny raport do pobrania</p>
         </div>
         {!data && (
           <button
