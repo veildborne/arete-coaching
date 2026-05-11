@@ -129,6 +129,56 @@ function calculatePerformanceTrends(logs) {
   return trends.sort((a, b) => b.e1rm - a.e1rm).slice(0, 5)
 }
 
+function calculateRirAdherence(logs) {
+  let total = 0, withinRange = 0
+  logs.forEach(log => {
+    (log.exercises || []).forEach(ex => {
+      (ex.sets || []).forEach(s => {
+        if (s.rir_actual != null && s.rir_target != null) {
+          total++
+          if (Math.abs(s.rir_actual - s.rir_target) <= 1) withinRange++
+        }
+      })
+    })
+  })
+  if (total === 0) return null
+  return { pct: Math.round((withinRange / total) * 100), total }
+}
+
+function analyzeWeightTrend(weightLogs) {
+  if (!weightLogs || weightLogs.length < 3) return null
+  const sorted = [...weightLogs].sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at))
+  const last7 = sorted.slice(0, 7)
+  const prev7 = sorted.slice(7, 14)
+  const avg7 = last7.reduce((s, l) => s + parseFloat(l.weight_kg), 0) / last7.length
+  const avg14 = prev7.length >= 3 ? prev7.reduce((s, l) => s + parseFloat(l.weight_kg), 0) / prev7.length : null
+  const delta = avg14 ? parseFloat((avg7 - avg14).toFixed(2)) : null
+  const deltaPct = avg14 ? parseFloat(((delta / avg14) * 100).toFixed(2)) : null
+  let suggestion = null, suggestionColor = '#8F9AAF'
+  if (deltaPct !== null) {
+    if (deltaPct < -1.0) { suggestion = '↓ Spada za szybko — rozważ +100–200 kcal'; suggestionColor = '#E8A020' }
+    else if (deltaPct >= -1.0 && deltaPct <= -0.3) { suggestion = '✓ Optymalny spadek — zostaw kalorie'; suggestionColor = '#47D18C' }
+    else if (deltaPct > -0.3 && deltaPct < 0.3) { suggestion = '→ Waga stoi — sprawdź adherencję, rozważ -100–200 kcal'; suggestionColor = '#E8A020' }
+    else if (deltaPct >= 0.3) { suggestion = '↑ Waga rośnie — jeśli redukcja: -100–200 kcal'; suggestionColor = '#EF6B73' }
+  }
+  return { avg7: avg7.toFixed(1), avg14: avg14?.toFixed(1), delta, deltaPct, suggestion, suggestionColor, dataPoints: last7.length }
+}
+
+function calculateWeeklyVolume(logs) {
+  const byMuscle = {}
+  logs.forEach(log => {
+    (log.exercises || []).forEach(ex => {
+      const m = ex.muscle_group || 'inne'
+      if (!byMuscle[m]) byMuscle[m] = 0
+      byMuscle[m] += (ex.sets || []).length
+    })
+  })
+  return Object.entries(byMuscle)
+    .map(([muscle, sets]) => ({ muscle, sets }))
+    .sort((a, b) => b.sets - a.sets)
+    .slice(0, 8)
+}
+
 function Pill({ children, color, bg, border }) {
   return (
     <span
@@ -517,7 +567,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires }) {
+export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires, weightLogs = [] }) {
   const router = useRouter()
   const [tab, setTab] = useState('plans')
   const [checkins, setCheckins] = useState(initialCheckins)
@@ -532,6 +582,9 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
 
   // FAZA 6: Compliance score
   const complianceData = calculateCompliance(logs, plans)
+  const rirAdherence = calculateRirAdherence(logs)
+  const weightTrend = analyzeWeightTrend(weightLogs)
+  const weeklyVolume = calculateWeeklyVolume(logs)
 
   const TABS = [
     { id: 'plans',         label: 'Plany',           count: plans.length },
@@ -827,6 +880,66 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
         {/* LOGS TAB */}
         {tab === 'logs' && (
           <>
+            <div className="grid grid-cols-1 gap-3 mb-6">
+              {rirAdherence && (
+                <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+                  <div className="text-[10px] text-muted uppercase tracking-widest mb-2">RIR Adherence</div>
+                  <div className="flex items-end gap-3 mb-2">
+                    <span className="text-2xl font-semibold" style={{ color: rirAdherence.pct >= 75 ? '#47D18C' : rirAdherence.pct >= 50 ? '#E8A020' : '#EF6B73' }}>
+                      {rirAdherence.pct}%
+                    </span>
+                    <span className="text-xs text-muted mb-1">serii w targecie ±1 RIR ({rirAdherence.total} serii total)</span>
+                  </div>
+                  <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${rirAdherence.pct}%`, background: rirAdherence.pct >= 75 ? '#47D18C' : rirAdherence.pct >= 50 ? '#E8A020' : '#EF6B73' }} />
+                  </div>
+                </div>
+              )}
+              {weightTrend && (
+                <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+                  <div className="text-[10px] text-muted uppercase tracking-widest mb-2">Trend wagi (7 dni)</div>
+                  <div className="flex items-center gap-4 mb-2 flex-wrap">
+                    <div>
+                      <span className="text-xl font-semibold text-warm">{weightTrend.avg7} kg</span>
+                      <span className="text-xs text-muted ml-2">śr. 7 dni</span>
+                    </div>
+                    {weightTrend.avg14 && (
+                      <div>
+                        <span className="text-sm text-muted">{weightTrend.avg14} kg</span>
+                        <span className="text-xs text-muted ml-1">poprzednie 7 dni</span>
+                      </div>
+                    )}
+                    {weightTrend.delta !== null && (
+                      <span className="text-sm font-medium" style={{ color: weightTrend.delta < 0 ? '#47D18C' : '#EF6B73' }}>
+                        {weightTrend.delta > 0 ? '+' : ''}{weightTrend.delta} kg ({weightTrend.deltaPct > 0 ? '+' : ''}{weightTrend.deltaPct}%)
+                      </span>
+                    )}
+                  </div>
+                  {weightTrend.suggestion && (
+                    <div className="text-xs px-3 py-2 rounded-lg border" style={{ borderColor: `${weightTrend.suggestionColor}40`, color: weightTrend.suggestionColor, background: `${weightTrend.suggestionColor}10` }}>
+                      {weightTrend.suggestion}
+                    </div>
+                  )}
+                </div>
+              )}
+              {weeklyVolume.length > 0 && (
+                <div className="bg-[#1a1a1a] border border-white/[0.07] rounded-[10px] p-4">
+                  <div className="text-[10px] text-muted uppercase tracking-widest mb-3">Objętość per partia (ostatnie 20 sesji)</div>
+                  <div className="space-y-2">
+                    {weeklyVolume.map(({ muscle, sets }) => (
+                      <div key={muscle} className="flex items-center gap-3">
+                        <div className="text-[11px] text-muted w-28 shrink-0 capitalize">{muscle.replace('_', ' ')}</div>
+                        <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                          <div className="h-full rounded-full bg-gold/60" style={{ width: `${Math.min(100, (sets / weeklyVolume[0].sets) * 100)}%` }} />
+                        </div>
+                        <div className="text-[11px] text-muted w-12 text-right">{sets} serii</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Volume Tracking */}
             <Section title="Volume per partia (wszystkie logi)">
               {logs.length === 0 ? (
