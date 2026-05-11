@@ -449,7 +449,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
   }
 
   if (saved) return (
-    <div className="min-h-screen bg-gradient-to-b from-[#131f36] via-[#0a0f1a] to-[#060912] flex items-center justify-center font-body">
+    <div className="min-h-screen flex items-center justify-center font-body">
       <div className="text-center">
         <div className="font-display text-6xl text-gold mb-4">✓</div>
         <h2 className="font-display text-[28px] text-[#e8e8e8] m-0 mb-2">
@@ -462,7 +462,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#131f36] via-[#0a0f1a] to-[#060912] text-[#e8e8e8] font-body">
+    <div className="min-h-screen text-[#e8e8e8] font-body">
       {swapTarget && (
         <SwapPicker
           currentExercise={swapTarget.exercise}
@@ -482,7 +482,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
       )}
 
       {/* Topbar */}
-      <nav className="sticky top-0 z-50 bg-[rgba(10,14,26,0.9)] backdrop-blur-xl border-b border-gold/15 px-6 h-14 flex items-center gap-4">
+      <nav className="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-gold/15 px-6 h-14 flex items-center gap-4">
         <button
           onClick={() => router.push(`/dashboard/client/${clientId}`)}
           className="text-[13px] text-gold/70 bg-none border-none cursor-pointer font-body p-0 hover:text-gold transition"

@@ -421,7 +421,7 @@ function SessionSummary({ stats, onContinue, clientId, planId }) {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] flex items-center justify-center font-body p-8">
+    <div className="min-h-screen flex items-center justify-center font-body p-8">
       <div className="text-center max-w-[340px] w-full">
         {/* Icon */}
         <div className="w-[72px] h-[72px] rounded-full bg-[rgba(71,209,140,0.15)] border-2 border-[rgba(71,209,140,0.35)] flex items-center justify-center mx-auto mb-6 text-[2rem]">
@@ -700,7 +700,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
   if (!started) {
     const sessionName = Object.values(activePlan?.plan_data?.sessions || {}).find(s => s.label === dayLabel)?.name || dayLabel
     return (
-      <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] flex items-center justify-center p-6 font-body">
+      <div className="min-h-screen flex items-center justify-center p-6 font-body">
         <div className="w-full max-w-sm text-center">
           <p className="text-[10px] text-[rgba(184,166,119,0.5)] uppercase tracking-widest mb-3">Dzisiejszy trening</p>
           <h1 className="font-display text-4xl text-[#b8a677] mb-2">{sessionName}</h1>
@@ -728,7 +728,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#131f36_0%,#0a0f1a_60%,#060912_100%)] text-warm font-body">
+    <div className="min-h-screen text-warm font-body">
       {/* Exercise picker */}
       {showPicker && (
         <ExercisePicker
@@ -742,7 +742,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
       {showRestTimer && <RestTimer onDismiss={() => setShowRestTimer(false)} />}
 
       {/* TOP BAR */}
-      <nav className="sticky top-0 z-50 bg-[rgba(10,14,26,0.92)] backdrop-blur-xl border-b border-[rgba(184,166,119,0.15)] py-[0.85rem] px-5 flex justify-between items-center">
+      <nav className="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-[rgba(184,166,119,0.15)] py-[0.85rem] px-5 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/client')}
