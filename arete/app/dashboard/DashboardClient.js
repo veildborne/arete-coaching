@@ -218,15 +218,13 @@ export default function DashboardClient({ profile, clients }) {
     <div className="min-h-screen text-warm font-body relative">
 
       {/* TOP NAV */}
-      <nav className="sticky top-0 z-50 bg-black/30 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-4 h-14 flex items-center gap-2">
-        {/* Logo */}
+      <nav className="sticky top-0 z-50 bg-black/30 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-3 h-14 flex items-center gap-2">
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="font-display text-lg text-gold tracking-widest">ARETÉ</span>
           <span className="text-[8px] px-1 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest hidden sm:block">α 0.1</span>
         </div>
 
-        {/* Nav tabs — scrollable on mobile */}
-        <div className="flex-1 flex items-center gap-0.5 overflow-x-auto scrollbar-hide mx-1">
+        <div className="flex-1 flex items-center justify-center gap-0.5 overflow-x-auto scrollbar-hide min-w-0">
           {[
             { id: 'overview',  label: 'Przegląd' },
             { id: 'clients',   label: 'Klienci' },
@@ -234,7 +232,7 @@ export default function DashboardClient({ profile, clients }) {
             { id: 'checkins',  label: 'Raporty', badge: stats.pendingCheckins },
           ].map(({ id, label, badge }) => (
             <button key={id} onClick={() => setActiveNav(id)}
-              className={`relative px-2.5 py-1 rounded-lg text-xs transition whitespace-nowrap shrink-0 ${activeNav === id ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
+              className={`relative px-2.5 py-1.5 rounded-lg text-[11px] sm:text-sm transition shrink-0 ${activeNav === id ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
               {label}
               {badge > 0 && (
                 <span className="absolute -top-1 -right-1 text-[8px] bg-danger text-white rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">{badge}</span>
@@ -243,15 +241,10 @@ export default function DashboardClient({ profile, clients }) {
           ))}
         </div>
 
-        {/* Actions — tylko ikony na mobile */}
         <div className="flex items-center gap-1.5 shrink-0">
           <button onClick={() => setInviteOpen(true)}
-            className="hidden sm:block bg-gold text-bg-deep px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition whitespace-nowrap">
+            className="bg-gold text-bg-deep px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:opacity-90 transition whitespace-nowrap">
             + Dodaj
-          </button>
-          <button onClick={() => setInviteOpen(true)}
-            className="sm:hidden w-8 h-8 bg-gold/15 border border-gold/30 rounded-lg flex items-center justify-center text-gold text-sm">
-            +
           </button>
           <div className="w-7 h-7 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center font-display text-gold text-xs font-bold shrink-0">
             {getInitials(profile?.full_name, profile?.email)}
@@ -270,22 +263,22 @@ export default function DashboardClient({ profile, clients }) {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6">
+        <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 mb-6">
           {[
-            { label: 'Klienci',        value: stats.active,          icon: '👥', color: '#D4B570', id: 'clients' },
-            { label: 'Wymagają uwagi', value: stats.needsAttention,  icon: '🔔', color: stats.needsAttention > 0 ? '#EF6B73' : '#47D18C', id: 'attention' },
-            { label: 'Bez planu',      value: stats.withoutPlan,     icon: '📋', color: stats.withoutPlan > 0 ? '#E8A020' : '#47D18C', id: null },
-            { label: 'Treningi',       value: stats.totalLogs,       icon: '💪', color: '#D4B570', id: null },
-            { label: 'Raporty',        value: stats.pendingCheckins, icon: '📊', color: stats.pendingCheckins > 0 ? '#EF6B73' : '#47D18C', id: 'checkins' },
+            { label: 'Klienci',        value: stats.active,          icon: '◎', color: '#D4B570', id: 'clients' },
+            { label: 'Uwaga',          value: stats.needsAttention,  icon: '!', color: stats.needsAttention > 0 ? '#EF6B73' : '#47D18C', id: 'attention' },
+            { label: 'Bez planu',      value: stats.withoutPlan,     icon: '○', color: stats.withoutPlan > 0 ? '#E8A020' : '#47D18C', id: null },
+            { label: 'Treningi',       value: stats.totalLogs,       icon: '↑', color: '#D4B570', id: null },
+            { label: 'Raporty',        value: stats.pendingCheckins, icon: '◈', color: stats.pendingCheckins > 0 ? '#EF6B73' : '#47D18C', id: 'checkins' },
           ].map(({ label, value, icon, color, id }) => (
             <div key={label}
               onClick={() => id && setActiveNav(id)}
-              className={`bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-3 sm:p-4 transition ${id ? 'cursor-pointer hover:border-gold/30' : ''}`}>
+              className="bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-xl p-3 transition cursor-pointer hover:border-gold/30">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] text-muted uppercase tracking-widest">{label}</p>
+                <p className="text-[9px] text-muted uppercase tracking-widest">{label}</p>
                 <span style={{ color }}>{icon}</span>
               </div>
-              <p className="text-2xl font-display" style={{ color }}>{value}</p>
+              <p className="text-xl font-display" style={{ color }}>{value}</p>
             </div>
           ))}
         </div>
