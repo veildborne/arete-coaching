@@ -1079,7 +1079,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
 
         {tab === 'nutrition' && (
           <Section title="Cele żywieniowe">
-            <NutritionPanel clientId={client.id} initialTargets={nutritionTargets} />
+            <NutritionPanel clientId={client.id} initialTargets={nutritionTargets} questionnaire={questionnaire} />
           </Section>
         )}
 

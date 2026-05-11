@@ -7,6 +7,69 @@ const MACRO_COLORS = {
   carbs: '#5B8DB8',
 }
 
+// ─── Mifflin-St Jeor + Israetel/Helms/McDonald ───────────────────────────────
+function calculateSuggested(questionnaire) {
+  if (!questionnaire?.data) return null
+  const q = questionnaire.data
+
+  const waga    = parseFloat(q.waga_kg)    || 0
+  const wzrost  = parseFloat(q.wzrost_cm)  || 0
+  const wiek    = parseFloat(q.wiek)       || 25
+  const plec    = q.plec || 'Mężczyzna'
+  const cel     = q.cel  || 'Budowa masy mięśniowej'
+  const staz    = q.staz || '1-2 lata'
+
+  if (!waga || !wzrost) return null
+
+  // Mifflin-St Jeor BMR
+  let bmr = plec === 'Kobieta'
+    ? (10 * waga) + (6.25 * wzrost) - (5 * wiek) - 161
+    : (10 * waga) + (6.25 * wzrost) - (5 * wiek) + 5
+
+  // Activity multiplier
+  const actMap = {
+    'less_6':  1.2,
+    '6_7':     1.375,
+    '7_8':     1.55,
+    'more_8':  1.55,
+  }
+  const dni = parseInt(q.dni_tydzien) || 3
+  const actMult = dni <= 2 ? 1.2 : dni <= 3 ? 1.375 : dni <= 5 ? 1.55 : 1.725
+  let tdee = Math.round(bmr * actMult)
+
+  // Cel adjustment (McDonald/Helms)
+  let calAdj = 0
+  if (cel === 'Redukcja tkanki tłuszczowej') calAdj = -300
+  else if (cel === 'Budowa masy mięśniowej') calAdj = +300
+  else if (cel === 'Rekompozycja') calAdj = 0
+  else if (cel === 'Wzrost siły') calAdj = +200
+  const calories = tdee + calAdj
+
+  // Białko — Helms/Israetel: 2.0g/kg BW (środek zakresu 1.8-2.4)
+  // Dla redukcji wyżej (2.2) żeby chronić masę — McDonald
+  const proteinMulti = cel === 'Redukcja tkanki tłuszczowej' ? 2.2 : 2.0
+  const protein_g = Math.round(waga * proteinMulti)
+
+  // Tłuszcz — minimum 0.8g/kg (McDonald) — zaokrąglone do 5
+  const fat_g = Math.round((waga * 0.8) / 5) * 5
+
+  // Węgle — reszta kalorii
+  const proteinKcal = protein_g * 4
+  const fatKcal     = fat_g * 9
+  const carbsKcal   = Math.max(0, calories - proteinKcal - fatKcal)
+  const carbs_g     = Math.round(carbsKcal / 4)
+
+  return {
+    calories,
+    protein_g,
+    fat_g,
+    carbs_g,
+    tdee,
+    bmr: Math.round(bmr),
+    rationale: `BMR ${Math.round(bmr)} kcal × ${actMult} = TDEE ${tdee} kcal ${calAdj !== 0 ? `${calAdj > 0 ? '+' : ''}${calAdj} kcal (${cel})` : '(recomp)'}. Białko ${proteinMulti}g/kg, tłuszcz 0.8g/kg min.`,
+  }
+}
+
 function MacroBar({ label, value, total, color }) {
   const pct = total > 0 ? Math.min(100, Math.round((value / total) * 100)) : 0
   return (
@@ -22,21 +85,43 @@ function MacroBar({ label, value, total, color }) {
   )
 }
 
-export default function NutritionPanel({ clientId, initialTargets }) {
-  const [targets, setTargets] = useState(initialTargets || null)
-  const [editing, setEditing] = useState(!initialTargets)
+export default function NutritionPanel({ clientId, initialTargets, questionnaire }) {
+  const suggested = calculateSuggested(questionnaire)
+
+  const [targets, setTargets]   = useState(initialTargets || null)
+  const [editing, setEditing]   = useState(!initialTargets)
+  const [showRationale, setShowRationale] = useState(false)
   const [form, setForm] = useState({
-    calories: initialTargets?.calories || '',
-    protein_g: initialTargets?.protein_g || '',
-    fat_g: initialTargets?.fat_g || '',
-    carbs_g: initialTargets?.carbs_g || '',
-    notes: initialTargets?.notes || '',
+    calories:  initialTargets?.calories  || suggested?.calories  || '',
+    protein_g: initialTargets?.protein_g || suggested?.protein_g || '',
+    fat_g:     initialTargets?.fat_g     || suggested?.fat_g     || '',
+    carbs_g:   initialTargets?.carbs_g   || suggested?.carbs_g   || '',
+    notes:     initialTargets?.notes     || '',
   })
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved]   = useState(false)
+
+  function applySuggested() {
+    if (!suggested) return
+    setForm(p => ({
+      ...p,
+      calories:  suggested.calories,
+      protein_g: suggested.protein_g,
+      fat_g:     suggested.fat_g,
+      carbs_g:   suggested.carbs_g,
+    }))
+  }
 
   const totalMacroKcal = targets
     ? (targets.protein_g * 4) + (targets.fat_g * 9) + (targets.carbs_g * 4)
+    : 0
+
+  // Live macro kcal check while editing
+  const liveKcal = form.protein_g && form.fat_g && form.carbs_g
+    ? (parseInt(form.protein_g) * 4) + (parseInt(form.fat_g) * 9) + (parseInt(form.carbs_g) * 4)
+    : 0
+  const liveCalDiff = form.calories && liveKcal
+    ? liveKcal - parseInt(form.calories)
     : 0
 
   async function handleSave() {
@@ -48,21 +133,21 @@ export default function NutritionPanel({ clientId, initialTargets }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         client_id: clientId,
-        calories: parseInt(calories),
+        calories:  parseInt(calories),
         protein_g: parseInt(protein_g),
-        fat_g: parseInt(fat_g),
-        carbs_g: parseInt(carbs_g),
-        notes: form.notes,
+        fat_g:     parseInt(fat_g),
+        carbs_g:   parseInt(carbs_g),
+        notes:     form.notes,
       }),
     })
     setSaving(false)
     if (res.ok) {
       setTargets({
-        calories: parseInt(calories),
+        calories:  parseInt(calories),
         protein_g: parseInt(protein_g),
-        fat_g: parseInt(fat_g),
-        carbs_g: parseInt(carbs_g),
-        notes: form.notes,
+        fat_g:     parseInt(fat_g),
+        carbs_g:   parseInt(carbs_g),
+        notes:     form.notes,
       })
       setEditing(false)
       setSaved(true)
@@ -85,8 +170,45 @@ export default function NutritionPanel({ clientId, initialTargets }) {
         </div>
       </div>
 
+      {/* Suggested banner */}
+      {suggested && !initialTargets && !editing && (
+        <div className="mb-4 p-3 rounded-lg border border-[rgba(82,183,136,0.2)] bg-[rgba(82,183,136,0.05)]">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[11px] text-success">✦ Sugestia algorytmu</span>
+            <button onClick={() => setShowRationale(r => !r)} className="text-[10px] text-muted hover:text-warm transition">
+              {showRationale ? 'Ukryj' : 'Pokaż obliczenia'}
+            </button>
+          </div>
+          {showRationale && (
+            <p className="text-[11px] text-muted leading-relaxed mb-2">{suggested.rationale}</p>
+          )}
+          <div className="flex gap-3 text-xs mb-2">
+            <span className="text-warm">{suggested.calories} kcal</span>
+            <span style={{ color: MACRO_COLORS.protein }}>B: {suggested.protein_g}g</span>
+            <span style={{ color: MACRO_COLORS.fat }}>T: {suggested.fat_g}g</span>
+            <span style={{ color: MACRO_COLORS.carbs }}>W: {suggested.carbs_g}g</span>
+          </div>
+          <button
+            onClick={() => { applySuggested(); setEditing(true) }}
+            className="text-[11px] px-3 py-1.5 rounded-lg border border-success/30 text-success hover:bg-success/10 transition"
+          >
+            Zastosuj i edytuj →
+          </button>
+        </div>
+      )}
+
       {editing ? (
         <div className="space-y-3">
+          {/* Suggested quick-apply while editing */}
+          {suggested && (
+            <div className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05]">
+              <span className="text-[11px] text-muted">Sugestia: {suggested.calories} kcal / B{suggested.protein_g} T{suggested.fat_g} W{suggested.carbs_g}</span>
+              <button onClick={applySuggested} className="text-[10px] px-2.5 py-1 rounded border border-gold/20 text-gold/60 hover:text-gold transition">
+                Zastosuj
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-2">
             {[
               { key: 'calories',  label: 'Kalorie (kcal)', color: '#D4B570' },
@@ -105,6 +227,16 @@ export default function NutritionPanel({ clientId, initialTargets }) {
               </div>
             ))}
           </div>
+
+          {/* Live macro check */}
+          {liveKcal > 0 && (
+            <div className={`text-[11px] px-3 py-2 rounded-lg border ${Math.abs(liveCalDiff) <= 50 ? 'border-success/20 text-success' : 'border-[rgba(232,160,32,0.3)] text-[#E8A020]'}`}>
+              Makro = {liveKcal} kcal
+              {liveCalDiff !== 0 && ` (${liveCalDiff > 0 ? '+' : ''}${liveCalDiff} vs cel)`}
+              {Math.abs(liveCalDiff) <= 50 && ' ✓'}
+            </div>
+          )}
+
           <div>
             <div className="text-[10px] text-muted mb-1 uppercase tracking-widest">Notatka dla klienta</div>
             <textarea
@@ -115,6 +247,7 @@ export default function NutritionPanel({ clientId, initialTargets }) {
               className="w-full py-2 px-3 rounded-lg bg-white/[0.04] border border-gold/20 text-[#e8e8e8] text-sm font-body outline-none resize-none focus:border-gold/40"
             />
           </div>
+
           <button
             onClick={handleSave}
             disabled={saving}
@@ -144,7 +277,17 @@ export default function NutritionPanel({ clientId, initialTargets }) {
         </div>
       ) : (
         <div className="text-center py-6 text-muted text-sm">
-          Brak ustawionych celów żywieniowych
+          {suggested ? (
+            <div>
+              <p className="mb-3">Brak ustawionych celów</p>
+              <button
+                onClick={() => { applySuggested(); setEditing(true) }}
+                className="text-[11px] px-4 py-2 rounded-lg border border-gold/30 text-gold hover:bg-gold/10 transition"
+              >
+                ✦ Użyj sugestii algorytmu
+              </button>
+            </div>
+          ) : 'Brak ustawionych celów żywieniowych — uzupełnij ankietę klienta'}
         </div>
       )}
     </div>
