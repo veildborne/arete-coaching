@@ -706,13 +706,24 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             {/* Coach Message */}
             <CoachMessageCard coachName={coachName} />
 
-            {/* Questionnaire status badge */}
-            {questionnaire && (
+            {/* Ankieta status */}
+            {profile?.questionnaire_requested ? (
+              <div className="bg-surface border border-gold/30 rounded-2xl px-5 py-4">
+                <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
+                <p className="text-sm font-medium text-gold">📋 Czeka na wypełnienie</p>
+                <button
+                  onClick={() => router.push('/client/questionnaire')}
+                  className="mt-2 text-xs text-gold/70 underline hover:text-gold transition"
+                >
+                  Wypełnij teraz →
+                </button>
+              </div>
+            ) : questionnaire ? (
               <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4">
                 <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
                 <p className="text-sm font-medium text-success">✓ Wypełniona</p>
               </div>
-            )}
+            ) : null}
 
             {/* Plan link */}
             {activePlan && (
