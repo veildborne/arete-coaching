@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import NutritionPanel from './NutritionPanel'
 import MealPlanBuilder from './MealPlanBuilder'
-import ClientReport from './ClientReport'
+import dynamic from 'next/dynamic'
+const ClientReport = dynamic(() => import('./ClientReport'), { ssr: false })
 
 const TIER_COLORS = {
   paideia: { color: '#a07850', bg: 'rgba(160,120,80,0.12)', border: 'rgba(160,120,80,0.3)' },
