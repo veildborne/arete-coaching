@@ -422,6 +422,13 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
     setSaving(false)
     if (!error) {
       setSaved(true)
+      try {
+        await fetch('/api/email/plan-ready', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientId }),
+        })
+      } catch (e) { console.error('Email error:', e) }
       setTimeout(() => router.push(`/dashboard/client/${clientId}`), 1500)
     } else {
       alert('Błąd zapisu: ' + error.message)

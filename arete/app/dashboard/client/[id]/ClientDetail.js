@@ -387,6 +387,17 @@ function CheckinCard({ ci, onFeedbackSaved }) {
       setSaved(true)
       setOpen(false)
       onFeedbackSaved?.(ci.id, text.trim())
+      try {
+        await fetch('/api/email/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId: ci.client_id,
+            feedbackText: text.trim(),
+            weekNumber: ci.week_number,
+          }),
+        })
+      } catch (e) { console.error('Email error:', e) }
       setTimeout(() => setSaved(false), 3000)
     }
   }
