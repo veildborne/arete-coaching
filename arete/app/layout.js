@@ -40,7 +40,9 @@ export default function RootLayout({ children }) {
       </head>
       <body className="bg-[#020810]">
         <GlobalBackground />
-        {children}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          {children}
+        </div>
         <script dangerouslySetInnerHTML={{ __html: `
           if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
