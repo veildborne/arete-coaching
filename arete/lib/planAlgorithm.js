@@ -392,14 +392,25 @@ export function generatePlan(questionnaire, exercises) {
         const isAvoid    = params.avoidMuscles.includes(muscle)
         const freq       = muscleFrequency[muscle] || 1
 
-        const sets = computeSessionSets(
+        const musclesInSession = sessionDef.muscles.length
+
+        // Session density factor — more muscles = less sets per muscle
+        // Realistic target: 12-18 total working sets per session (60-90 min)
+        const densityFactor = musclesInSession <= 2 ? 1.0
+          : musclesInSession === 3 ? 0.95
+          : musclesInSession === 4 ? 0.80
+          : 0.70
+
+        const rawSets = computeSessionSets(
           muscle, params.experience, isPriority, isAvoid,
           freq, params.recoveryModifier, params.cardioFactor
         )
+        const sets = Math.max(2, Math.round(rawSets * densityFactor))
 
-        // Small muscles = 1 exercise; large muscles = 2 if enough sets
+        // 2nd exercise only when session is less dense AND enough sets
+        const exCountThreshold = musclesInSession <= 3 ? 5 : 7
         const isSmall = ['abs','calves','shoulders_rear','biceps','triceps'].includes(muscle)
-        const exCount  = isSmall ? 1 : sets >= 5 ? 2 : 1
+        const exCount = isSmall ? 1 : sets >= exCountThreshold ? 2 : 1
 
         const picked = pickExercises(
           exercises.filter(e => !usedExercises.has(e.name)),
@@ -408,8 +419,7 @@ export function generatePlan(questionnaire, exercises) {
         picked.forEach(ex => usedExercises.add(ex.name))
 
         return picked.map((ex, idx) => {
-          // Isolation (2nd exercise) gets 60% of sets, min 2
-          const exSets = idx === 0 ? sets : Math.max(2, Math.round(sets * 0.6))
+          const exSets = idx === 0 ? sets : Math.max(2, Math.round(sets * 0.5))
           const weeks  = buildWeeksProgression(exSets, muscle, params.experience, params.goal, params.knowsRir)
           const week1  = weeks[0]
 
@@ -421,18 +431,15 @@ export function generatePlan(questionnaire, exercises) {
             compound:         ex.compound ?? false,
             stretch_position: ex.stretch_position ?? false,
             sfr_rating:       ex.sfr_rating,
-            // Flat fields (WorkoutLogger backward compat + week 1 default)
             sets:             week1.sets,
             rep_range:        week1.rep_range,
             rir_target:       week1.rir,
-            // Weekly progression array (PlanViewer)
             weeks,
             note: [
               isPriority ? '★ priorytet' : '',
               isAvoid    ? '↓ maintenance' : '',
-              ex.stretch_position && params.goal !== 'Wzrost siły' ? '↔ stretch position' : '',
-              params.cardioFactor < 1 && ['quads','hamstrings','glutes','calves'].includes(muscle)
-                ? '⚠ cardio interference' : '',
+              ex.stretch_position && params.goal !== 'Wzrost siły' ? '↔ stretch' : '',
+              params.cardioFactor < 1 && ['quads','hamstrings','glutes','calves'].includes(muscle) ? '⚠ cardio' : '',
             ].filter(Boolean).join(' · '),
           }
         })
