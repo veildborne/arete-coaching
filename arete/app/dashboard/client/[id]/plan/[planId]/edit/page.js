@@ -1,0 +1,42 @@
+import { createAdminClient } from '@/lib/supabase-admin'
+import { createClient } from '@/lib/supabase-server'
+import { redirect, notFound } from 'next/navigation'
+import { isCoachProfile } from '@/lib/auth-roles'
+import PlanBuilder from '../../new/PlanBuilder'
+
+export default async function EditPlanPage({ params }) {
+  const supabase = createClient()
+  const admin = createAdminClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: coach } = await supabase
+    .from('profiles').select('role, full_name').eq('id', user.id).single()
+  if (!isCoachProfile(coach, user)) redirect('/client')
+
+  const { data: client } = await admin
+    .from('profiles').select('*').eq('id', params.id).single()
+  if (!client) notFound()
+
+  const { data: plan } = await admin
+    .from('training_plans').select('*').eq('id', params.planId).single()
+  if (!plan) notFound()
+
+  const { data: questionnaire } = await admin
+    .from('questionnaires').select('*').eq('client_id', params.id)
+    .order('submitted_at', { ascending: false }).limit(1).maybeSingle()
+
+  const { data: exercises } = await admin
+    .from('exercises').select('*').order('muscle_group')
+
+  return (
+    <PlanBuilder
+      client={client}
+      questionnaire={questionnaire}
+      exercises={exercises || []}
+      clientId={params.id}
+      existingPlan={plan}
+    />
+  )
+}

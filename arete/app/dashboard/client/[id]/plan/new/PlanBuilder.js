@@ -324,7 +324,7 @@ function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, onAdd, a
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function PlanBuilder({ client, questionnaire, exercises = [], clientId }) {
+export default function PlanBuilder({ client, questionnaire, exercises = [], clientId, existingPlan = null }) {
   const router = useRouter()
   const [plan, setPlan]           = useState(null)
   const [planName, setPlanName]   = useState('')
@@ -335,7 +335,10 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
   const [addTarget, setAddTarget] = useState(null)
 
   useEffect(() => {
-    if (questionnaire) {
+    if (existingPlan) {
+      setPlan(existingPlan.plan_data)
+      setPlanName(existingPlan.name)
+    } else if (questionnaire) {
       const generated = generatePlan(questionnaire, exercises)
       setPlan(generated)
       const firstName = client.full_name?.split(' ')[0] || 'Klient'

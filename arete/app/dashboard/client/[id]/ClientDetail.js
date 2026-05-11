@@ -877,6 +877,12 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                           </button>
                         )}
                         <button
+                          onClick={() => router.push(`/dashboard/client/${client.id}/plan/${plan.id}/edit`)}
+                          className="text-xs border border-[rgba(212,181,112,0.25)] text-gold px-3 py-1.5 rounded-lg hover:bg-gold/10 transition"
+                        >
+                          ✎ Edytuj
+                        </button>
+                        <button
                           onClick={() => router.push(`/dashboard/client/${client.id}/plan/new`)}
                           className="text-[11px] px-3 py-1.5 rounded-lg border border-[rgba(255,255,255,0.08)] text-[#555] hover:text-[#888] transition cursor-pointer bg-transparent font-body"
                         >
