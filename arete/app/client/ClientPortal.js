@@ -571,179 +571,184 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
   const todayDate = new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="dashboard-root min-h-screen bg-bg-deep text-warm font-body pb-24">
+    <div className="min-h-screen bg-bg-deep text-warm font-body">
 
-      {/* NAV */}
-      <nav className="sticky top-0 z-50 bg-bg-deep/80 backdrop-blur-md border-b border-[rgba(212,181,112,0.18)] px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="font-display text-2xl text-gold tracking-widest">ARETÉ</span>
+      {/* TOP NAV */}
+      <nav className="sticky top-0 z-50 bg-bg-deep/90 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-6 h-14 flex items-center gap-6">
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="font-display text-xl text-gold tracking-widest">ARETÉ</span>
           <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest">α 0.1</span>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted">{firstName}</span>
-          <button
-            onClick={handleLogout}
-            className="text-xs border border-[rgba(212,181,112,0.3)] text-gold px-3 py-1.5 rounded-lg hover:bg-gold hover:text-bg-deep transition"
-          >
+        <div className="flex-1 flex items-center justify-center gap-1">
+          {[
+            { href: '/client',         label: 'Przegląd' },
+            { href: '/client/workout', label: 'Trening'  },
+            { href: '/client/plan',    label: 'Plan'      },
+            { href: '/client/checkin', label: 'Raport'    },
+          ].map(({ href, label }) => {
+            const active = typeof window !== 'undefined' && window.location.pathname === href
+            return (
+              <button key={href} onClick={() => router.push(href)}
+                className={`px-4 py-1.5 rounded-lg text-sm transition ${active ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
+                {label}
+              </button>
+            )
+          })}
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-sm text-muted hidden sm:block">{firstName}</span>
+          <button onClick={handleLogout}
+            className="text-xs border border-[rgba(212,181,112,0.25)] text-gold/70 px-3 py-1.5 rounded-lg hover:bg-gold/10 transition">
             Wyloguj
           </button>
         </div>
       </nav>
 
-      {/* MAIN */}
-      <main className={`max-w-6xl mx-auto px-4 py-8 transition-opacity duration-500 ${entered ? 'opacity-100' : 'opacity-0'}`}>
+      <main className={`max-w-7xl mx-auto px-4 sm:px-6 py-6 transition-opacity duration-500 ${entered ? 'opacity-100' : 'opacity-0'}`}>
 
-        {/* Header */}
-        <div className="mb-6">
-          <p className="text-sm text-muted mb-1">{todayDate}</p>
-          <h1 className="text-4xl font-display text-gold">Witaj, {firstName}</h1>
-        </div>
+        {/* DATE */}
+        <p className="text-xs text-muted mb-4 capitalize">{todayDate}</p>
 
-        {/* 2-col grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
-
-          {/* ── LEFT ── */}
-          <div className="space-y-4">
-
-            {/* Today Quest */}
-            <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gold/[0.04] rounded-full blur-3xl pointer-events-none" />
-              <p className="text-[10px] text-gold uppercase tracking-widest mb-3">Dzisiejszy quest</p>
-              <h2 className="text-2xl font-display text-warm mb-2">
-                {planInfo.isRestDay ? 'Regeneracja' : planInfo.sessionName}
-              </h2>
-              <div className="flex flex-wrap gap-3 text-sm text-muted mb-5">
+        {/* HERO — dzisiejszy trening */}
+        <div className="relative bg-gradient-to-br from-[#1a1200] via-[#0f0d00] to-bg-deep border border-gold/20 rounded-2xl p-6 mb-6 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-gold/[0.03] to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/[0.03] rounded-full blur-3xl pointer-events-none" />
+          <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
+            <div className="flex-1">
+              <p className="text-[10px] text-gold/60 uppercase tracking-widest mb-2">Dzisiejszy trening</p>
+              <h1 className="text-3xl sm:text-4xl font-display text-gold mb-3 leading-tight">
+                {planInfo.isRestDay ? 'Dzień regeneracji' : planInfo.sessionName}
+              </h1>
+              <div className="flex flex-wrap gap-4 text-sm text-muted mb-4">
                 <span>{planInfo.exerciseCount} ćwiczeń</span>
                 <span>~{planInfo.estimatedTime} min</span>
                 <span>RIR {planInfo.rir}</span>
-                <span className="text-success font-medium">+120 XP</span>
+                <span className="text-success">+120 XP</span>
               </div>
               {activePlan && (
-                <div className="mb-5">
-                  <div className="flex justify-between text-xs text-muted mb-1.5">
-                    <span>Tydzień {planInfo.currentWeek}/{planInfo.maxWeeks}</span>
+                <div className="max-w-sm">
+                  <div className="flex justify-between text-xs text-muted mb-1">
+                    <span>Tydzień {planInfo.currentWeek} z {planInfo.maxWeeks}</span>
                     <span>{Math.round(((planInfo.currentWeek - 1) / planInfo.maxWeeks) * 100)}%</span>
                   </div>
-                  <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-gold/70 to-gold rounded-full"
-                      style={{ width: `${Math.round(((planInfo.currentWeek - 1) / planInfo.maxWeeks) * 100)}%` }}
-                    />
+                  <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-gold/50 to-gold rounded-full transition-all duration-700"
+                      style={{ width: `${Math.round(((planInfo.currentWeek - 1) / planInfo.maxWeeks) * 100)}%` }} />
                   </div>
                 </div>
               )}
-              <button
-                onClick={() => router.push('/client/workout')}
-                disabled={!activePlan}
-                className="w-full bg-gold text-bg-deep font-bold py-3.5 rounded-xl hover:opacity-90 active:scale-[0.98] transition text-sm tracking-wide disabled:opacity-50"
-              >
-                {activePlan ? 'Rozpocznij trening →' : 'Plan w przygotowaniu'}
+            </div>
+            <div className="shrink-0">
+              <button onClick={() => router.push('/client/workout')} disabled={!activePlan}
+                className="bg-gold text-bg-deep font-bold px-8 py-4 rounded-xl hover:opacity-90 active:scale-[0.98] transition text-sm tracking-wide disabled:opacity-40 whitespace-nowrap">
+                {activePlan ? 'Rozpocznij →' : 'Plan w przygotowaniu'}
               </button>
             </div>
+          </div>
+        </div>
 
-            {/* Campaign Progress */}
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+          {/* COL 1 — Postęp i aktywność */}
+          <div className="space-y-4">
+            <CharacterCard profile={profile} recentLogs={safeLogs} questionnaire={questionnaire} totalXP={totalXP} />
+            <AchievementPreview recentLogs={safeLogs} clientAchievements={clientAchievements} />
             <CampaignProgress activePlan={activePlan} planInfo={planInfo} />
+          </div>
 
-            {/* Activity Feed */}
-            <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6">
+          {/* COL 2 — Aktywność i raporty */}
+          <div className="space-y-4">
+            <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
+
+            {/* Ostatnia aktywność */}
+            <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
               <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Ostatnia aktywność</p>
               {safeLogs.length === 0 ? (
-                <p className="text-muted text-sm text-center py-6">
-                  Pierwszy trening otworzy historię.
-                </p>
+                <p className="text-muted text-sm text-center py-4">Pierwszy trening otworzy historię.</p>
               ) : (
-                <div className="divide-y divide-[rgba(212,181,112,0.08)]">
+                <div className="divide-y divide-[rgba(212,181,112,0.06)]">
                   {safeLogs.slice(0, 5).map(log => (
-                    <div key={log.id} className="flex items-center justify-between gap-4 py-3">
+                    <div key={log.id} className="flex items-center justify-between gap-3 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-success/10 border border-success/20 flex items-center justify-center text-sm text-success shrink-0">
-                          ⚡
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{log.day_label || 'Trening ukończony'}</p>
-                          <p className="text-xs text-muted">Sesja treningowa</p>
-                        </div>
+                        <div className="w-7 h-7 rounded-full bg-success/10 border border-success/20 flex items-center justify-center text-xs text-success shrink-0">⚡</div>
+                        <p className="text-sm text-warm">{log.day_label || 'Trening'}</p>
                       </div>
-                      <span className="text-muted text-xs shrink-0">{formatDate(log.session_date || log.created_at)}</span>
+                      <span className="text-xs text-muted shrink-0">{formatDate(log.session_date || log.created_at)}</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Historia check-inów z feedbackiem */}
+            {/* Historia raportów */}
             {safeCheckins.length > 0 && (
-              <div className="bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl p-6">
-                <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Historia check-inów</p>
+              <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[10px] text-muted uppercase tracking-widest">Raporty tygodniowe</p>
+                  <button onClick={() => router.push('/client/checkin')}
+                    className="text-[10px] text-gold/60 hover:text-gold transition">Nowy →</button>
+                </div>
                 <div className="space-y-3">
-                  {safeCheckins.map(ci => (
-                    <div key={ci.id} className="bg-bg-deep rounded-xl p-4 border border-[rgba(212,181,112,0.08)]">
+                  {safeCheckins.slice(0, 3).map(ci => (
+                    <div key={ci.id} className="bg-bg-deep rounded-xl p-3 border border-[rgba(212,181,112,0.06)]">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-display text-gold text-sm">Tydzień {ci.week_number}</span>
-                        <span className="text-[10px] text-muted">{ci.submitted_at ? new Date(ci.submitted_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }) : '—'}</span>
+                        <span className="text-xs font-medium text-gold">Tydzień {ci.week_number}</span>
+                        <span className="text-[10px] text-muted">{formatDate(ci.submitted_at)}</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 mb-3">
+                      <div className="grid grid-cols-3 gap-2 mb-2">
                         {[
                           { label: 'Energia', value: ci.energy_level },
                           { label: 'Sen', value: ci.sleep_quality },
-                          { label: 'Realizacja diety', value: ci.adherence_pct ? `${ci.adherence_pct}%` : '—' },
+                          { label: 'Dieta', value: ci.adherence_pct ? `${ci.adherence_pct}%` : '—' },
                         ].map(m => (
                           <div key={m.label} className="text-center">
-                            <p className="text-[9px] text-muted uppercase tracking-wider mb-0.5">{m.label}</p>
-                            <p className="text-sm font-medium text-warm">{m.value ?? '—'}</p>
+                            <p className="text-[9px] text-muted mb-0.5">{m.label}</p>
+                            <p className="text-xs font-medium text-warm">{m.value ?? '—'}</p>
                           </div>
                         ))}
                       </div>
-                      {ci.client_notes && (
-                        <p className="text-xs text-muted mb-2 italic">"{ci.client_notes}"</p>
-                      )}
                       {ci.coach_feedback ? (
-                        <div className="border-l-2 border-gold/40 pl-3 mt-2">
-                          <p className="text-[10px] text-gold uppercase tracking-widest mb-1">Odpowiedź trenera</p>
-                          <p className="text-xs text-warm/80 leading-relaxed">{ci.coach_feedback}</p>
+                        <div className="border-l-2 border-gold/30 pl-2 mt-2">
+                          <p className="text-[10px] text-gold mb-0.5">Odpowiedź trenera</p>
+                          <p className="text-xs text-warm/70 leading-relaxed">{ci.coach_feedback}</p>
                         </div>
                       ) : (
-                        <p className="text-[10px] text-muted/50 mt-2">Oczekuje na odpowiedź trenera...</p>
+                        <p className="text-[10px] text-muted/40 mt-1">Oczekuje na odpowiedź...</p>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
             )}
-
-            <CheatMealTracker nutritionTargets={nutritionTargets} />
-
           </div>
 
-          {/* ── RIGHT ── */}
+          {/* COL 3 — Coach + Żywienie */}
           <div className="space-y-4">
-            <CharacterCard profile={profile} recentLogs={safeLogs} questionnaire={questionnaire} totalXP={totalXP} />
-            <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
-            <NutritionCard nutritionTargets={nutritionTargets} />
-            <MealPlanCard mealPlan={mealPlan} />
-            <AchievementPreview recentLogs={safeLogs} clientAchievements={clientAchievements} />
-            <WeightLog />
-
-            {/* Coach Message */}
-            <CoachMessageCard coachName={coachName} />
-
-            {/* Coach Note */}
+            {/* Coach note */}
             <CoachNoteCard note={coachNote} />
 
-            {/* Ankieta status */}
+            {/* Coach message */}
+            <CoachMessageCard coachName={coachName} />
+
+            {/* Żywienie */}
+            <NutritionCard nutritionTargets={nutritionTargets} />
+            <MealPlanCard mealPlan={mealPlan} />
+            <CheatMealTracker nutritionTargets={nutritionTargets} />
+            <WeightLog />
+
+            {/* Ankieta */}
             {profile?.questionnaire_requested ? (
-              <div className="bg-surface border border-gold/30 rounded-2xl px-5 py-4">
+              <div className="bg-surface border border-gold/25 rounded-2xl px-5 py-4">
                 <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
-                <p className="text-sm font-medium text-gold">📋 Czeka na wypełnienie</p>
-                <button
-                  onClick={() => router.push('/client/questionnaire')}
-                  className="mt-2 text-xs text-gold/70 underline hover:text-gold transition"
-                >
+                <p className="text-sm font-medium text-gold mb-2">📋 Czeka na wypełnienie</p>
+                <button onClick={() => router.push('/client/questionnaire')}
+                  className="text-xs text-gold/70 underline hover:text-gold transition">
                   Wypełnij teraz →
                 </button>
               </div>
             ) : questionnaire ? (
-              <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4">
+              <div className="bg-surface border border-[rgba(212,181,112,0.1)] rounded-2xl px-5 py-4">
                 <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Ankieta</p>
                 <p className="text-sm font-medium text-success">✓ Wypełniona</p>
               </div>
@@ -751,39 +756,19 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
 
             {/* Plan link */}
             {activePlan && (
-              <button
-                onClick={() => router.push('/client/plan')}
-                className="w-full flex items-center justify-between bg-surface border border-[rgba(212,181,112,0.18)] rounded-2xl px-5 py-4 hover:border-gold transition group"
-              >
+              <button onClick={() => router.push('/client/plan')}
+                className="w-full flex items-center justify-between bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl px-5 py-4 hover:border-gold/40 transition group">
                 <div className="text-left">
                   <p className="text-[10px] text-muted uppercase tracking-widest mb-1">Plan treningowy</p>
-                  <p className="text-sm font-medium">{planInfo.mesocycleName}</p>
+                  <p className="text-sm font-medium text-warm">{planInfo.mesocycleName}</p>
                 </div>
-                <span className="text-muted group-hover:text-gold transition">→</span>
+                <span className="text-muted group-hover:text-gold transition text-lg">→</span>
               </button>
             )}
           </div>
+
         </div>
       </main>
-
-      {/* BOTTOM NAV */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-bg-deep/95 backdrop-blur-md border-t border-[rgba(212,181,112,0.18)] px-4 py-3 flex justify-around z-50">
-        {[
-          { href: '/client',         icon: '⌂', label: 'Home'    },
-          { href: '/client/workout', icon: '⚡', label: 'Trening' },
-          { href: '/client/plan',    icon: '▦', label: 'Plan'     },
-          { href: '/client/checkin', icon: '✓', label: 'Check-in' },
-        ].map(({ href, icon, label }) => (
-          <button
-            key={href}
-            onClick={() => router.push(href)}
-            className="flex flex-col items-center gap-1 text-muted hover:text-gold transition"
-          >
-            <span className="text-lg">{icon}</span>
-            <span className="text-xs">{label}</span>
-          </button>
-        ))}
-      </nav>
 
       <ZeusWidget recentLogs={safeLogs} checkins={safeCheckins} />
     </div>
