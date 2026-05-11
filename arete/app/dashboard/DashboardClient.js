@@ -225,15 +225,15 @@ export default function DashboardClient({ profile, clients }) {
           <span className="text-[10px] text-muted ml-2 hidden sm:block">Panel Trenera</span>
         </div>
 
-        <div className="flex-1 flex items-center gap-1 justify-center">
+        <div className="flex-1 flex items-center gap-0.5 justify-center overflow-x-auto scrollbar-hide">
           {[
-            { id: 'overview',   label: 'Przegląd' },
-            { id: 'clients',    label: 'Klienci' },
-            { id: 'attention',  label: 'Uwaga', badge: stats.needsAttention },
-            { id: 'checkins',   label: 'Raporty', badge: stats.pendingCheckins },
+            { id: 'overview',  label: 'Przegląd' },
+            { id: 'clients',   label: 'Klienci' },
+            { id: 'attention', label: 'Uwaga',   badge: stats.needsAttention },
+            { id: 'checkins',  label: 'Raporty', badge: stats.pendingCheckins },
           ].map(({ id, label, badge }) => (
             <button key={id} onClick={() => setActiveNav(id)}
-              className={`relative px-4 py-1.5 rounded-lg text-sm transition ${activeNav === id ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
+              className={`relative px-3 py-1.5 rounded-lg text-xs sm:text-sm transition whitespace-nowrap ${activeNav === id ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
               {label}
               {badge > 0 && (
                 <span className="absolute -top-1 -right-1 text-[9px] bg-danger text-white rounded-full w-4 h-4 flex items-center justify-center font-bold">{badge}</span>
@@ -266,17 +266,17 @@ export default function DashboardClient({ profile, clients }) {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6">
           {[
-            { label: 'Klienci',        value: stats.active,         icon: '◎', color: '#D4B570',  id: 'clients' },
-            { label: 'Wymagają uwagi', value: stats.needsAttention, icon: '⚠', color: stats.needsAttention > 0 ? '#EF6B73' : '#47D18C', id: 'attention' },
-            { label: 'Bez planu',      value: stats.withoutPlan,    icon: '▭', color: stats.withoutPlan > 0 ? '#E8A020' : '#47D18C', id: null },
-            { label: 'Treningi',       value: stats.totalLogs,      icon: '⚡', color: '#D4B570',  id: null },
-            { label: 'Raporty',        value: stats.pendingCheckins,icon: '◈', color: stats.pendingCheckins > 0 ? '#EF6B73' : '#47D18C', id: 'checkins' },
+            { label: 'Klienci',        value: stats.active,          icon: '👥', color: '#D4B570', id: 'clients' },
+            { label: 'Wymagają uwagi', value: stats.needsAttention,  icon: '🔔', color: stats.needsAttention > 0 ? '#EF6B73' : '#47D18C', id: 'attention' },
+            { label: 'Bez planu',      value: stats.withoutPlan,     icon: '📋', color: stats.withoutPlan > 0 ? '#E8A020' : '#47D18C', id: null },
+            { label: 'Treningi',       value: stats.totalLogs,       icon: '💪', color: '#D4B570', id: null },
+            { label: 'Raporty',        value: stats.pendingCheckins, icon: '📊', color: stats.pendingCheckins > 0 ? '#EF6B73' : '#47D18C', id: 'checkins' },
           ].map(({ label, value, icon, color, id }) => (
             <div key={label}
               onClick={() => id && setActiveNav(id)}
-              className={`bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-4 transition ${id ? 'cursor-pointer hover:border-gold/30' : ''}`}>
+              className={`bg-black/30 backdrop-blur-sm border border-[rgba(212,181,112,0.12)] rounded-2xl p-3 sm:p-4 transition ${id ? 'cursor-pointer hover:border-gold/30' : ''}`}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] text-muted uppercase tracking-widest">{label}</p>
                 <span style={{ color }}>{icon}</span>
