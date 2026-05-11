@@ -217,6 +217,8 @@ const BLOCK_LABELS = {
   suplementy:            'Suplementy',
   // Inne
   dodatkowe_info:        'Dodatkowe info',
+  dysproporcja_obszar:   'Asymetria / dysproporcje',
+  dysproporcja_opis:     'Opis asymetrii',
 }
 
 const BLOCKS_ORDER = [
@@ -255,6 +257,10 @@ const BLOCKS_ORDER = [
   {
     title: 'Żywienie',
     keys: ['dieta_aktualna', 'alergie', 'suplementy'],
+  },
+  {
+    title: 'Asymetria i dysproporcje',
+    keys: ['dysproporcja_obszar', 'dysproporcja_opis'],
   },
   {
     title: 'Dodatkowe',
@@ -443,6 +449,69 @@ function CheckinCard({ ci, onFeedbackSaved }) {
         </div>
       )}
     </div>
+  )
+}
+
+// ─── Questionnaire Tab Component ──────────────────────────────────────────────
+
+function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
+  const [selectedIdx, setSelectedIdx] = useState(0)
+  const [requesting, setRequesting] = useState(false)
+  const [requested, setRequested] = useState(false)
+
+  const allQ = questionnaires && questionnaires.length > 0 ? questionnaires : questionnaire ? [questionnaire] : []
+  const selected = allQ[selectedIdx] || null
+
+  async function requestNewQuestionnaire() {
+    setRequesting(true)
+    const supabase = createClient()
+    await supabase
+      .from('profiles')
+      .update({ questionnaire_requested: true })
+      .eq('id', clientId)
+    setRequesting(false)
+    setRequested(true)
+    setTimeout(() => setRequested(false), 3000)
+  }
+
+  return (
+    <Section title="Ankieta onboardingowa">
+      {/* Historia + akcje */}
+      <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
+        <div className="flex gap-2 flex-wrap flex-1">
+          {allQ.length > 1 && allQ.map((q, i) => (
+            <button
+              key={q.id}
+              onClick={() => setSelectedIdx(i)}
+              className="text-[11px] px-3 py-1 rounded-full border transition"
+              style={{
+                borderColor: selectedIdx === i ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.15)',
+                color: selectedIdx === i ? '#D4B570' : '#666',
+                background: selectedIdx === i ? 'rgba(212,181,112,0.08)' : 'transparent',
+              }}
+            >
+              {i === 0 ? '★ Aktualna' : `Wersja ${allQ.length - i}`} — {new Date(q.submitted_at || q.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </button>
+          ))}
+          {allQ.length === 0 && (
+            <span className="text-xs text-muted">Brak ankiety</span>
+          )}
+        </div>
+        <button
+          onClick={requestNewQuestionnaire}
+          disabled={requesting || requested}
+          className="text-xs border px-3 py-1.5 rounded-full transition shrink-0"
+          style={{
+            borderColor: requested ? 'rgba(71,209,140,0.4)' : 'rgba(212,181,112,0.3)',
+            color: requested ? '#47D18C' : '#D4B570',
+          }}
+        >
+          {requested ? '✓ Wysłano prośbę' : requesting ? '...' : '📋 Poproś o nową ankietę'}
+        </button>
+      </div>
+
+      <AnkietaViewer questionnaire={selected} />
+    </Section>
   )
 }
 
@@ -875,19 +944,11 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
 
         {/* ANKIETA TAB */}
         {tab === 'questionnaire' && (
-          <Section title="Ankieta onboardingowa">
-            {questionnaires && questionnaires.length > 1 && (
-              <div className="mb-4 flex gap-2 flex-wrap">
-                <p className="text-xs text-muted w-full mb-1">Historia ankiet:</p>
-                {questionnaires.map((q, i) => (
-                  <span key={q.id} className="text-[11px] px-3 py-1 rounded-full border border-[rgba(212,181,112,0.2)] text-muted">
-                    {i === 0 ? '★ Aktualna' : `Wersja ${questionnaires.length - i}`} — {new Date(q.submitted_at || q.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </span>
-                ))}
-              </div>
-            )}
-            <AnkietaViewer questionnaire={questionnaire} />
-          </Section>
+          <QuestionnaireTab
+            questionnaire={questionnaire}
+            questionnaires={questionnaires}
+            clientId={client.id}
+          />
         )}
 
       </main>
