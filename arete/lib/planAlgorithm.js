@@ -1,8 +1,8 @@
 // ============================================================
-// ARETÉ — Plan Algorithm v4.0 — Master Level
+// ARETÉ — Plan Algorithm v5.0
 // ============================================================
 // Evidence:
-//   Israetel — MEV/MAV/MRV, frequency, deload
+//   Israetel — MEV/MAV/MRV, frequency, deload, volume ramp
 //   Helms    — RIR periodization, autoregulation
 //   Schoenfeld — hypertrophy mechanisms, rep ranges
 //   Nuckols  — volume-frequency tradeoffs
@@ -43,7 +43,7 @@ const RIR_BY_WEEK = {
 // ─── REP RANGES (Schoenfeld: sweet spot 6-20, per muscle/goal) ───────────────
 function getRepRange(goal, muscle) {
   const isHeavy = ['quads','chest','back','hamstrings','glutes'].includes(muscle)
-  const isLight = ['calves','abs','shoulders_rear'].includes(muscle)
+  const isLight = ['calves','abs','shoulders_rear','forearms'].includes(muscle)
 
   if (goal === 'Wzrost siły')                   return isHeavy ? '3-6'  : '6-10'
   if (goal === 'Redukcja tkanki tłuszczowej')   return isHeavy ? '8-12' : isLight ? '15-25' : '10-20'
@@ -63,8 +63,9 @@ function buildDecisionParams(q) {
   }
   const experience = expMap[q.staz] || 'intermediate'
 
+  // Recovery modifier — affects starting volume
   let recoveryModifier = 1.0
-  if (q.sen === 'less_6')  recoveryModifier -= 0.15
+  if (q.sen === 'less_6')   recoveryModifier -= 0.15
   else if (q.sen === '6_7') recoveryModifier -= 0.05
   else if (q.sen === 'more_8') recoveryModifier += 0.05
   const sleepQ = parseInt(q.sleep_quality) || 3
@@ -76,6 +77,7 @@ function buildDecisionParams(q) {
   if (q.praca === 'physical') recoveryModifier -= 0.10
   recoveryModifier = Math.max(0.65, Math.min(1.15, recoveryModifier))
 
+  // Priority / avoid muscles
   let priorityMuscles = []
   let avoidMuscles = []
   if (Array.isArray(q.priority_muscles)) {
@@ -87,6 +89,7 @@ function buildDecisionParams(q) {
   }
   if (Array.isArray(q.avoid_growth_muscles)) avoidMuscles = q.avoid_growth_muscles
 
+  // Equipment
   let equipment = new Set(['bodyweight'])
   if (Array.isArray(q.equipment) && q.equipment.length > 0) {
     q.equipment.forEach(e => equipment.add(e))
@@ -99,17 +102,20 @@ function buildDecisionParams(q) {
       ['barbell','dumbbell','squat_rack'].forEach(e=>equipment.add(e))
   }
 
+  // Pain / injury exclusions
   const painAreas = Array.isArray(q.pain_areas) ? q.pain_areas : []
   const painLevel = parseInt(q.pain_level) || 0
   const excludedMovements = []
   if (painAreas.includes('shoulder') && painLevel >= 4) excludedMovements.push('overhead_press','upright_row')
-  if (painAreas.includes('shoulder') && painLevel >= 6) excludedMovements.push('bench_press_barbell','dips')
-  if (painAreas.includes('knee')     && painLevel >= 4) excludedMovements.push('barbell_squat','lunge')
-  if (painAreas.includes('knee')     && painLevel >= 6) excludedMovements.push('leg_extension')
-  if (painAreas.includes('lower_back')&& painLevel >= 4) excludedMovements.push('conventional_deadlift','good_morning')
-  if (painAreas.includes('lower_back')&& painLevel >= 6) excludedMovements.push('romanian_deadlift','barbell_row')
-  if (painAreas.includes('elbow')    && painLevel >= 5) excludedMovements.push('dips','close_grip_bench','wrist_curl')
+  if (painAreas.includes('shoulder') && painLevel >= 6) excludedMovements.push('push','dips')
+  if (painAreas.includes('knee')     && painLevel >= 4) excludedMovements.push('squat','lunge')
+  if (painAreas.includes('knee')     && painLevel >= 6) excludedMovements.push('isolation')
+  if (painAreas.includes('lower_back')&& painLevel >= 4) excludedMovements.push('hinge')
+  if (painAreas.includes('lower_back')&& painLevel >= 6) excludedMovements.push('row')
+  if (painAreas.includes('elbow')    && painLevel >= 5) excludedMovements.push('close_grip_bench','wrist_curl')
+  if (painAreas.includes('wrist')    && painLevel >= 4) excludedMovements.push('wrist_curl')
 
+  // Cardio interference on lower body
   let cardioFactor = 1.0
   const cardioMatch = (q.cardio_ile || '').match(/(\d+)/)
   const cardioSessions = cardioMatch ? parseInt(cardioMatch[1]) : 0
@@ -118,6 +124,18 @@ function buildDecisionParams(q) {
 
   const days = parseInt(q.dni_tydzien) || 3
   const splitType = chooseSplit(days, priorityMuscles, q.plec, recoveryModifier, experience)
+
+  // Unilateral preference — triggered by dysproporcja in questionnaire
+  const dysproporcja = Array.isArray(q.dysproporcja_obszar) ? q.dysproporcja_obszar : []
+  const preferUnilateral = dysproporcja.some(d => ['left_arm','right_arm','shoulders'].includes(d))
+    ? ['back','biceps','triceps','shoulders_lat','shoulders_rear','chest']
+    : []
+  const preferUnilateralLegs = dysproporcja.some(d => ['left_leg','right_leg'].includes(d))
+    ? ['quads','hamstrings','glutes','calves']
+    : []
+
+  // Training style — affects exercise count per muscle
+  const trainingStyle = q.training_style || 'balanced' // 'simple' | 'balanced' | 'varied'
 
   return {
     experience, recoveryModifier, priorityMuscles, avoidMuscles,
@@ -130,6 +148,9 @@ function buildDecisionParams(q) {
     avoidExercises: parseAvoidedExercises(q.cwiczenia_unikane),
     preferenceMachines: q.preference_machines || 'mixed',
     sessionMinutes: parseInt((q.czas_sesji || '').replace(/\D/g, '')) || 60,
+    trainingStyle,
+    preferUnilateral,
+    preferUnilateralLegs,
   }
 }
 
@@ -238,43 +259,45 @@ function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, 
   const sizeClass = MUSCLE_SIZE_CLASS[muscle] || 'medium'
   const cap       = SESSION_CAPS[sizeClass]
 
-  // Weekly target: avoid=half MEV, priority=midpoint(MEV,MAV), normal=MEV
   let weeklyTarget
-  if (isAvoid)       weeklyTarget = Math.max(4, Math.round(L.mev * 0.5))
+  if (isAvoid)         weeklyTarget = Math.max(4, Math.round(L.mev * 0.5))
   else if (isPriority) weeklyTarget = Math.round((L.mev + L.mav) / 2)
-  else               weeklyTarget = L.mev
+  else                 weeklyTarget = L.mev
 
   weeklyTarget = Math.round(weeklyTarget * recoveryModifier)
 
-  // Cardio interference on lower body muscles
   if (['quads','hamstrings','glutes','calves'].includes(muscle))
     weeklyTarget = Math.round(weeklyTarget * cardioFactor)
 
-  // Understart at ~85% MEV pace → leaves room for progression
+  // Start slightly below MEV — leaves room for progression across mesocycle
   const weeklyStart = Math.round(weeklyTarget * 0.85)
   const perSession  = Math.max(2, Math.round(weeklyStart / Math.max(1, frequency)))
   return Math.min(perSession, cap)
 }
 
-// ─── WEEKLY PROGRESSION (Israetel volume ramp + Helms RIR drop) ───────────────
+// ─── WEEKLY PROGRESSION (Israetel ramp + Helms RIR drop) ─────────────────────
+// v5: stopniowy ramp zamiast flat + spike
+// tydzień 1-2: baseSets
+// tydzień 3-4: baseSets + 1
+// tydzień 5:   min(cap, baseSets + 2)   ← zbliżenie do MRV
+// tydzień 6:   deload (ceil * 0.5)
 function buildWeeksProgression(baseSets, muscle, experience, goal, knowsRir) {
   const sizeClass = MUSCLE_SIZE_CLASS[muscle] || 'medium'
   const cap       = SESSION_CAPS[sizeClass]
   const rirBase   = RIR_BY_WEEK[experience] || RIR_BY_WEEK.intermediate
   const repRange  = getRepRange(goal, muscle)
 
-  return [0,1,2,3,4,5].map(i => {
-    const isDeload = i === 5
-    let sets
-    if (isDeload) {
-      sets = Math.max(2, Math.ceil(baseSets * 0.5))
-    } else if (i === 4) {
-      // Week 5: +1 set approaching MRV
-      sets = Math.min(cap, baseSets + 1)
-    } else {
-      sets = baseSets
-    }
+  const setsPerWeek = [
+    baseSets,
+    baseSets,
+    Math.min(cap, baseSets + 1),
+    Math.min(cap, baseSets + 1),
+    Math.min(cap, baseSets + 2),
+    Math.max(2, Math.ceil(baseSets * 0.5)), // deload
+  ]
 
+  return setsPerWeek.map((sets, i) => {
+    const isDeload = i === 5
     let rir = rirBase[i]
     if (!knowsRir) rir = isDeload ? 5 : Math.min(4, rir + 1)
 
@@ -292,12 +315,13 @@ function buildWeeksProgression(baseSets, muscle, experience, goal, knowsRir) {
 function scoreExercise(ex, params, muscle) {
   let score = 0
   const { experience, priorityMuscles, avoidMuscles, equipment, painAreas,
-          painLevel, excludedMovements, goal, plec, preferenceMachines } = params
+          painLevel, excludedMovements, goal, plec, preferenceMachines,
+          preferUnilateral, preferUnilateralLegs } = params
 
   score += ({ S:30, A:20, B:10, C:0 }[ex.tier] ?? 10)
   score += (ex.sfr_rating ?? 3) * 3
 
-  // Stretch position bonus (Milo Wolf 2023 meta-analysis)
+  // Stretch position bonus (Milo Wolf 2023)
   if (ex.stretch_position && goal !== 'Wzrost siły') score += 10
 
   if (priorityMuscles.includes(muscle)) score += 15
@@ -320,9 +344,9 @@ function scoreExercise(ex, params, muscle) {
     if (ex.compound && ex.tier === 'B') score -= 5
   }
 
-  // Injury exclusions
+  // Injury exclusions — match movement_pattern
   if (painLevel >= 4) {
-    if (excludedMovements.some(m => ex.movement_pattern === m || (ex.name||'').toLowerCase().includes(m)))
+    if (excludedMovements.some(m => ex.movement_pattern === m))
       return -999
   }
   if (painAreas.includes('lower_back') && ex.lower_back_fatigue === 'high') score -= 20
@@ -335,6 +359,10 @@ function scoreExercise(ex, params, muscle) {
   if (goal === 'Rekompozycja'                && ex.compound)        score += 5
   if (plec === 'Kobieta' && ['glutes','hamstrings'].includes(muscle) && ex.stretch_position) score += 8
 
+  // Unilateral preference — dysproporcja correction
+  if (ex.unilateral && preferUnilateral.includes(muscle))     score += 20
+  if (ex.unilateral && preferUnilateralLegs.includes(muscle)) score += 20
+
   return score
 }
 
@@ -344,13 +372,44 @@ function pickExercises(exercises, muscle, count, params) {
     .filter(ex => {
       if (!params.avoidExercises?.length) return true
       const nameL = (ex.name_pl || ex.name || '').toLowerCase()
-      return !params.avoidExercises.some(av => nameL.includes(av))
+      // Split avoid terms and check each — more precise than single includes
+      return !params.avoidExercises.some(av =>
+        av.split(' ').every(word => nameL.includes(word))
+      )
     })
     .map(ex => ({ ex, score: scoreExercise(ex, params, muscle) }))
     .filter(({ score }) => score > -900)
     .sort((a, b) => b.score - a.score)
     .map(({ ex }) => ex)
     .slice(0, count)
+}
+
+// ─── PLAN VALIDATOR ───────────────────────────────────────────────────────────
+function validatePlan(sessions, splitDef) {
+  const errors   = []
+  const warnings = []
+
+  Object.entries(sessions).forEach(([key, session]) => {
+    if (session.exercises.length === 0) {
+      errors.push(`Sesja ${key} (${session.name}) — 0 ćwiczeń. Sprawdź dostępny sprzęt klienta lub seed ćwiczeń w DB.`)
+    }
+    const totalSets = session.exercises.reduce((s, e) => s + (e.sets || 0), 0)
+    if (totalSets > 0 && totalSets < 6) {
+      warnings.push(`Sesja ${key}: tylko ${totalSets} serii łącznie — rozważ zwiększenie czasu sesji lub objętości.`)
+    }
+    // Check that every planned muscle has at least 1 exercise
+    const musclesCovered = new Set(session.exercises.map(e => e.muscle_group))
+    const sessionDef = splitDef.sessions[key]
+    if (sessionDef) {
+      sessionDef.muscles.forEach(m => {
+        if (!musclesCovered.has(m)) {
+          warnings.push(`Sesja ${key}: brak ćwiczenia dla ${m} — brak sprzętu lub conflict z unikaniem.`)
+        }
+      })
+    }
+  })
+
+  return { valid: errors.length === 0, errors, warnings }
 }
 
 // ─── RATIONALE ────────────────────────────────────────────────────────────────
@@ -364,6 +423,10 @@ function generateRationale(params, splitDef) {
   if (!params.knowsRir) lines.push('Intensywność opisana słownie — klient uczy się RIR.')
   if (params.experience === 'beginner') lines.push('Objętość startowa MEV — plan dla początkujących.')
   if (params.cardioFactor < 1) lines.push(`Nogi: -${Math.round((1-params.cardioFactor)*100)}% z powodu wysokiego cardio.`)
+  if (params.trainingStyle === 'simple') lines.push('Styl prosty — jedno ćwiczenie per partia, focus na progresji.')
+  if (params.trainingStyle === 'varied') lines.push('Styl urozmaicony — więcej ćwiczeń per partia.')
+  if (params.preferUnilateral.length > 0 || params.preferUnilateralLegs.length > 0)
+    lines.push('Priorytet ćwiczeń unilateralnych — korekcja dysproporcji między stronami.')
   return lines.join(' ')
 }
 
@@ -386,78 +449,107 @@ export function generatePlan(questionnaire, exercises) {
   const sessions = {}
   Object.entries(splitDef.sessions).forEach(([sessionKey, sessionDef]) => {
     const usedExercises = new Set()
+    const sessionMinutes = params.sessionMinutes || 60
+
+    // Max exercises in this session based on time
+    const maxExercises = sessionMinutes >= 90 ? 8 : sessionMinutes >= 75 ? 6 : 5
+
+    const exerciseList = sessionDef.muscles.flatMap(muscle => {
+      const isPriority = params.priorityMuscles.includes(muscle)
+      const isAvoid    = params.avoidMuscles.includes(muscle)
+      const freq       = muscleFrequency[muscle] || 1
+
+      const musclesInSession = sessionDef.muscles.length
+      const densityFactor = musclesInSession <= 2 ? 1.0
+        : musclesInSession === 3
+          ? (sessionMinutes >= 75 ? 1.0 : 0.90)
+        : musclesInSession === 4
+          ? (sessionMinutes >= 90 ? 0.90 : sessionMinutes >= 75 ? 0.82 : 0.75)
+        : (sessionMinutes >= 90 ? 0.80 : 0.70)
+
+      const rawSets = computeSessionSets(
+        muscle, params.experience, isPriority, isAvoid,
+        freq, params.recoveryModifier, params.cardioFactor
+      )
+
+      const sets = Math.max(2, isPriority
+        ? rawSets
+        : Math.round(rawSets * densityFactor)
+      )
+
+      // Exercise count per muscle — driven by training_style
+      const isSmall = ['abs','calves','shoulders_rear','biceps','triceps','forearms'].includes(muscle)
+      let exCount = 1
+      if (!isSmall) {
+        if (params.trainingStyle === 'simple') {
+          exCount = 1
+        } else if (params.trainingStyle === 'varied') {
+          // Varied: 2 exercises whenever sets >= 4
+          exCount = sets >= 4 ? 2 : 1
+        } else {
+          // Balanced (default): 2 exercises only when many sets and time allows
+          const exCountThreshold = sessionMinutes >= 90 ? 5 : sessionMinutes >= 75 ? 6 : 8
+          exCount = sets >= exCountThreshold ? 2 : 1
+        }
+      }
+
+      const picked = pickExercises(
+        exercises.filter(e => !usedExercises.has(e.name)),
+        muscle, exCount, params
+      )
+      picked.forEach(ex => usedExercises.add(ex.name))
+      picked.sort((a, b) => (b.compound ? 1 : 0) - (a.compound ? 1 : 0))
+
+      return picked.map((ex, idx) => {
+        const exSets = idx === 0 ? sets : Math.max(2, Math.round(sets * 0.5))
+        const weeks  = buildWeeksProgression(exSets, muscle, params.experience, params.goal, params.knowsRir)
+        const week1  = weeks[0]
+
+        return {
+          exercise_id:      ex.id,
+          name:             ex.name,
+          name_pl:          ex.name_pl,
+          muscle_group:     muscle,
+          compound:         ex.compound ?? false,
+          stretch_position: ex.stretch_position ?? false,
+          sfr_rating:       ex.sfr_rating,
+          unilateral:       ex.unilateral ?? false,
+          sets:             week1.sets,
+          rep_range:        week1.rep_range,
+          rir_target:       week1.rir,
+          weeks,
+          note: [
+            isPriority        ? '★ priorytet' : '',
+            isAvoid           ? '↓ maintenance' : '',
+            ex.stretch_position && params.goal !== 'Wzrost siły' ? '↔ stretch' : '',
+            ex.unilateral     ? '⚖ unilateral' : '',
+            params.cardioFactor < 1 && ['quads','hamstrings','glutes','calves'].includes(muscle) ? '⚠ cardio' : '',
+          ].filter(Boolean).join(' · '),
+        }
+      })
+    })
+
+    // FIX: priority-aware slice — priorytetowe mięśnie nie mogą być ucięte
+    const sortedForCap = [...exerciseList].sort((a, b) => {
+      const aPrio = params.priorityMuscles.includes(a.muscle_group) ? 0 : 1
+      const bPrio = params.priorityMuscles.includes(b.muscle_group) ? 0 : 1
+      return aPrio - bPrio
+    })
 
     sessions[sessionKey] = {
-      label: sessionKey,
-      name:  sessionDef.name,
-      exercises: sessionDef.muscles.flatMap(muscle => {
-        const isPriority = params.priorityMuscles.includes(muscle)
-        const isAvoid    = params.avoidMuscles.includes(muscle)
-        const freq       = muscleFrequency[muscle] || 1
-
-        const musclesInSession = sessionDef.muscles.length
-        const sessionMinutes = params.sessionMinutes || 60
-
-        const densityFactor = musclesInSession <= 2 ? 1.0
-          : musclesInSession === 3
-            ? (sessionMinutes >= 75 ? 1.0 : 0.90)
-          : musclesInSession === 4
-            ? (sessionMinutes >= 90 ? 0.90 : sessionMinutes >= 75 ? 0.82 : 0.75)
-          : (sessionMinutes >= 90 ? 0.80 : 0.70)
-
-        const rawSets = computeSessionSets(
-          muscle, params.experience, isPriority, isAvoid,
-          freq, params.recoveryModifier, params.cardioFactor
-        )
-
-        const sets = Math.max(2, isPriority
-          ? rawSets
-          : Math.round(rawSets * densityFactor)
-        )
-
-        // 2nd exercise only when session is less dense AND enough sets
-        const exCountThreshold = sessionMinutes >= 90 ? 5 : sessionMinutes >= 75 ? 6 : 8
-        const isSmall = ['abs','calves','shoulders_rear','biceps','triceps'].includes(muscle)
-        const exCount = isSmall ? 1 : sets >= exCountThreshold ? 2 : 1
-
-        const picked = pickExercises(
-          exercises.filter(e => !usedExercises.has(e.name)),
-          muscle, exCount, params
-        )
-        picked.forEach(ex => usedExercises.add(ex.name))
-        picked.sort((a, b) => (b.compound ? 1 : 0) - (a.compound ? 1 : 0))
-
-        return picked.map((ex, idx) => {
-          const exSets = idx === 0 ? sets : Math.max(2, Math.round(sets * 0.5))
-          const weeks  = buildWeeksProgression(exSets, muscle, params.experience, params.goal, params.knowsRir)
-          const week1  = weeks[0]
-
-          return {
-            exercise_id:      ex.id,
-            name:             ex.name,
-            name_pl:          ex.name_pl,
-            muscle_group:     muscle,
-            compound:         ex.compound ?? false,
-            stretch_position: ex.stretch_position ?? false,
-            sfr_rating:       ex.sfr_rating,
-            sets:             week1.sets,
-            rep_range:        week1.rep_range,
-            rir_target:       week1.rir,
-            weeks,
-            note: [
-              isPriority ? '★ priorytet' : '',
-              isAvoid    ? '↓ maintenance' : '',
-              ex.stretch_position && params.goal !== 'Wzrost siły' ? '↔ stretch' : '',
-              params.cardioFactor < 1 && ['quads','hamstrings','glutes','calves'].includes(muscle) ? '⚠ cardio' : '',
-            ].filter(Boolean).join(' · '),
-          }
-        })
-      }),
+      label:     sessionKey,
+      name:      sessionDef.name,
+      exercises: sortedForCap.slice(0, maxExercises),
     }
-
-    const maxExercises = sessionMinutes >= 90 ? 8 : sessionMinutes >= 75 ? 6 : 5
-    sessions[sessionKey].exercises = sessions[sessionKey].exercises.slice(0, maxExercises)
   })
+
+  // Validate before returning
+  const validation = validatePlan(sessions, splitDef)
+  if (!validation.valid) {
+    throw new Error(
+      `Plan generation failed:\n${validation.errors.join('\n')}`
+    )
+  }
 
   // Plan-level weekly progression metadata
   const weeklyProgression = [1,2,3,4,5,6].map(week => ({
@@ -468,23 +560,26 @@ export function generatePlan(questionnaire, exercises) {
   }))
 
   return {
-    split_name:        splitDef.name,
-    split_type:        params.splitType,
-    days:              params.days,
-    goal:              params.goal,
-    staz:              params.staz,
-    experience:        params.experience,
-    recovery_modifier: params.recoveryModifier,
-    priority_muscles:  params.priorityMuscles,
-    avoid_muscles:     params.avoidMuscles,
-    mesocycle_weeks:   6,
-    current_week:      1,
-    rir_start:         (RIR_BY_WEEK[params.experience] || RIR_BY_WEEK.intermediate)[0],
+    split_name:         splitDef.name,
+    split_type:         params.splitType,
+    days:               params.days,
+    goal:               params.goal,
+    staz:               params.staz,
+    experience:         params.experience,
+    recovery_modifier:  params.recoveryModifier,
+    priority_muscles:   params.priorityMuscles,
+    avoid_muscles:      params.avoidMuscles,
+    training_style:     params.trainingStyle,
+    has_dysproporcja:   params.preferUnilateral.length > 0 || params.preferUnilateralLegs.length > 0,
+    mesocycle_weeks:    6,
+    current_week:       1,
+    rir_start:          (RIR_BY_WEEK[params.experience] || RIR_BY_WEEK.intermediate)[0],
     sessions,
     weekly_progression: weeklyProgression,
-    equipment_used:    [...params.equipment],
-    cardio_factor:     params.cardioFactor,
-    rationale:         generateRationale(params, splitDef),
-    generated_at:      new Date().toISOString(),
+    equipment_used:     [...params.equipment],
+    cardio_factor:      params.cardioFactor,
+    rationale:          generateRationale(params, splitDef),
+    validation_warnings: validation.warnings,
+    generated_at:       new Date().toISOString(),
   }
 }
