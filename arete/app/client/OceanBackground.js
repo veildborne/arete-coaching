@@ -86,12 +86,6 @@ export default function OceanBackground() {
         position: 'absolute', inset: 0,
         background: 'linear-gradient(180deg, #020c18 0%, #030e1f 50%, #020a15 100%)',
       }}/>
-      {/* Subtle gold glow top */}
-      <div style={{
-        position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-        width: '80%', height: '40%',
-        background: 'radial-gradient(ellipse at 50% 0%, rgba(180,140,60,0.08) 0%, transparent 70%)',
-      }}/>
       {/* Canvas particles */}
       <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}/>
     </div>

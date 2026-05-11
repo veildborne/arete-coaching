@@ -218,14 +218,15 @@ export default function DashboardClient({ profile, clients }) {
     <div className="min-h-screen text-warm font-body relative">
 
       {/* TOP NAV */}
-      <nav className="sticky top-0 z-50 bg-black/30 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-6 h-14 flex items-center gap-4">
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="font-display text-xl text-gold tracking-widest">ARETÉ</span>
-          <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest">α 0.1</span>
-          <span className="text-[10px] text-muted ml-2 hidden sm:block">Panel Trenera</span>
+      <nav className="sticky top-0 z-50 bg-black/30 backdrop-blur-xl border-b border-[rgba(212,181,112,0.12)] px-4 h-14 flex items-center gap-2">
+        {/* Logo */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="font-display text-lg text-gold tracking-widest">ARETÉ</span>
+          <span className="text-[8px] px-1 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest hidden sm:block">α 0.1</span>
         </div>
 
-        <div className="flex-1 flex items-center gap-0.5 justify-center overflow-x-auto scrollbar-hide">
+        {/* Nav tabs — scrollable on mobile */}
+        <div className="flex-1 flex items-center gap-0.5 overflow-x-auto scrollbar-hide mx-1">
           {[
             { id: 'overview',  label: 'Przegląd' },
             { id: 'clients',   label: 'Klienci' },
@@ -233,27 +234,30 @@ export default function DashboardClient({ profile, clients }) {
             { id: 'checkins',  label: 'Raporty', badge: stats.pendingCheckins },
           ].map(({ id, label, badge }) => (
             <button key={id} onClick={() => setActiveNav(id)}
-              className={`relative px-3 py-1.5 rounded-lg text-xs sm:text-sm transition whitespace-nowrap ${activeNav === id ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
+              className={`relative px-2.5 py-1 rounded-lg text-xs transition whitespace-nowrap shrink-0 ${activeNav === id ? 'bg-gold/10 text-gold' : 'text-muted hover:text-warm'}`}>
               {label}
               {badge > 0 && (
-                <span className="absolute -top-1 -right-1 text-[9px] bg-danger text-white rounded-full w-4 h-4 flex items-center justify-center font-bold">{badge}</span>
+                <span className="absolute -top-1 -right-1 text-[8px] bg-danger text-white rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">{badge}</span>
               )}
             </button>
           ))}
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Actions — tylko ikony na mobile */}
+        <div className="flex items-center gap-1.5 shrink-0">
           <button onClick={() => setInviteOpen(true)}
-            className="bg-gold text-bg-deep px-4 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition">
-            + Dodaj klienta
+            className="hidden sm:block bg-gold text-bg-deep px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition whitespace-nowrap">
+            + Dodaj
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center font-display text-gold text-xs font-bold">
-              {getInitials(profile?.full_name, profile?.email)}
-            </div>
-            <button onClick={async () => { const s = createClient(); await s.auth.signOut(); window.location.href = '/' }}
-              className="text-[10px] text-muted hover:text-danger transition">↩</button>
+          <button onClick={() => setInviteOpen(true)}
+            className="sm:hidden w-8 h-8 bg-gold/15 border border-gold/30 rounded-lg flex items-center justify-center text-gold text-sm">
+            +
+          </button>
+          <div className="w-7 h-7 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center font-display text-gold text-xs font-bold shrink-0">
+            {getInitials(profile?.full_name, profile?.email)}
           </div>
+          <button onClick={async () => { const s = createClient(); await s.auth.signOut(); window.location.href = '/' }}
+            className="text-[10px] text-muted hover:text-danger transition hidden sm:block">↩</button>
         </div>
       </nav>
 
