@@ -219,6 +219,7 @@ export default function DashboardClient({ profile, clients }) {
 
       <nav style={{position:'sticky',top:0,zIndex:50,background:'rgba(0,0,0,0.4)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(212,181,112,0.12)',height:'52px',display:'flex',alignItems:'center',padding:'0 10px',gap:'6px'}}>
         <span style={{fontFamily:'Cormorant Garamond,serif',fontSize:'1.1rem',color:'#D4B570',letterSpacing:'0.2em',flexShrink:0}}>ARETÉ</span>
+        <span style={{fontSize:'8px',padding:'2px 6px',borderRadius:'4px',border:'1px solid rgba(212,181,112,0.2)',color:'rgba(212,181,112,0.4)',letterSpacing:'0.1em',flexShrink:0}}>α 0.1</span>
         <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:'2px'}}>
           {[{id:'overview',label:'Przegląd'},{id:'clients',label:'Klienci'},{id:'attention',label:'Uwaga',badge:stats.needsAttention},{id:'checkins',label:'Raporty',badge:stats.pendingCheckins}].map(({id,label,badge})=>(
             <button key={id} onClick={()=>setActiveNav(id)} style={{position:'relative',padding:'5px 8px',borderRadius:'8px',fontSize:'11px',border:'none',cursor:'pointer',fontFamily:'Outfit,sans-serif',whiteSpace:'nowrap',background:activeNav===id?'rgba(212,181,112,0.12)':'transparent',color:activeNav===id?'#D4B570':'#8F9AAF'}}>
