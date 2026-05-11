@@ -185,9 +185,90 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap }) {
   )
 }
 
+// ─── Add Picker ───────────────────────────────────────────────────────────────
+
+function AddPicker({ sessionKey, allExercises, onSelect, onClose }) {
+  const [search, setSearch] = useState('')
+  const [muscleFilter, setMuscleFilter] = useState('')
+
+  const muscles = [...new Set(allExercises.map(e => e.muscle_group))].sort()
+
+  const filtered = allExercises.filter(e => {
+    const matchSearch = !search || (e.name_pl || e.name).toLowerCase().includes(search.toLowerCase())
+    const matchMuscle = !muscleFilter || e.muscle_group === muscleFilter
+    return matchSearch && matchMuscle
+  })
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-[rgba(6,9,18,0.96)] flex flex-col">
+      <div className="pt-4 px-5 pb-3 bg-[rgba(10,14,26,0.95)] border-b border-gold/15">
+        <div className="flex items-center gap-3 mb-2.5">
+          <button onClick={onClose} className="bg-none border-none cursor-pointer text-gold/70 text-[1.3rem] p-0">←</button>
+          <div>
+            <div className="text-[11px] text-gold/50 uppercase tracking-widest">Dodaj ćwiczenie</div>
+            <div className="text-sm text-[#e8e8e8] font-medium">Sesja {sessionKey}</div>
+          </div>
+        </div>
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Szukaj ćwiczenia..."
+          autoFocus
+          className="w-full py-2.5 px-4 bg-white/[0.05] border border-gold/20 rounded-lg outline-none text-[#e8e8e8] font-body text-sm box-border mb-2"
+        />
+        <div className="flex gap-1.5 flex-wrap">
+          <button
+            onClick={() => setMuscleFilter('')}
+            className="text-[10px] px-2.5 py-1 rounded-full border transition"
+            style={{ borderColor: !muscleFilter ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.15)', color: !muscleFilter ? '#D4B570' : '#666', background: !muscleFilter ? 'rgba(212,181,112,0.08)' : 'transparent' }}
+          >
+            Wszystkie
+          </button>
+          {muscles.map(m => (
+            <button
+              key={m}
+              onClick={() => setMuscleFilter(m === muscleFilter ? '' : m)}
+              className="text-[10px] px-2.5 py-1 rounded-full border transition"
+              style={{ borderColor: muscleFilter === m ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.15)', color: muscleFilter === m ? '#D4B570' : '#666', background: muscleFilter === m ? 'rgba(212,181,112,0.08)' : 'transparent' }}
+            >
+              {MUSCLE_PL[m] || m}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {filtered.length === 0 && (
+          <div className="p-12 text-center text-[#555] text-[13px]">Brak wyników</div>
+        )}
+        {filtered.map(ex => (
+          <button
+            key={ex.id}
+            onClick={() => { onSelect(sessionKey, ex); onClose() }}
+            className="w-full flex items-center justify-between py-3.5 px-5 bg-none border-none border-b border-white/[0.04] cursor-pointer text-left hover:bg-gold/[0.05] transition"
+          >
+            <div>
+              <div className="text-sm text-[#e8e8e8] font-medium mb-0.5">{ex.name_pl || ex.name}</div>
+              <div className="text-[11px] text-[#555]">
+                {MUSCLE_PL[ex.muscle_group] || ex.muscle_group}
+                {ex.stretch_position && <span className="text-[rgba(82,183,136,0.7)] ml-1.5">· stretch</span>}
+                {ex.unilateral && <span className="text-[rgba(100,181,246,0.7)] ml-1.5">· unilateral</span>}
+              </div>
+            </div>
+            <div className="flex gap-2 items-center">
+              <div className="text-[11px] text-gold/60 px-2 py-0.5 rounded bg-gold/[0.08]">SFR {ex.sfr_rating}</div>
+              <div className="text-gold text-lg">+</div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Session Card ─────────────────────────────────────────────────────────────
 
-function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, allExercises }) {
+function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, onAdd, allExercises }) {
   return (
     <div className="bg-gradient-to-br from-[#131f36] to-[#0f1a2e] border border-gold/15 rounded-xl p-5 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(212,196,148,0.3)] to-transparent" />
@@ -220,6 +301,12 @@ function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, allExerc
             allExercises={allExercises}
           />
         ))}
+        <button
+          onClick={() => onAdd(sessionKey)}
+          className="mt-2 w-full py-2 rounded-lg bg-transparent border border-dashed border-gold/20 text-gold/50 text-xs cursor-pointer font-body hover:border-gold/40 hover:text-gold/70 transition"
+        >
+          + Dodaj ćwiczenie
+        </button>
       </div>
     </div>
   )
@@ -235,6 +322,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
   const [saved, setSaved]         = useState(false)
   const [showDeload, setShowDeload] = useState(false)
   const [swapTarget, setSwapTarget] = useState(null)
+  const [addTarget, setAddTarget] = useState(null)
 
   useEffect(() => {
     if (questionnaire) {
@@ -259,6 +347,29 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
     setPlan(prev => {
       const sessions = { ...prev.sessions }
       const exs = sessions[sessionKey].exercises.filter((_, i) => i !== exIdx)
+      sessions[sessionKey] = { ...sessions[sessionKey], exercises: exs }
+      return { ...prev, sessions }
+    })
+  }
+
+  function addExercise(sessionKey, exercise) {
+    setPlan(prev => {
+      const sessions = { ...prev.sessions }
+      const exs = [...sessions[sessionKey].exercises]
+      exs.push({
+        exercise_id:      exercise.id,
+        name:             exercise.name,
+        name_pl:          exercise.name_pl || exercise.name,
+        muscle_group:     exercise.muscle_group,
+        compound:         exercise.compound ?? false,
+        stretch_position: exercise.stretch_position ?? false,
+        sfr_rating:       exercise.sfr_rating,
+        unilateral:       exercise.unilateral ?? false,
+        sets:             3,
+        rep_range:        '8-12',
+        rir_target:       2,
+        note:             '+ dodane ręcznie',
+      })
       sessions[sessionKey] = { ...sessions[sessionKey], exercises: exs }
       return { ...prev, sessions }
     })
@@ -338,6 +449,15 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
           allExercises={exercises}
           onSelect={confirmSwap}
           onClose={() => setSwapTarget(null)}
+        />
+      )}
+
+      {addTarget && (
+        <AddPicker
+          sessionKey={addTarget}
+          allExercises={exercises}
+          onSelect={addExercise}
+          onClose={() => setAddTarget(null)}
         />
       )}
 
@@ -537,6 +657,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
                   onUpdate={updateExercise}
                   onRemove={removeExercise}
                   onSwap={openSwap}
+                  onAdd={key => setAddTarget(key)}
                   allExercises={exercises}
                 />
               ))}
