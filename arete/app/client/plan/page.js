@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import PlanViewer from '@/components/client/PlanViewer'
+import PlanViewer from '@/app/client/PlanViewer'
 
 export default function PlanPage() {
   const router = useRouter()
