@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import NutritionPanel from './NutritionPanel'
+import MealPlanBuilder from './MealPlanBuilder'
 
 const TIER_COLORS = {
   paideia: { color: '#a07850', bg: 'rgba(160,120,80,0.12)', border: 'rgba(160,120,80,0.3)' },
@@ -579,7 +580,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires, weightLogs = [], nutritionTargets = null }) {
+export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires, weightLogs = [], nutritionTargets = null, mealPlan = null }) {
   const router = useRouter()
   const [tab, setTab] = useState('plans')
   const [checkins, setCheckins] = useState(initialCheckins)
@@ -1080,6 +1081,15 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
         {tab === 'nutrition' && (
           <Section title="Cele żywieniowe">
             <NutritionPanel clientId={client.id} initialTargets={nutritionTargets} questionnaire={questionnaire} />
+            <div className="mt-4">
+              <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Plan żywieniowy</p>
+              <MealPlanBuilder
+                clientId={client.id}
+                questionnaire={questionnaire}
+                nutritionTargets={nutritionTargets}
+                initialPlan={mealPlan}
+              />
+            </div>
           </Section>
         )}
 

@@ -74,6 +74,13 @@ export default async function ClientPage({ params }) {
     .eq('client_id', params.id)
     .maybeSingle()
 
+  const { data: mealPlan } = await admin
+    .from('meal_plans')
+    .select('*')
+    .eq('client_id', params.id)
+    .eq('is_active', true)
+    .maybeSingle()
+
   return (
     <ClientDetail
       client={client}
@@ -85,6 +92,7 @@ export default async function ClientPage({ params }) {
       questionnaires={questionnaires || []}
       weightLogs={weightLogs || []}
       nutritionTargets={nutritionTargets || null}
+      mealPlan={mealPlan || null}
     />
   )
 }

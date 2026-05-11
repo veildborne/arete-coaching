@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
 import NutritionCard from './NutritionCard'
+import MealPlanCard from './MealPlanCard'
 import CheatMealTracker from './CheatMealTracker'
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -521,7 +522,7 @@ function ZeusWidget({ recentLogs, checkins }) {
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins, totalXP = 0, clientAchievements = [], nutritionTargets = null }) {
+export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins, totalXP = 0, clientAchievements = [], nutritionTargets = null, mealPlan = null }) {
   const router   = useRouter()
   const [entered, setEntered] = useState(false)
   useEffect(() => setEntered(true), [])
@@ -706,6 +707,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             <CharacterCard profile={profile} recentLogs={safeLogs} questionnaire={questionnaire} totalXP={totalXP} />
             <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
             <NutritionCard nutritionTargets={nutritionTargets} />
+            <MealPlanCard mealPlan={mealPlan} />
             <AchievementPreview recentLogs={safeLogs} clientAchievements={clientAchievements} />
             <WeightLog />
 
