@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
+import { IconHome, IconTraining, IconPlan, IconReport, IconLogout } from '@/lib/GreekIcons'
 import NutritionCard from './NutritionCard'
 import MealPlanCard from './MealPlanCard'
 import CheatMealTracker from './CheatMealTracker'
@@ -583,22 +584,24 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
         </div>
         <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:'2px'}}>
           {[
-            {href:'/client',label:'Przegląd'},
-            {href:'/client/workout',label:'Trening'},
-            {href:'/client/plan',label:'Plan'},
-            {href:'/client/checkin',label:'Raport'},
-          ].map(({href,label})=>{
+            {href:'/client',icon:<IconHome size={16}/>,label:'Przegląd'},
+            {href:'/client/workout',icon:<IconTraining size={16}/>,label:'Trening'},
+            {href:'/client/plan',icon:<IconPlan size={16}/>,label:'Plan'},
+            {href:'/client/checkin',icon:<IconReport size={16}/>,label:'Raport'},
+          ].map(({href,icon,label})=>{
             const active=typeof window!=='undefined'&&window.location.pathname===href
             return(
-              <button key={href} onClick={()=>router.push(href)} style={{padding:'5px 8px',borderRadius:'8px',fontSize:'11px',border:'none',cursor:'pointer',fontFamily:'Outfit,sans-serif',whiteSpace:'nowrap',background:active?'rgba(212,181,112,0.12)':'transparent',color:active?'#D4B570':'#8F9AAF'}}>
-                {label}
+              <button key={href} onClick={()=>router.push(href)} style={{padding:'5px 8px',borderRadius:'8px',fontSize:'11px',border:'none',cursor:'pointer',fontFamily:'Outfit,sans-serif',whiteSpace:'nowrap',background:active?'rgba(212,181,112,0.12)':'transparent',color:active?'#D4B570':'#8F9AAF',display:'flex',alignItems:'center',gap:'4px'}}>
+                {icon}{label}
               </button>
             )
           })}
         </div>
         <div style={{display:'flex',alignItems:'center',gap:'5px',flexShrink:0}}>
           <span style={{fontSize:'11px',color:'#8F9AAF'}}>{firstName}</span>
-          <button onClick={handleLogout} style={{background:'none',border:'none',color:'#8F9AAF',fontSize:'16px',cursor:'pointer',padding:'4px'}}>↩</button>
+          <button onClick={handleLogout} style={{background:'none',border:'none',cursor:'pointer',padding:'4px',display:'flex',alignItems:'center'}}>
+            <IconLogout size={18}/>
+          </button>
         </div>
       </nav>
 

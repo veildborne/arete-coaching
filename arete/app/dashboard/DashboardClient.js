@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { IconClients, IconAttention, IconAdd, IconLogout, IconProgress, IconReport } from '@/lib/GreekIcons'
 
 function getInitials(name, email) {
   const source = name || email || 'AR'
@@ -229,9 +230,13 @@ export default function DashboardClient({ profile, clients }) {
           ))}
         </div>
         <div style={{display:'flex',alignItems:'center',gap:'5px',flexShrink:0}}>
-          <button onClick={()=>setInviteOpen(true)} style={{background:'#D4B570',color:'#0f0f0f',border:'none',borderRadius:'7px',padding:'5px 9px',fontSize:'11px',fontWeight:'700',cursor:'pointer'}}>+</button>
+          <button onClick={()=>setInviteOpen(true)} style={{background:'#D4B570',color:'#0f0f0f',border:'none',borderRadius:'8px',padding:'5px 10px',fontSize:'11px',fontWeight:'700',cursor:'pointer',display:'flex',alignItems:'center',gap:'4px'}}>
+            <IconAdd size={14} color="#0f0f0f"/> Dodaj
+          </button>
           <div style={{width:'26px',height:'26px',borderRadius:'50%',background:'rgba(212,181,112,0.15)',border:'1px solid rgba(212,181,112,0.3)',display:'flex',alignItems:'center',justifyContent:'center',color:'#D4B570',fontSize:'10px',fontWeight:'bold'}}>{getInitials(profile?.full_name,profile?.email)}</div>
-          <button onClick={async()=>{const s=createClient();await s.auth.signOut();window.location.href='/'}} style={{background:'none',border:'none',color:'#8F9AAF',fontSize:'13px',cursor:'pointer'}}>↩</button>
+          <button onClick={async()=>{const s=createClient();await s.auth.signOut();window.location.href='/'}} style={{background:'none',border:'none',cursor:'pointer',padding:'4px',display:'flex',alignItems:'center'}}>
+            <IconLogout size={18}/>
+          </button>
         </div>
       </nav>
 
@@ -243,14 +248,17 @@ export default function DashboardClient({ profile, clients }) {
 
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'8px',marginBottom:'20px'}}>
           {[
-            {label:'Klienci',value:stats.active,color:'#D4B570',id:'clients'},
-            {label:'Uwaga',value:stats.needsAttention,color:stats.needsAttention>0?'#EF6B73':'#47D18C',id:'attention'},
-            {label:'Bez planu',value:stats.withoutPlan,color:stats.withoutPlan>0?'#E8A020':'#47D18C',id:null},
-            {label:'Treningi',value:stats.totalLogs,color:'#D4B570',id:null},
-            {label:'Raporty',value:stats.pendingCheckins,color:stats.pendingCheckins>0?'#EF6B73':'#47D18C',id:'checkins'},
-          ].map(({label,value,color,id})=>(
+            {label:'Klienci',value:stats.active,icon:<IconClients size={18}/>,color:'#D4B570',id:'clients'},
+            {label:'Uwaga',value:stats.needsAttention,icon:<IconAttention size={18} color={stats.needsAttention>0?'#EF6B73':'#47D18C'}/>,color:stats.needsAttention>0?'#EF6B73':'#47D18C',id:'attention'},
+            {label:'Bez planu',value:stats.withoutPlan,icon:<IconProgress size={18} color={stats.withoutPlan>0?'#E8A020':'#47D18C'}/>,color:stats.withoutPlan>0?'#E8A020':'#47D18C',id:null},
+            {label:'Treningi',value:stats.totalLogs,icon:<IconProgress size={18}/>,color:'#D4B570',id:null},
+            {label:'Raporty',value:stats.pendingCheckins,icon:<IconReport size={18} color={stats.pendingCheckins>0?'#EF6B73':'#47D18C'}/>,color:stats.pendingCheckins>0?'#EF6B73':'#47D18C',id:'checkins'},
+          ].map(({label,value,icon,color,id})=>(
             <div key={label} onClick={()=>id&&setActiveNav(id)} style={{background:'rgba(15,20,35,0.85)',border:'2px solid rgba(212,181,112,0.35)',borderRadius:'12px',padding:'10px 12px',cursor:id?'pointer':'default'}}>
-              <p style={{fontSize:'9px',color:'#8F9AAF',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:'4px'}}>{label}</p>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'4px'}}>
+                <p style={{fontSize:'9px',color:'#8F9AAF',textTransform:'uppercase',letterSpacing:'0.08em',margin:0}}>{label}</p>
+                {icon}
+              </div>
               <p style={{fontSize:'1.4rem',fontFamily:'Cormorant Garamond,serif',color,margin:0}}>{value}</p>
             </div>
           ))}
