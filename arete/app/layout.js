@@ -1,5 +1,6 @@
 import './globals.css'
 import { Cormorant_Garamond, Outfit } from 'next/font/google'
+import GlobalBackground from './GlobalBackground'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -37,7 +38,8 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Areté" />
       </head>
-      <body>
+      <body className="bg-[#020810]">
+        <GlobalBackground />
         {children}
         <script dangerouslySetInnerHTML={{ __html: `
           if ('serviceWorker' in navigator) {

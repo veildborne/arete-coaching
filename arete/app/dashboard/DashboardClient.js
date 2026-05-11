@@ -222,10 +222,10 @@ export default function DashboardClient({ profile, clients }) {
   ]
 
   return (
-    <div className="min-h-screen bg-bg-deep text-warm font-body flex">
+    <div className="min-h-screen bg-transparent text-warm font-body flex">
 
       {/* SIDEBAR */}
-      <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-[rgba(212,181,112,0.12)] bg-surface sticky top-0 h-screen">
+      <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-[rgba(212,181,112,0.12)] bg-black/20 backdrop-blur-xl sticky top-0 h-screen">
         <div className="p-6 border-b border-[rgba(212,181,112,0.1)]">
           <div>
             <span className="font-display text-2xl text-gold tracking-widest">ARETÉ</span>
@@ -266,7 +266,7 @@ export default function DashboardClient({ profile, clients }) {
       </aside>
 
       {/* MOBILE TOP NAV */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-bg-deep/95 backdrop-blur-md border-b border-[rgba(212,181,112,0.15)] px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-xl border-b border-[rgba(212,181,112,0.15)] px-4 py-3 flex items-center justify-between">
         <div>
           <span className="font-display text-xl text-gold tracking-widest">ARETÉ</span>
           <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest ml-2">α 0.1</span>
@@ -464,7 +464,7 @@ export default function DashboardClient({ profile, clients }) {
       </main>
 
       {/* MOBILE BOTTOM NAV */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-bg-deep/95 backdrop-blur-md border-t border-[rgba(212,181,112,0.15)] px-4 py-3 flex justify-around z-50">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/20 backdrop-blur-xl border-t border-[rgba(212,181,112,0.15)] px-4 py-3 flex justify-around z-50">
         {NAV_ITEMS.map(({ id, icon, label, badge }) => (
           <button key={id} onClick={() => setActiveNav(id)}
             className={`flex flex-col items-center gap-1 relative ${activeNav === id ? 'text-gold' : 'text-muted'}`}>

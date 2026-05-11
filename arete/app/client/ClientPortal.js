@@ -8,7 +8,6 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } fro
 import NutritionCard from './NutritionCard'
 import MealPlanCard from './MealPlanCard'
 import CheatMealTracker from './CheatMealTracker'
-import OceanBackground from './OceanBackground'
 import OceanLoader from './OceanLoader'
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -574,7 +573,6 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
 
   return (
     <div className="min-h-screen text-warm font-body relative">
-      <OceanBackground />
       {!entered && <OceanLoader />}
       <div className={`relative z-10 transition-opacity duration-1000 ${entered ? 'opacity-100' : 'opacity-0'}`}>
 
