@@ -22,13 +22,14 @@ const VOLUME_LANDMARKS = {
   glutes:         { beginner:{mev:6, mav:12,mrv:16}, intermediate:{mev:8, mav:14,mrv:20}, advanced:{mev:10,mav:16,mrv:22} },
   calves:         { beginner:{mev:6, mav:10,mrv:14}, intermediate:{mev:8, mav:12,mrv:16}, advanced:{mev:10,mav:14,mrv:20} },
   abs:            { beginner:{mev:6, mav:10,mrv:14}, intermediate:{mev:8, mav:12,mrv:16}, advanced:{mev:10,mav:14,mrv:18} },
+  forearms:       { beginner:{mev:4, mav:8, mrv:12}, intermediate:{mev:6, mav:10,mrv:14}, advanced:{mev:8, mav:12,mrv:16} },
 }
 
 // ─── SESSION SET CAPS (max hard sets per muscle per session) ──────────────────
 const MUSCLE_SIZE_CLASS = {
   chest:'large', back:'large', quads:'large', hamstrings:'large', glutes:'large',
   shoulders_lat:'medium', shoulders_rear:'medium',
-  biceps:'small', triceps:'small', calves:'small', abs:'small',
+  biceps:'small', triceps:'small', calves:'small', abs:'small', forearms:'small',
 }
 const SESSION_CAPS = { large:6, medium:5, small:4 }
 
@@ -47,6 +48,7 @@ function getRepRange(goal, muscle) {
   if (goal === 'Wzrost siły')                   return isHeavy ? '3-6'  : '6-10'
   if (goal === 'Redukcja tkanki tłuszczowej')   return isHeavy ? '8-12' : isLight ? '15-25' : '10-20'
   // Hypertrophy / Recomp / Health
+  if (muscle === 'forearms') return '12-20'
   if (isHeavy) return '6-12'
   if (isLight) return '12-20'
   return '8-15'
@@ -106,7 +108,7 @@ function buildDecisionParams(q) {
   if (painAreas.includes('knee')     && painLevel >= 6) excludedMovements.push('leg_extension')
   if (painAreas.includes('lower_back')&& painLevel >= 4) excludedMovements.push('conventional_deadlift','good_morning')
   if (painAreas.includes('lower_back')&& painLevel >= 6) excludedMovements.push('romanian_deadlift','barbell_row')
-  if (painAreas.includes('elbow')    && painLevel >= 5) excludedMovements.push('dips','close_grip_bench')
+  if (painAreas.includes('elbow')    && painLevel >= 5) excludedMovements.push('dips','close_grip_bench','wrist_curl')
 
   let cardioFactor = 1.0
   const cardioMatch = (q.cardio_ile || '').match(/(\d+)/)
@@ -200,10 +202,10 @@ const SPLIT_STRUCTURES = {
     name: 'Push / Pull / Legs x1.5',
     sessions: {
       A: { name:'Push',         muscles:['chest','shoulders_lat','triceps'] },
-      B: { name:'Pull',         muscles:['back','biceps','shoulders_rear'] },
+      B: { name:'Pull',         muscles:['back','biceps','shoulders_rear','forearms'] },
       C: { name:'Legs',         muscles:['quads','hamstrings','glutes','calves'] },
       D: { name:'Push B',       muscles:['chest','shoulders_lat','triceps'] },
-      E: { name:'Pull B + Abs', muscles:['back','biceps','abs'] },
+      E: { name:'Pull B + Abs', muscles:['back','biceps','abs','forearms'] },
     }
   },
   ppl_glute_5: {
@@ -220,10 +222,10 @@ const SPLIT_STRUCTURES = {
     name: 'PPL x2',
     sessions: {
       A: { name:'Push A',  muscles:['chest','shoulders_lat','triceps'] },
-      B: { name:'Pull A',  muscles:['back','biceps','shoulders_rear'] },
+      B: { name:'Pull A',  muscles:['back','biceps','shoulders_rear','forearms'] },
       C: { name:'Legs A',  muscles:['quads','hamstrings','glutes','calves'] },
       D: { name:'Push B',  muscles:['chest','shoulders_lat','triceps'] },
-      E: { name:'Pull B',  muscles:['back','biceps','abs'] },
+      E: { name:'Pull B',  muscles:['back','biceps','abs','forearms'] },
       F: { name:'Legs B',  muscles:['glutes','hamstrings','quads'] },
     }
   },
