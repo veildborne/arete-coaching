@@ -57,6 +57,15 @@ export default async function ClientPage() {
     .limit(1)
     .maybeSingle()
 
+  const { data: xpEvents } = await supabase
+    .from('xp_events')
+    .select('xp')
+    .eq('client_id', user.id)
+  const { data: clientAchievements } = await supabase
+    .from('achievements')
+    .select('achievement_id, unlocked_at')
+    .eq('client_id', user.id)
+
   return (
     <ClientPortal
       profile={profile}
@@ -65,6 +74,8 @@ export default async function ClientPage() {
       questionnaire={questionnaire}
       coachName={coach?.full_name || null}
       checkins={checkins || []}
+      totalXP={xpEvents ? xpEvents.reduce((s, e) => s + e.xp, 0) : 0}
+      clientAchievements={clientAchievements || []}
     />
   )
 }

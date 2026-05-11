@@ -680,6 +680,12 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
       completed: true,
     })
 
+    fetch('/api/xp/award', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source: 'workout', metadata: { description: 'Sesja treningowa ukończona' } })
+    })
+
     setSaving(false)
     setSessionStats({
       duration,

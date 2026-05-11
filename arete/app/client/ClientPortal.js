@@ -78,8 +78,8 @@ function getGenderAccent(questionnaire) {
 
 // ─── CHARACTER CARD ───────────────────────────────────────────────────────────
 
-function CharacterCard({ profile, recentLogs, questionnaire }) {
-  const xp = (recentLogs?.length ?? 0) * 120
+function CharacterCard({ profile, recentLogs, questionnaire, totalXP = 0 }) {
+  const xp = totalXP || (recentLogs?.length ?? 0) * 120
   const nextXP    = 500
   const pct       = Math.min(100, Math.round((xp / nextXP) * 100))
   const archetype = getArchetype(xp)
@@ -255,12 +255,13 @@ function CampaignProgress({ activePlan, planInfo }) {
 
 // ─── ACHIEVEMENT PREVIEW ──────────────────────────────────────────────────────
 
-function AchievementPreview({ recentLogs }) {
+function AchievementPreview({ recentLogs, clientAchievements = [] }) {
+  const unlockedSet = new Set((clientAchievements || []).map(a => a.achievement_id))
   const unlocked = {
-    protos:    (recentLogs?.length ?? 0) > 0,
-    askesis:   (recentLogs?.length ?? 0) >= 12,
-    kleos:     false, // TODO: detect PR from logs
-    arete_fin: false,
+    protos:    unlockedSet.has('protos'),
+    askesis:   unlockedSet.has('askesis'),
+    kleos:     unlockedSet.has('kleos'),
+    arete_fin: unlockedSet.has('arete_fin'),
   }
 
   return (
@@ -518,7 +519,7 @@ function ZeusWidget({ recentLogs, checkins }) {
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins }) {
+export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins, totalXP = 0, clientAchievements = [] }) {
   const router   = useRouter()
   const [entered, setEntered] = useState(false)
   useEffect(() => setEntered(true), [])
@@ -698,9 +699,9 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
 
           {/* ── RIGHT ── */}
           <div className="space-y-4">
-            <CharacterCard profile={profile} recentLogs={safeLogs} questionnaire={questionnaire} />
+            <CharacterCard profile={profile} recentLogs={safeLogs} questionnaire={questionnaire} totalXP={totalXP} />
             <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
-            <AchievementPreview recentLogs={safeLogs} />
+            <AchievementPreview recentLogs={safeLogs} clientAchievements={clientAchievements} />
             <WeightLog />
 
             {/* Coach Message */}
