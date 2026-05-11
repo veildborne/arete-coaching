@@ -333,6 +333,16 @@ function CoachMessageCard({ coachName }) {
   )
 }
 
+function CoachNoteCard({ note }) {
+  if (!note) return null
+  return (
+    <div className="bg-surface border border-gold/20 rounded-2xl p-5">
+      <p className="text-[10px] text-gold uppercase tracking-widest mb-3">Notatka od trenera</p>
+      <p className="text-sm text-warm/80 leading-relaxed">{note}</p>
+    </div>
+  )
+}
+
 function WeightLog() {
   const [weight, setWeight] = useState('')
   const [logs, setLogs] = useState([])
@@ -522,7 +532,7 @@ function ZeusWidget({ recentLogs, checkins }) {
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins, totalXP = 0, clientAchievements = [], nutritionTargets = null, mealPlan = null }) {
+export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins, totalXP = 0, clientAchievements = [], nutritionTargets = null, mealPlan = null, coachNote = null }) {
   const router   = useRouter()
   const [entered, setEntered] = useState(false)
   useEffect(() => setEntered(true), [])
@@ -716,6 +726,9 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
 
             {/* Coach Message */}
             <CoachMessageCard coachName={coachName} />
+
+            {/* Coach Note */}
+            <CoachNoteCard note={coachNote} />
 
             {/* Ankieta status */}
             {profile?.questionnaire_requested ? (

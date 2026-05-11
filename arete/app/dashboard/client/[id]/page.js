@@ -93,6 +93,7 @@ export default async function ClientPage({ params }) {
       weightLogs={weightLogs || []}
       nutritionTargets={nutritionTargets || null}
       mealPlan={mealPlan || null}
+      coach_profile_note={client?.coach_profile_note || null}
     />
   )
 }

@@ -580,9 +580,80 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
   )
 }
 
+// ─── Coach Profile Note ────────────────────────────────────────────────────────
+
+function CoachProfileNote({ clientId, initialNote }) {
+  const [note, setNote] = useState(initialNote || '')
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  async function handleSave() {
+    setSaving(true)
+    const supabase = createClient()
+    await supabase.from('profiles').update({ coach_profile_note: note }).eq('id', clientId)
+    setSaving(false)
+    setEditing(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  return (
+    <div className="bg-[#1a1a1a] border border-gold/15 rounded-[10px] p-4 mb-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] text-gold uppercase tracking-widest">Notatka coacha</span>
+        <div className="flex gap-2 items-center">
+          {saved && <span className="text-[10px] text-success">✓ Zapisano</span>}
+          <button
+            onClick={() => setEditing(e => !e)}
+            className="text-[10px] px-2 py-1 rounded border border-gold/20 text-gold/60 hover:text-gold transition"
+          >
+            {editing ? 'Anuluj' : '✎ Edytuj'}
+          </button>
+          {note && !editing && (
+            <button
+              onClick={async () => {
+                const supabase = createClient()
+                await supabase.from('profiles').update({ coach_profile_note: null }).eq('id', clientId)
+                setNote('')
+              }}
+              className="text-[10px] px-2 py-1 rounded border border-danger/20 text-danger/60 hover:text-danger transition"
+            >
+              Usuń
+            </button>
+          )}
+        </div>
+      </div>
+      {editing ? (
+        <div className="space-y-2">
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Notatka widoczna dla klienta w jego panelu — na co zwrócić uwagę, wskazówki, motywacja..."
+            rows={3}
+            className="w-full py-2 px-3 rounded-lg bg-white/[0.04] border border-gold/20 text-[#e8e8e8] text-sm font-body outline-none resize-none focus:border-gold/40"
+          />
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full py-2 rounded-lg text-xs font-bold font-body"
+            style={{ background: 'linear-gradient(135deg,#b8a677,#d4c494)', color: '#0f1a2e' }}
+          >
+            {saving ? 'Zapisuję...' : 'Zapisz notatkę'}
+          </button>
+        </div>
+      ) : note ? (
+        <p className="text-sm text-warm/80 leading-relaxed">{note}</p>
+      ) : (
+        <p className="text-xs text-muted/50">Brak notatki — kliknij Edytuj aby dodać.</p>
+      )}
+    </div>
+  )
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires, weightLogs = [], nutritionTargets = null, mealPlan = null }) {
+export default function ClientDetail({ client, plans, logs, checkins: initialCheckins, questionnaire, coachName, questionnaires, weightLogs = [], nutritionTargets = null, mealPlan = null, coach_profile_note = null }) {
   const router = useRouter()
   const [tab, setTab] = useState('plans')
   const [checkins, setCheckins] = useState(initialCheckins)
@@ -757,6 +828,9 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
             </div>
           </div>
         </div>
+
+        {/* Coach Profile Note */}
+        <CoachProfileNote clientId={client.id} initialNote={coach_profile_note} />
 
         {/* Tabs */}
         <div className="flex gap-0.5 border-b border-white/[0.07] mb-6">

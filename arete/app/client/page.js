@@ -91,6 +91,7 @@ export default async function ClientPage() {
       clientAchievements={clientAchievements || []}
       nutritionTargets={nutritionTargets || null}
       mealPlan={mealPlan || null}
+      coachNote={profile?.coach_profile_note || null}
     />
   )
 }
