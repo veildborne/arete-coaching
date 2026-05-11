@@ -186,6 +186,8 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
     priority_muscles: [],
     avoid_growth_muscles: [],
     pain_areas: [],
+    dysproporcja_obszar: [],
+    dysproporcja_opis: '',
   })
 
   useEffect(() => {
@@ -515,6 +517,29 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
               placeholder="np. martwy ciąg, dipsy, wykroki — lub: brak"
               rows={2} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }} />
           </div>
+        </Block>
+
+        {/* BLOK 7b — Dysproporcje i asymetria */}
+        <Block title="Asymetria i dysproporcje" subtitle="Opcjonalne. Wpływa na dobór ćwiczeń unilateralnych.">
+          <div>
+            <Label>Czy czujesz różnicę siły lub rozmiaru między stronami?</Label>
+            <MultiCheckbox name="dysproporcja_obszar" value={form.dysproporcja_obszar} onChange={set} options={[
+              { value: 'left_arm',  label: 'Lewa ręka / ramię słabsze' },
+              { value: 'right_arm', label: 'Prawa ręka / ramię słabsza' },
+              { value: 'left_leg',  label: 'Lewa noga słabsza' },
+              { value: 'right_leg', label: 'Prawa noga słabsza' },
+              { value: 'shoulders', label: 'Barki nierówne' },
+            ]} />
+            <Hint>Gdy zaznaczysz — plan preferuje ćwiczenia wykonywane osobno na każdą stronę (Bulgarian, Single Arm Row, Single Leg Curl etc.).</Hint>
+          </div>
+          {form.dysproporcja_obszar && form.dysproporcja_obszar.length > 0 && (
+            <div>
+              <Label>Opis asymetrii (opcjonalnie)</Label>
+              <textarea value={form.dysproporcja_opis || ''} onChange={e => set('dysproporcja_opis', e.target.value)}
+                placeholder="np. prawa noga po kontuzji kolana jest wyraźnie słabsza, różnica ok. 20%"
+                rows={2} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }} />
+            </div>
+          )}
         </Block>
 
         {/* BLOK 8 — Ból i kontuzje */}
