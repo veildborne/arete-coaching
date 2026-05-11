@@ -285,6 +285,16 @@ function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, onAdd, a
           <div className="text-[11px] text-gold/50">
             {session.exercises.length} ćwiczeń · {session.exercises.reduce((s, e) => s + (e.sets || 0), 0)} serii
           </div>
+          {(() => {
+            const totalSets = session.exercises.reduce((s, e) => s + (e.sets || 0), 0)
+            const estMin = Math.round(totalSets * 3.5 + (session.exercises?.length || 0) * 5)
+            if (estMin > 90) return (
+              <div className="text-[11px] text-[#E8A020] mt-1">
+                ⚠ Sesja może być zbyt długa (~{estMin} min)
+              </div>
+            )
+            return null
+          })()}
         </div>
       </div>
 
@@ -356,7 +366,6 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
     setPlan(prev => {
       const sessions = { ...prev.sessions }
       const exs = [...sessions[sessionKey].exercises]
-      const rirStart = prev.rir_start ?? prev.weekly_progression?.[0]?.rir ?? 2
       exs.push({
         exercise_id:      exercise.id,
         name:             exercise.name,
@@ -368,7 +377,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
         unilateral:       exercise.unilateral ?? false,
         sets:             3,
         rep_range:        '8-12',
-        rir_target:       rirStart,
+        rir_target:       prev?.weekly_progression?.[0]?.rir ?? 2,
         note:             '+ dodane ręcznie',
       })
       sessions[sessionKey] = { ...sessions[sessionKey], exercises: exs }
@@ -541,15 +550,26 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
                         weeklyVolume[m] = (weeklyVolume[m] || 0) + (ex.sets || 0)
                       })
                     })
+                    const MEV = {
+                      chest:8, back:8, quads:8, hamstrings:6, glutes:8,
+                      shoulders_lat:6, shoulders_rear:6, biceps:6, triceps:6,
+                      abs:6, calves:4, forearms:4,
+                    }
                     return Object.entries(weeklyVolume).sort((a,b) => b[1]-a[1]).map(([muscle, sets]) => {
                       const isPriority = plan.priority_muscles?.includes(muscle)
+                      const mev = MEV[muscle] || 0
+                      const belowMev = sets < mev
                       return (
-                        <div key={muscle} className="bg-bg-deep rounded-lg p-2.5 flex justify-between items-center">
+                        <div key={muscle} className="bg-bg-deep rounded-lg p-2.5 flex justify-between items-center"
+                          style={{ border: belowMev ? '1px solid rgba(239,107,115,0.3)' : 'transparent' }}>
                           <span className="text-xs text-muted">
                             {muscleLabels[muscle] || muscle}
                             {isPriority && <span className="text-gold ml-1">★</span>}
+                            {belowMev && <span className="text-danger ml-1">⚠ MEV</span>}
                           </span>
-                          <span className="text-sm font-semibold text-warm">{sets} serii</span>
+                          <span className="text-sm font-semibold" style={{ color: belowMev ? '#EF6B73' : '#e8e8e8' }}>
+                            {sets} serii
+                          </span>
                         </div>
                       )
                     })
