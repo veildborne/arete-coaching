@@ -424,6 +424,41 @@ export default function DashboardClient({ profile, clients }) {
                 </div>
               </div>
             )}
+
+            {/* COMPLIANCE SUMMARY */}
+            {safeClients.length > 0 && (() => {
+              const withCompliance = safeClients
+                .map(c => ({ c, pct: calculateCompliance(c.logs, c.plans) }))
+                .filter(({ pct }) => pct !== null)
+                .sort((a, b) => a.pct - b.pct)
+              if (withCompliance.length === 0) return null
+              const avgCompliance = Math.round(withCompliance.reduce((s, { pct }) => s + pct, 0) / withCompliance.length)
+              return (
+                <div className="bg-surface border border-[rgba(212,181,112,0.12)] rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[10px] text-muted uppercase tracking-widest">Compliance — 4 tygodnie</p>
+                    <span className="text-sm font-semibold" style={{ color: avgCompliance >= 80 ? '#47D18C' : avgCompliance >= 60 ? '#E8A020' : '#EF6B73' }}>
+                      śr. {avgCompliance}%
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {withCompliance.map(({ c, pct }) => (
+                      <div key={c.id} onClick={() => router.push(`/dashboard/client/${c.id}`)}
+                        className="cursor-pointer hover:opacity-80 transition">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-warm">{c.full_name?.split(' ')[0] || 'Klient'}</span>
+                          <span style={{ color: pct >= 80 ? '#47D18C' : pct >= 60 ? '#E8A020' : '#EF6B73' }}>{pct}%</span>
+                        </div>
+                        <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all"
+                            style={{ width: `${pct}%`, background: pct >= 80 ? '#47D18C' : pct >= 60 ? '#E8A020' : '#EF6B73' }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         </div>
       </main>
