@@ -915,10 +915,10 @@ export default function Home() {
       <section style={{padding:'5rem 1.5rem',maxWidth:'900px',margin:'0 auto'}}>
         <div style={{textAlign:'center',marginBottom:'3rem'}}>
           <p style={{fontSize:'0.65rem',letterSpacing:'0.3em',color:'rgba(184,166,119,0.6)',marginBottom:'1rem',textTransform:'uppercase'}}>SYSTEM</p>
-          <h2 style={{fontFamily:'var(--font-display)',fontSize:'clamp(1.8rem,4vw,2.8rem)',color:'#D4B570',marginBottom:'1rem'}}>Areté System — coaching bez chaosu</h2>
+          <h2 style={{fontFamily:'var(--font-display)',fontSize:'clamp(1.8rem,4vw,2.8rem)',color:'#D4B570',marginBottom:'1rem',fontWeight:600}}>Areté System — coaching bez chaosu</h2>
           <p style={{color:'rgba(200,190,170,0.7)',maxWidth:'600px',margin:'0 auto',lineHeight:1.7,fontSize:'0.95rem'}}>Każdy klient ma swój panel. Trener widzi dane w czasie rzeczywistym. System analizuje, flaguje problemy, sugeruje korekty.</p>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:'1.5rem'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:'1.5rem',marginBottom:'3rem'}}>
           {[
             {icon:'▦',title:'Plan treningowy',desc:'Periodyzowany 6-tygodniowy cykl. MEV/MRV Israetela, RIR Helmsa, dobór ćwiczeń pod Twój sprzęt i anatomię.'},
             {icon:'◈',title:'Raport tygodniowy',desc:'Waga, energia, sen, realizacja planu. Trener widzi dane i odpowiada z feedbackiem. Pętla coachingowa zamknięta.'},
@@ -927,12 +927,12 @@ export default function Home() {
           ].map((item,i)=>(
             <div key={i} style={{background:'rgba(255,255,255,0.02)',border:'2px solid rgba(184,166,119,0.2)',borderRadius:'16px',padding:'2rem'}}>
               <div style={{fontSize:'1.5rem',marginBottom:'1rem',color:'#D4B570'}}>{item.icon}</div>
-              <h3 style={{fontFamily:'var(--font-display)',fontSize:'1.1rem',color:'#D4B570',marginBottom:'0.75rem'}}>{item.title}</h3>
+              <h3 style={{fontFamily:'var(--font-display)',fontSize:'1.1rem',color:'#D4B570',marginBottom:'0.75rem',fontWeight:600}}>{item.title}</h3>
               <p style={{color:'rgba(200,190,170,0.7)',fontSize:'0.875rem',lineHeight:1.7,margin:0}}>{item.desc}</p>
             </div>
           ))}
         </div>
-        <div style={{textAlign:'center',marginTop:'3rem'}}>
+        <div style={{textAlign:'center'}}>
           <span style={{display:'inline-flex',alignItems:'center',gap:'0.5rem',background:'rgba(212,181,112,0.08)',border:'1px solid rgba(212,181,112,0.25)',borderRadius:'99px',padding:'0.5rem 1.25rem',fontSize:'0.75rem',color:'rgba(212,181,112,0.7)',letterSpacing:'0.1em'}}>
             <span style={{width:6,height:6,borderRadius:'50%',background:'#47D18C',display:'inline-block'}}/>
             System w aktywnym rozwoju · Alpha 0.1 · Nowe funkcje co tydzień
