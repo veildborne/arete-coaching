@@ -635,9 +635,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
       {/* Topbar */}
       <header className="border-b border-white/[0.07] px-7 h-14 flex items-center gap-4 sticky top-0 bg-[rgba(15,15,15,0.95)] backdrop-blur-xl z-50">
         <span className="font-display text-xl font-bold text-gold tracking-widest">ARETÉ</span>
-        <span className="text-[10px] px-2 py-0.5 rounded-full border border-gold/30 text-[#8a7d5a] tracking-widest">
-          BETA
-        </span>
+        <span className="text-[10px] px-2 py-0.5 rounded-full border border-gold/30 text-[#8a7d5a] tracking-widest">α 0.1</span>
         <span className="text-white/15 text-base">|</span>
         <button
           onClick={() => router.push('/dashboard')}

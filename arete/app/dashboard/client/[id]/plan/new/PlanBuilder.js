@@ -487,9 +487,12 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
           ← {client.full_name || 'Klient'}
         </button>
         <div className="flex-1" />
-        <span className="font-display text-xl font-semibold text-[#d4c494] tracking-[0.35em]">
-          ARETÉ
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-display text-xl font-semibold text-[#d4c494] tracking-[0.35em]">
+            ARETÉ
+          </span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest">α 0.1</span>
+        </div>
       </nav>
 
       <main className="max-w-[860px] mx-auto px-6 py-8 pb-20">

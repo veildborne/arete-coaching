@@ -565,7 +565,10 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
 
       {/* NAV */}
       <nav className="sticky top-0 z-50 bg-bg-deep/80 backdrop-blur-md border-b border-[rgba(212,181,112,0.18)] px-6 py-4 flex items-center justify-between">
-        <span className="font-display text-2xl text-gold tracking-widest">ARETÉ</span>
+        <div className="flex items-center gap-2">
+          <span className="font-display text-2xl text-gold tracking-widest">ARETÉ</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest">α 0.1</span>
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-muted">{firstName}</span>
           <button

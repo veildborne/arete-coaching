@@ -227,7 +227,10 @@ export default function DashboardClient({ profile, clients }) {
       {/* SIDEBAR */}
       <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-[rgba(212,181,112,0.12)] bg-surface sticky top-0 h-screen">
         <div className="p-6 border-b border-[rgba(212,181,112,0.1)]">
-          <span className="font-display text-2xl text-gold tracking-widest">ARETÉ</span>
+          <div className="flex items-center gap-2">
+            <span className="font-display text-2xl text-gold tracking-widest">ARETÉ</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest">α 0.1</span>
+          </div>
           <p className="text-[10px] text-muted uppercase tracking-widest mt-1">Panel Trenera</p>
         </div>
 
@@ -264,7 +267,10 @@ export default function DashboardClient({ profile, clients }) {
 
       {/* MOBILE TOP NAV */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-bg-deep/95 backdrop-blur-md border-b border-[rgba(212,181,112,0.15)] px-4 py-3 flex items-center justify-between">
-        <span className="font-display text-xl text-gold tracking-widest">ARETÉ</span>
+        <div className="flex items-center gap-2">
+          <span className="font-display text-xl text-gold tracking-widest">ARETÉ</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded border border-gold/20 text-gold/40 tracking-widest">α 0.1</span>
+        </div>
         <button onClick={() => setInviteOpen(true)} className="bg-gold text-bg-deep px-3 py-1.5 rounded-lg text-xs font-semibold">+ Dodaj</button>
       </div>
 
