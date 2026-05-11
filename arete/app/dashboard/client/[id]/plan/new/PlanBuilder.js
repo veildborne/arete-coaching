@@ -111,11 +111,45 @@ function SwapPicker({ currentExercise, allExercises, onSelect, onClose }) {
 
 // ─── Exercise Row ─────────────────────────────────────────────────────────────
 
-function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap }) {
+function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap, onReorder, totalExercises }) {
   const [editing, setEditing] = useState(false)
+  const [dragging, setDragging] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
 
   return (
-    <div className="bg-white/[0.02] border border-gold/10 rounded-lg p-3 flex items-start gap-3">
+    <div
+      draggable
+      onDragStart={e => { setDragging(true); e.dataTransfer.setData('exIdx', String(exIdx)); e.dataTransfer.setData('sessionKey', sessionKey) }}
+      onDragEnd={() => { setDragging(false); setDragOver(false) }}
+      onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={e => {
+        e.preventDefault()
+        setDragOver(false)
+        const fromIdx = parseInt(e.dataTransfer.getData('exIdx'))
+        const fromSession = e.dataTransfer.getData('sessionKey')
+        if (fromSession === sessionKey && fromIdx !== exIdx) onReorder(sessionKey, fromIdx, exIdx)
+      }}
+      style={{
+        opacity: dragging ? 0.4 : 1,
+        transform: dragOver ? 'scale(1.01)' : 'scale(1)',
+        transition: 'all 0.15s',
+        cursor: 'grab',
+        borderColor: dragOver ? 'rgba(212,181,112,0.5)' : undefined,
+        borderWidth: dragOver ? '2px' : undefined,
+      }}
+      className="bg-white/[0.02] border-2 border-gold/10 rounded-lg p-3 flex items-start gap-3"
+    >
+      {/* Drag handle */}
+      <div className="flex flex-col gap-0.5 pt-1 shrink-0 opacity-30 hover:opacity-70 transition">
+        {[0,1,2].map(i => (
+          <div key={i} className="flex gap-0.5">
+            <div className="w-1 h-1 rounded-full bg-gold"/>
+            <div className="w-1 h-1 rounded-full bg-gold"/>
+          </div>
+        ))}
+      </div>
+
       <div
         className="w-0.5 rounded-full self-stretch shrink-0"
         style={{ background: ex.stretch_priority ? '#52B788' : 'rgba(184,166,119,0.4)' }}
@@ -123,36 +157,29 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-          <span className="text-sm font-medium text-[#e8e8e8]">
-            {ex.name_pl || ex.name}
-          </span>
+          <span className="text-sm font-medium text-[#e8e8e8]">{ex.name_pl || ex.name}</span>
           <Badge>{MUSCLE_PL[ex.muscle_group] || ex.muscle_group}</Badge>
           {ex.stretch_priority && <Badge color="#52B788">↔ stretch</Badge>}
+          {ex.unilateral && <Badge color="#64B5F6">⚖ unilateral</Badge>}
           {ex.note && ex.note.includes('★') && <Badge color="#D4AF37">★ priorytet</Badge>}
         </div>
-
         <div className="flex gap-4 flex-wrap text-xs text-gold/70">
           <span>{ex.sets} serie</span>
           <span>{ex.rep_range} powt.</span>
           <span>RIR {ex.rir_target}</span>
-          {ex.progression && <span className="text-[rgba(160,160,160,0.4)]">{ex.progression}</span>}
         </div>
-
         {editing && (
           <div className="mt-2.5 flex gap-2 flex-wrap">
             {[
-              { label: 'Serie',       key: 'sets',      type: 'number', w: 'w-12' },
-              { label: 'Zakres powt.', key: 'rep_range', type: 'text',   w: 'w-20' },
-              { label: 'RIR',         key: 'rir_target', type: 'number', w: 'w-12' },
+              { label: 'Serie', key: 'sets', type: 'number', w: 'w-12' },
+              { label: 'Zakres powt.', key: 'rep_range', type: 'text', w: 'w-20' },
+              { label: 'RIR', key: 'rir_target', type: 'number', w: 'w-12' },
             ].map(f => (
               <div key={f.key}>
                 <div className="text-[9px] text-[#555] mb-0.5 uppercase tracking-widest">{f.label}</div>
-                <input
-                  type={f.type}
-                  value={ex[f.key]}
+                <input type={f.type} value={ex[f.key]}
                   onChange={e => onUpdate(sessionKey, exIdx, f.key, f.type === 'number' ? parseInt(e.target.value) : e.target.value)}
-                  className={`${f.w} py-1 px-2 rounded bg-white/[0.05] border border-gold/20 text-[#e8e8e8] text-[13px] font-body`}
-                />
+                  className={`${f.w} py-1 px-2 rounded bg-white/[0.05] border border-gold/20 text-[#e8e8e8] text-[13px] font-body`}/>
               </div>
             ))}
           </div>
@@ -160,26 +187,14 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap }) {
       </div>
 
       <div className="flex gap-1 shrink-0">
-        <button
-          onClick={() => onSwap(sessionKey, exIdx, ex)}
-          className="py-1 px-2 rounded text-[11px] bg-transparent border border-[rgba(100,181,246,0.25)] text-[#64B5F6] cursor-pointer font-body"
-        >
-          ⇄
-        </button>
-        <button
-          onClick={() => setEditing(e => !e)}
-          className={`py-1 px-2 rounded text-[11px] border border-gold/20 text-gold cursor-pointer font-body ${
-            editing ? 'bg-gold/15' : 'bg-transparent'
-          }`}
-        >
+        <button onClick={() => onSwap(sessionKey, exIdx, ex)}
+          className="py-1 px-2 rounded text-[11px] bg-transparent border-2 border-[rgba(100,181,246,0.35)] text-[#64B5F6] cursor-pointer font-body">⇄</button>
+        <button onClick={() => setEditing(e => !e)}
+          className={`py-1 px-2 rounded text-[11px] border-2 border-gold/20 text-gold cursor-pointer font-body ${editing ? 'bg-gold/15' : 'bg-transparent'}`}>
           {editing ? 'OK' : 'Edytuj'}
         </button>
-        <button
-          onClick={() => onRemove(sessionKey, exIdx)}
-          className="py-1 px-2 rounded text-[11px] bg-transparent border border-[rgba(229,115,115,0.2)] text-[#E57373] cursor-pointer font-body"
-        >
-          ✕
-        </button>
+        <button onClick={() => onRemove(sessionKey, exIdx)}
+          className="py-1 px-2 rounded text-[11px] bg-transparent border-2 border-[rgba(229,115,115,0.3)] text-[#E57373] cursor-pointer font-body">✕</button>
       </div>
     </div>
   )
@@ -268,7 +283,7 @@ function AddPicker({ sessionKey, allExercises, onSelect, onClose }) {
 
 // ─── Session Card ─────────────────────────────────────────────────────────────
 
-function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, onAdd, allExercises }) {
+function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, onAdd, onReorder, allExercises }) {
   return (
     <div className="bg-gradient-to-br from-[#131f36] to-[#0f1a2e] border border-gold/15 rounded-xl p-5 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(212,196,148,0.3)] to-transparent" />
@@ -308,6 +323,8 @@ function SessionCard({ sessionKey, session, onUpdate, onRemove, onSwap, onAdd, a
             onUpdate={onUpdate}
             onRemove={onRemove}
             onSwap={onSwap}
+            onReorder={onReorder}
+            totalExercises={session.exercises.length}
             allExercises={allExercises}
           />
         ))}
@@ -360,6 +377,18 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
     setPlan(prev => {
       const sessions = { ...prev.sessions }
       const exs = sessions[sessionKey].exercises.filter((_, i) => i !== exIdx)
+      sessions[sessionKey] = { ...sessions[sessionKey], exercises: exs }
+      return { ...prev, sessions }
+    })
+  }
+
+  function reorderExercise(sessionKey, fromIdx, toIdx) {
+    if (fromIdx === toIdx) return
+    setPlan(prev => {
+      const sessions = { ...prev.sessions }
+      const exs = [...sessions[sessionKey].exercises]
+      const [moved] = exs.splice(fromIdx, 1)
+      exs.splice(toIdx, 0, moved)
       sessions[sessionKey] = { ...sessions[sessionKey], exercises: exs }
       return { ...prev, sessions }
     })
@@ -665,6 +694,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
             <div className="text-[11px] text-[#555] mb-4">
               <span className="text-[#64B5F6] mr-2">⇄</span> Zamień ćwiczenie
               <span className="ml-4 mr-2">Edytuj</span> Serie / powt. / RIR
+              <span className="ml-4 mr-2 opacity-50">⠿</span> Przeciągnij aby zmienić kolejność
             </div>
 
             {/* Toggle deload */}
@@ -692,6 +722,7 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
                   onRemove={removeExercise}
                   onSwap={openSwap}
                   onAdd={key => setAddTarget(key)}
+                  onReorder={reorderExercise}
                   allExercises={exercises}
                 />
               ))}
