@@ -295,24 +295,29 @@ function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, 
   const cap       = SESSION_CAPS[sizeClass]
 
   let weeklyTarget
-  if (isAvoid)         weeklyTarget = Math.max(4, Math.round(L.mev * 0.5))
-  else if (isPriority) weeklyTarget = Math.round((L.mav + L.mrv) / 2)
-  else                 weeklyTarget = Math.round((L.mev + L.mav) / 2)
 
-  // Recovery modifier obcina target ale nie poniżej MEV tygodniowego
-  const weeklyMin = L.mev
-  weeklyTarget = Math.max(weeklyMin, Math.round(weeklyTarget * recoveryModifier))
+  if (isAvoid) {
+    // Avoid — minimum volume, utrzymanie tylko
+    weeklyTarget = Math.max(4, Math.round(L.mev * 0.5))
+  } else if (isPriority) {
+    // Priority — zawsze MAV, recovery modifier NIE dotyka priority
+    // Israetel: nie obcinasz priorytetu, obcinasz resztę
+    weeklyTarget = Math.round((L.mav + L.mrv) / 2)
+  } else {
+    // Neutral — recovery modifier uderza tutaj
+    const neutralTarget = Math.round((L.mev + L.mav) / 2)
+    // Przy niskiej regeneracji → schodzi do MEV
+    weeklyTarget = Math.max(L.mev, Math.round(neutralTarget * recoveryModifier))
+  }
 
-  if (['quads','hamstrings','glutes','calves'].includes(muscle))
+  // Cardio interference — tylko nogi, tylko neutral
+  if (!isPriority && ['quads','hamstrings','glutes','calves'].includes(muscle)) {
     weeklyTarget = Math.round(weeklyTarget * cardioFactor)
+    weeklyTarget = Math.max(L.mev, weeklyTarget)
+  }
 
-  // Start na 95% targetu — zostawiamy miejsce na ramp ale nie za dużo
-  const weeklyStart = Math.round(weeklyTarget * 0.95)
-  const perSession  = Math.max(2, Math.round(weeklyStart / Math.max(1, frequency)))
-
-  // Floor at MEV per session — never drop below regardless of recovery modifier
-  const mevPerSession = Math.max(2, Math.round(L.mev / Math.max(1, frequency)))
-  return Math.min(Math.max(perSession, mevPerSession), cap)
+  const perSession = Math.max(2, Math.round(weeklyTarget / Math.max(1, frequency)))
+  return Math.min(perSession, cap)
 }
 
 // ─── WEEKLY PROGRESSION (Israetel ramp + Helms RIR drop) ─────────────────────
