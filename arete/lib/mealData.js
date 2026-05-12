@@ -649,15 +649,32 @@ export function findBestTemplates(questionnaire, nutritionTargets) {
     )
   }
 
+  const targetProteinPct = nutritionTargets.protein_g && targetKcal
+    ? (nutritionTargets.protein_g * 4) / targetKcal
+    : 0.30
+  const targetFatPct = nutritionTargets.fat_g && targetKcal
+    ? (nutritionTargets.fat_g * 9) / targetKcal
+    : 0.25
+
   return MEAL_TEMPLATES
     .filter(t => !templateHasExcluded(t))
     .map(t => {
       let score = 0
       if (t.goal === goal) score += 40
-      score -= Math.abs(t.calories - targetKcal) / 50
+      score -= Math.abs(t.calories - targetKcal) / 100
       score -= Math.abs(t.meal_count - mealCount) * 5
       if (isVeg && t.id.startsWith('veg')) score += 30
       if (plec === 'Kobieta' && t.id.startsWith('women')) score += 20
+
+      // Macro ratio match — kluczowe żeby szablon miał podobne proporcje B/T/W
+      const tMacro = calcTemplateMacros(t)
+      if (tMacro.kcal > 0) {
+        const tProteinPct = (tMacro.protein * 4) / tMacro.kcal
+        const tFatPct = (tMacro.fat * 9) / tMacro.kcal
+        score -= Math.abs(tProteinPct - targetProteinPct) * 120
+        score -= Math.abs(tFatPct - targetFatPct) * 80
+      }
+
       return { ...t, score }
     })
     .sort((a, b) => b.score - a.score)
