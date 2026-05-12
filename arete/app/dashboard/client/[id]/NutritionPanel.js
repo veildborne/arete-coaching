@@ -1,73 +1,11 @@
 'use client'
 import { useState } from 'react'
+import { calculateNutritionFromQuestionnaire } from '@/lib/nutritionEngine'
 
 const MACRO_COLORS = {
   protein: '#52B788',
   fat: '#E8A020',
   carbs: '#5B8DB8',
-}
-
-// ─── Mifflin-St Jeor + Israetel/Helms/McDonald ───────────────────────────────
-function calculateSuggested(questionnaire) {
-  if (!questionnaire?.data) return null
-  const q = questionnaire.data
-
-  const waga    = parseFloat(q.waga_kg)    || 0
-  const wzrost  = parseFloat(q.wzrost_cm)  || 0
-  const wiek    = parseFloat(q.wiek)       || 25
-  const plec    = q.plec || 'Mężczyzna'
-  const cel     = q.cel  || 'Budowa masy mięśniowej'
-  const staz    = q.staz || '1-2 lata'
-
-  if (!waga || !wzrost) return null
-
-  // Mifflin-St Jeor BMR
-  let bmr = plec === 'Kobieta'
-    ? (10 * waga) + (6.25 * wzrost) - (5 * wiek) - 161
-    : (10 * waga) + (6.25 * wzrost) - (5 * wiek) + 5
-
-  // Activity multiplier
-  const actMap = {
-    'less_6':  1.2,
-    '6_7':     1.375,
-    '7_8':     1.55,
-    'more_8':  1.55,
-  }
-  const dni = parseInt(q.dni_tydzien) || 3
-  const actMult = dni <= 2 ? 1.2 : dni <= 3 ? 1.375 : dni <= 5 ? 1.55 : 1.725
-  let tdee = Math.round(bmr * actMult)
-
-  // Cel adjustment (McDonald/Helms)
-  let calAdj = 0
-  if (cel === 'Redukcja tkanki tłuszczowej') calAdj = -300
-  else if (cel === 'Budowa masy mięśniowej') calAdj = +300
-  else if (cel === 'Rekompozycja') calAdj = 0
-  else if (cel === 'Wzrost siły') calAdj = +200
-  const calories = tdee + calAdj
-
-  // Białko — Helms/Israetel: 2.0g/kg BW (środek zakresu 1.8-2.4)
-  // Dla redukcji wyżej (2.2) żeby chronić masę — McDonald
-  const proteinMulti = cel === 'Redukcja tkanki tłuszczowej' ? 2.2 : 2.0
-  const protein_g = Math.round(waga * proteinMulti)
-
-  // Tłuszcz — minimum 0.8g/kg (McDonald) — zaokrąglone do 5
-  const fat_g = Math.round((waga * 0.8) / 5) * 5
-
-  // Węgle — reszta kalorii
-  const proteinKcal = protein_g * 4
-  const fatKcal     = fat_g * 9
-  const carbsKcal   = Math.max(0, calories - proteinKcal - fatKcal)
-  const carbs_g     = Math.round(carbsKcal / 4)
-
-  return {
-    calories,
-    protein_g,
-    fat_g,
-    carbs_g,
-    tdee,
-    bmr: Math.round(bmr),
-    rationale: `BMR ${Math.round(bmr)} kcal × ${actMult} = TDEE ${tdee} kcal ${calAdj !== 0 ? `${calAdj > 0 ? '+' : ''}${calAdj} kcal (${cel})` : '(recomp)'}. Białko ${proteinMulti}g/kg, tłuszcz 0.8g/kg min.`,
-  }
 }
 
 function getPhaseTransitionHint(questionnaire, currentTargets) {
@@ -175,7 +113,7 @@ function MacroBar({ label, value, total, color }) {
 }
 
 export default function NutritionPanel({ clientId, initialTargets, questionnaire }) {
-  const suggested = calculateSuggested(questionnaire)
+  const suggested = calculateNutritionFromQuestionnaire(questionnaire?.data)
 
   const [targets, setTargets]   = useState(initialTargets || null)
   const [editing, setEditing]   = useState(!initialTargets)
@@ -194,7 +132,7 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
     if (!suggested) return
     setForm(p => ({
       ...p,
-      calories:  suggested.calories,
+      calories:  suggested.targetCalories,
       protein_g: suggested.protein_g,
       fat_g:     suggested.fat_g,
       carbs_g:   suggested.carbs_g,
@@ -275,21 +213,52 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
       {/* Suggested banner */}
       {suggested && !editing && (
         <div className="mb-4 p-3 rounded-lg border border-[rgba(82,183,136,0.2)] bg-[rgba(82,183,136,0.05)]">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] text-success">✦ Sugestia algorytmu</span>
-            <button onClick={() => setShowRationale(r => !r)} className="text-[10px] text-muted hover:text-warm transition">
-              {showRationale ? 'Ukryj' : 'Pokaż obliczenia'}
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                style={{ background: `${suggested.aggressivenessColor}15`, color: suggested.aggressivenessColor, border: `1px solid ${suggested.aggressivenessColor}40` }}>
+                {suggested.aggressivenessLabelPl}
+              </span>
+              <button onClick={() => setShowRationale(r => !r)} className="text-[10px] text-muted hover:text-warm transition">
+                {showRationale ? 'Ukryj' : 'Szczegóły'}
+              </button>
+            </div>
           </div>
+
           {showRationale && (
-            <p className="text-[11px] text-muted leading-relaxed mb-2">{suggested.rationale}</p>
+            <div className="mb-3 space-y-1">
+              <p className="text-[11px] text-muted leading-relaxed">{suggested.rationale}</p>
+              <div className="flex gap-3 text-[10px] mt-1">
+                <span className="text-muted">BMR: <span className="text-warm">{suggested.bmr} kcal</span></span>
+                <span className="text-muted">TDEE: <span className="text-warm">{suggested.tdee} kcal</span></span>
+                <span className="text-muted">Deficyt: <span className="text-warm">{suggested.deficitPct}%</span></span>
+              </div>
+              <div className="text-[10px] text-muted">
+                Tempo redukcji: ~{suggested.weeklyRateKg} kg/tydzień
+              </div>
+            </div>
           )}
+
           <div className="flex gap-3 text-xs mb-2">
-            <span className="text-warm">{suggested.calories} kcal</span>
-            <span style={{ color: MACRO_COLORS.protein }}>B: {suggested.protein_g}g</span>
-            <span style={{ color: MACRO_COLORS.fat }}>T: {suggested.fat_g}g</span>
-            <span style={{ color: MACRO_COLORS.carbs }}>W: {suggested.carbs_g}g</span>
+            <span className="text-warm font-medium">{suggested.targetCalories} kcal</span>
+            <span style={{ color: '#52B788' }}>B: {suggested.protein_g}g</span>
+            <span style={{ color: '#E8A020' }}>T: {suggested.fat_g}g</span>
+            <span style={{ color: '#5B8DB8' }}>W: {suggested.carbs_g}g</span>
+            <span className="text-muted text-[10px] self-center">{suggested.proteinPerKg}g/kg</span>
           </div>
+
+          {suggested.warnings && suggested.warnings.length > 0 && (
+            <div className="mb-2 space-y-1">
+              {suggested.warnings.map((w, i) => (
+                <div key={i} className="flex gap-2 text-[10px] px-2 py-1.5 rounded-lg bg-[rgba(239,107,115,0.08)] border border-[rgba(239,107,115,0.2)]">
+                  <span className="text-danger shrink-0">⚠</span>
+                  <span className="text-danger/80">{w}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <button
             onClick={() => { applySuggested(); setEditing(true) }}
             className="text-[11px] px-3 py-1.5 rounded-lg border border-success/30 text-success hover:bg-success/10 transition"
@@ -333,7 +302,7 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
           {/* Suggested quick-apply while editing */}
           {suggested && (
             <div className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05]">
-              <span className="text-[11px] text-muted">Sugestia: {suggested.calories} kcal / B{suggested.protein_g} T{suggested.fat_g} W{suggested.carbs_g}</span>
+              <span className="text-[11px] text-muted">Sugestia: {suggested.targetCalories} kcal / B{suggested.protein_g} T{suggested.fat_g} W{suggested.carbs_g}</span>
               <button onClick={applySuggested} className="text-[10px] px-2.5 py-1 rounded border border-gold/20 text-gold/60 hover:text-gold transition">
                 Zastosuj
               </button>
