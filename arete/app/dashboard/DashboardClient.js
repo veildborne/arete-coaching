@@ -1,8 +1,11 @@
 'use client'
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase-browser'
 import { IconClients, IconAttention, IconAdd, IconLogout, IconProgress, IconReport, IconKnowledge } from '@/lib/GreekIcons'
+
+const ZeusWidget = dynamic(() => import('../client/ZeusWidget'), { ssr: false })
 
 function getInitials(name, email) {
   const source = name || email || 'AR'
@@ -421,6 +424,7 @@ export default function DashboardClient({ profile, clients }) {
       </main>
 
       <InviteClientModal open={inviteOpen} onClose={() => setInviteOpen(false)} onSuccess={() => router.refresh()} />
+      <ZeusWidget recentLogs={[]} checkins={[]} />
     </div>
   )
 }
