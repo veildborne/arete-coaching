@@ -188,6 +188,9 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
     pain_areas: [],
     dysproporcja_obszar: [],
     dysproporcja_opis: '',
+    food_exclusions: [],
+    food_exclusions_other: '',
+    ilosc_posilkow: '4',
   })
 
   useEffect(() => {
@@ -516,6 +519,42 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
             <textarea value={form.cwiczenia_unikane || ''} onChange={e => set('cwiczenia_unikane', e.target.value)}
               placeholder="np. martwy ciąg, dipsy, wykroki — lub: brak"
               rows={2} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }} />
+          </div>
+        </Block>
+
+        {/* BLOK 7a — Preferencje żywieniowe */}
+        <Block title="Preferencje żywieniowe" subtitle="Pomaga dobrać odpowiedni plan posiłków">
+          <div>
+            <Label>Czego unikasz lub nie jesz?</Label>
+            <MultiCheckbox name="food_exclusions" value={form.food_exclusions} onChange={set} options={[
+              { value: 'pork',      label: 'Wieprzowina' },
+              { value: 'beef',      label: 'Wołowina' },
+              { value: 'fish',      label: 'Ryby i owoce morza' },
+              { value: 'dairy',     label: 'Nabiał (mleko, ser, jogurt)' },
+              { value: 'eggs',      label: 'Jajka' },
+              { value: 'gluten',    label: 'Gluten (pszenica, żyto)' },
+              { value: 'nuts',      label: 'Orzechy' },
+              { value: 'legumes',   label: 'Rośliny strączkowe (fasola, soczewica)' },
+            ]} />
+          </div>
+          <div>
+            <Label>Inne wykluczenia lub alergie</Label>
+            <textarea
+              value={form.food_exclusions_other || ''}
+              onChange={e => set('food_exclusions_other', e.target.value)}
+              placeholder="np. nie jem brokułów, alergia na seler, nie lubię ryżu..."
+              rows={2}
+              style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
+            />
+          </div>
+          <div>
+            <Label>Ile posiłków dziennie preferujesz?</Label>
+            <SingleSelect name="ilosc_posilkow" value={form.ilosc_posilkow} onChange={set} options={[
+              { value: '3', label: '3 posiłki' },
+              { value: '4', label: '4 posiłki' },
+              { value: '5', label: '5 posiłków' },
+              { value: '2', label: '2 posiłki (IF)' },
+            ]} />
           </div>
         </Block>
 

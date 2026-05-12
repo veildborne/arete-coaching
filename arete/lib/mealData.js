@@ -415,8 +415,32 @@ export function findBestTemplates(questionnaire, nutritionTargets) {
   const mealCount = parseInt(q.ilosc_posilkow) || 4
   const isVeg = (q.dieta_aktualna || '').toLowerCase().includes('wegetarian')
   const plec = q.plec || 'Mężczyzna'
+  const exclusions = Array.isArray(q.food_exclusions) ? q.food_exclusions : []
+
+  // Mapa wykluczeń → food_ids do pominięcia
+  const EXCLUDED_FOODS = {
+    pork:     ['pork_loin', 'ham_lean'],
+    beef:     ['beef_lean', 'beef_mince'],
+    fish:     ['salmon', 'tuna_can', 'cod', 'tilapia', 'mackerel', 'shrimp', 'sardines'],
+    dairy:    ['milk_2pct', 'greek_yogurt', 'cottage_cheese', 'skyr', 'mozzarella', 'whey_protein', 'butter'],
+    eggs:     ['eggs_whole', 'egg_whites'],
+    gluten:   ['bread_whole', 'bread_white', 'pasta_whole', 'pasta_white', 'couscous', 'corn_tortilla'],
+    nuts:     ['almonds', 'walnuts', 'cashews', 'peanut_butter'],
+    legumes:  ['lentils', 'chickpeas', 'black_beans'],
+  }
+
+  const excludedFoodIds = new Set(
+    exclusions.flatMap(ex => EXCLUDED_FOODS[ex] || [])
+  )
+
+  function templateHasExcluded(template) {
+    return template.meals.some(meal =>
+      meal.items.some(item => excludedFoodIds.has(item.food_id))
+    )
+  }
 
   return MEAL_TEMPLATES
+    .filter(t => !templateHasExcluded(t))
     .map(t => {
       let score = 0
       if (t.goal === goal) score += 40
