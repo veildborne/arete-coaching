@@ -698,10 +698,11 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="">Cel...</option>
-                              <option value="hipertrofia">Hipertrofia</option>
-                              <option value="recomp">Recomp</option>
-                              <option value="redukcja">Redukcja</option>
-                              <option value="siła">Siła</option>
+                              <option value="Redukcja tkanki tłuszczowej">Redukcja tkanki tłuszczowej</option>
+                              <option value="Budowa masy mięśniowej">Budowa masy mięśniowej</option>
+                              <option value="Rekompozycja">Rekompozycja</option>
+                              <option value="Wzrost siły">Wzrost siły</option>
+                              <option value="Zdrowie i kondycja">Zdrowie i kondycja</option>
                             </select>
                             <select
                               value={editForm.staz || ''}
@@ -737,22 +738,28 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                         <div className="bg-white/[0.03] rounded-lg p-3">
                           <div className="text-[10px] text-gold uppercase tracking-widest mb-2">Regeneracja</div>
                           <div className="grid grid-cols-3 gap-2">
-                            <input
-                              type="number"
-                              placeholder="Sen (h)"
+                            <select
                               value={editForm.sen || ''}
                               onChange={e => setEditForm({ ...editForm, sen: e.target.value })}
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
-                            />
+                            >
+                              <option value="">Sen...</option>
+                              <option value="less_6">Mniej niż 6h</option>
+                              <option value="6_7">6-7h</option>
+                              <option value="7_8">7-8h</option>
+                              <option value="more_8">Ponad 8h</option>
+                            </select>
                             <select
                               value={editForm.stress_level || ''}
-                              onChange={e => setEditForm({ ...editForm, stress_level: e.target.value })}
+                              onChange={e => setEditForm({ ...editForm, stress_level: parseInt(e.target.value) })}
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="">Stres...</option>
-                              <option value="niski">Niski</option>
-                              <option value="umiarkowany">Umiarkowany</option>
-                              <option value="wysoki">Wysoki</option>
+                              <option value="1">1 — Bardzo niski</option>
+                              <option value="2">2 — Niski</option>
+                              <option value="3">3 — Umiarkowany</option>
+                              <option value="4">4 — Wysoki</option>
+                              <option value="5">5 — Bardzo wysoki</option>
                             </select>
                             <select
                               value={editForm.praca || ''}
@@ -760,9 +767,9 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="">Typ pracy...</option>
-                              <option value="siedzaca">Siedząca</option>
-                              <option value="lekka">Lekka</option>
-                              <option value="fizyczna">Fizyczna</option>
+                              <option value="sedentary">Siedząca</option>
+                              <option value="light">Lekka aktywna</option>
+                              <option value="physical">Fizyczna</option>
                             </select>
                           </div>
                         </div>
@@ -777,6 +784,44 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                             rows={2}
                             className="w-full py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none resize-none focus:border-gold/40"
                           />
+                        </div>
+
+                        {/* Dodatkowe */}
+                        <div className="bg-white/[0.03] rounded-lg p-3">
+                          <div className="text-[10px] text-gold uppercase tracking-widest mb-2">Dodatkowe</div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <select
+                              value={editForm.knows_rir ? 'true' : 'false'}
+                              onChange={e => setEditForm({ ...editForm, knows_rir: e.target.value === 'true' })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            >
+                              <option value="false">Nie zna RIR</option>
+                              <option value="true">Zna RIR</option>
+                            </select>
+                            <input
+                              type="number"
+                              min="0"
+                              max="10"
+                              placeholder="Ból (0-10)"
+                              value={editForm.pain_level || 0}
+                              onChange={e => setEditForm({ ...editForm, pain_level: parseInt(e.target.value) })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Partie do nie rozbudowywania (np. calves)"
+                              value={Array.isArray(editForm.avoid_growth_muscles) ? editForm.avoid_growth_muscles.join(', ') : ''}
+                              onChange={e => setEditForm({ ...editForm, avoid_growth_muscles: e.target.value.split(',').map(s=>s.trim()).filter(Boolean) })}
+                              className="col-span-2 py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Ćwiczenia unikane"
+                              value={editForm.cwiczenia_unikane || ''}
+                              onChange={e => setEditForm({ ...editForm, cwiczenia_unikane: e.target.value })}
+                              className="col-span-2 py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                          </div>
                         </div>
 
                         {/* Akcje */}
