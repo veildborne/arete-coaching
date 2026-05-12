@@ -584,10 +584,10 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
         </div>
         <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:'2px'}}>
           {[
-            {href:'/client',icon:<IconHome size={18}/>,label:'Przegląd'},
-            {href:'/client/workout',icon:<IconTraining size={18}/>,label:'Trening'},
-            {href:'/client/plan',icon:<IconPlan size={18}/>,label:'Plan'},
-            {href:'/client/checkin',icon:<IconReport size={18}/>,label:'Raport'},
+            {href:'/client',icon:<IconHome size={16}/>,label:'Przegląd'},
+            {href:'/client/workout',icon:<IconTraining size={16}/>,label:'Trening'},
+            {href:'/client/plan',icon:<IconPlan size={16}/>,label:'Plan'},
+            {href:'/client/checkin',icon:<IconReport size={16}/>,label:'Raport'},
           ].map(({href,icon,label})=>{
             const active=typeof window!=='undefined'&&window.location.pathname===href
             return(
