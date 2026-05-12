@@ -3,16 +3,18 @@ import { useEffect, useState } from 'react'
 
 const SPRITE_COLS = 7
 const SPRITE_ROWS = 11
-const SPRITE_W = 179  // 1254px / 7 cols
-const SPRITE_H = 114  // 1254px / 11 rows
+const SPRITE_W = 179
+const SPRITE_H = 114
 
 const STATES = {
   idle:      { row: 0, frames: [0,1,2,3,4,5,6], fps: 6 },
   walk:      { row: 1, frames: [0,1,2,3,4,5,6], fps: 8 },
-  celebrate: { row: 5, frames: [0,1,2,3],       fps: 6 },
-  alert:     { row: 5, frames: [4,5],            fps: 4 },
-  sleep:     { row: 6, frames: [2,3],            fps: 2 },
-  warrior:   { row: 6, frames: [4,5],            fps: 6 },
+  celebrate: { row: 3, frames: [0,1,2,3,4,5,6], fps: 8 },
+  alert:     { row: 5, frames: [0,1,2,3,4,5],   fps: 6 },
+  sleep:     { row: 6, frames: [0,1,2,3,4],      fps: 3 },
+  warrior:   { row: 4, frames: [0,1,2,3,4,5,6], fps: 8 },
+  training:  { row: 9, frames: [0,1,2,3,4],      fps: 6 },
+  point:     { row: 7, frames: [0,1,2,3,4],      fps: 5 },
 }
 
 export default function ZeusWidget({ recentLogs = [], checkins = [] }) {
@@ -28,6 +30,7 @@ export default function ZeusWidget({ recentLogs = [], checkins = [] }) {
     const pendingCheckin = checkins.some(c => !c.coach_feedback)
     const recentWorkout = recentLogs.length > 0 &&
       new Date() - new Date(recentLogs[0]?.session_date) < 86400000 * 2
+    const hasNoWorkout = recentLogs.length === 0
 
     if (hour >= 22 || hour < 6) {
       setState('sleep')
@@ -37,7 +40,10 @@ export default function ZeusWidget({ recentLogs = [], checkins = [] }) {
       setTooltip('Trener czeka na Twój raport!')
     } else if (recentWorkout) {
       setState('celebrate')
-      setTooltip('Świetna robota! Trening zaliczony.')
+      setTooltip('Świetna robota! Trening zaliczony! 💪')
+    } else if (hasNoWorkout) {
+      setState('point')
+      setTooltip('Czas na pierwszy trening!')
     } else {
       setState('idle')
       setTooltip('Cześć! Co dzisiaj trenujemy?')
@@ -59,7 +65,7 @@ export default function ZeusWidget({ recentLogs = [], checkins = [] }) {
   const currentFrame = s.frames[frame]
   const bgX = -(currentFrame * SPRITE_W)
   const bgY = -(s.row * SPRITE_H)
-  const displaySize = 64
+  const displaySize = 72
 
   return (
     <div style={{
