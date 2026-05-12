@@ -70,6 +70,65 @@ function calculateSuggested(questionnaire) {
   }
 }
 
+function getPhaseTransitionHint(questionnaire, currentTargets) {
+  if (!questionnaire?.data || !currentTargets) return null
+  const q = questionnaire.data
+  const currentGoal = q.cel || ''
+  const waga = parseFloat(q.waga_kg) || 0
+
+  // Wykryj poprzedni cel na podstawie kalorii
+  // Jeśli kalorie > TDEE to masa, jeśli < to redukcja
+  const tdeeApprox = waga * 30 // uproszczony TDEE
+  const isCurrentlyBulking = currentTargets.calories > tdeeApprox + 100
+  const isCurrentlyCutting = currentTargets.calories < tdeeApprox - 100
+
+  const hints = []
+
+  if (isCurrentlyBulking && currentGoal === 'Redukcja tkanki tłuszczowej') {
+    hints.push({
+      type: 'warning',
+      title: 'Przejście masa → redukcja',
+      steps: [
+        `Faza 1 (2-4 tyg): Maintenance — ${Math.round(tdeeApprox)} kcal. Pozwól metabolizmowi się zresetować.`,
+        `Faza 2: Stopniowe obniżanie o 100-200 kcal co 1-2 tygodnie.`,
+        `Cel: ${Math.round(tdeeApprox - 300)} kcal (deficyt ~300 kcal).`,
+        `Białko: utrzymaj ${Math.round(waga * 2.2)}g — chroni masę mięśniową w deficycie.`,
+      ],
+      source: 'McDonald / Israetel'
+    })
+  }
+
+  if (isCurrentlyCutting && currentGoal === 'Budowa masy mięśniowej') {
+    hints.push({
+      type: 'info',
+      title: 'Przejście redukcja → masa',
+      steps: [
+        `Faza 1 (1-2 tyg): Diet break — ${Math.round(tdeeApprox)} kcal. Resetuje leptynę i metabolizm.`,
+        `Faza 2: Stopniowe zwiększanie o 100-200 kcal co 1-2 tygodnie.`,
+        `Cel: ${Math.round(tdeeApprox + 200)} kcal (surplus ~200 kcal dla minimize fat gain).`,
+        `Białko: ${Math.round(waga * 2.0)}g — w surplus można zejść do 2.0g/kg.`,
+      ],
+      source: 'Israetel / Helms'
+    })
+  }
+
+  if (currentGoal === 'Rekompozycja') {
+    hints.push({
+      type: 'info',
+      title: 'Rekompozycja',
+      steps: [
+        `TDEE: ${Math.round(tdeeApprox)} kcal — kalorii na utrzymanie.`,
+        `Białko wysokie: ${Math.round(waga * 2.2)}g — kluczowe dla rekomp.`,
+        `Cykl kaloryczny: dni treningowe +100-150 kcal, dni odpoczynku -100-150 kcal.`,
+        `Efekty wolniejsze niż dedykowana masa/redukcja — informuj klienta.`,
+      ],
+      source: 'Helms / Nuckols'
+    })
+  }
+
+  return hints.length > 0 ? hints[0] : null
+}
+
 function MacroBar({ label, value, total, color }) {
   const pct = total > 0 ? Math.min(100, Math.round((value / total) * 100)) : 0
   return (
@@ -196,6 +255,35 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
           </button>
         </div>
       )}
+
+      {/* Phase transition hints */}
+      {(() => {
+        const hint = getPhaseTransitionHint(questionnaire, targets)
+        if (!hint) return null
+        const isWarning = hint.type === 'warning'
+        return (
+          <div className="mb-4 p-4 rounded-xl border"
+            style={{ borderColor: isWarning ? 'rgba(232,160,32,0.3)' : 'rgba(91,141,184,0.3)', background: isWarning ? 'rgba(232,160,32,0.04)' : 'rgba(91,141,184,0.04)' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ color: isWarning ? '#E8A020' : '#5B8DB8' }}>
+                {isWarning ? '⚠' : 'ℹ'}
+              </span>
+              <p className="text-xs font-semibold" style={{ color: isWarning ? '#E8A020' : '#5B8DB8' }}>
+                {hint.title}
+              </p>
+              <span className="text-[9px] text-muted ml-auto">{hint.source}</span>
+            </div>
+            <div className="space-y-1.5">
+              {hint.steps.map((step, i) => (
+                <div key={i} className="flex gap-2 text-xs text-muted">
+                  <span style={{ color: isWarning ? '#E8A020' : '#5B8DB8' }} className="shrink-0">{i + 1}.</span>
+                  <span>{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {editing ? (
         <div className="space-y-3">
