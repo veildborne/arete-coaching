@@ -501,7 +501,7 @@ export function generatePlan(questionnaire, exercises) {
     const muscleCount = sessionDef.muscles.length
 
     // Max exercises based on muscle count and training style, not time
-    const maxExercises = muscleCount + (params.trainingStyle === 'varied' ? 2 : params.trainingStyle === 'simple' ? 0 : 1)
+    const maxExercises = muscleCount + (params.trainingStyle === 'varied' ? 1 : params.trainingStyle === 'simple' ? 0 : 0)
 
     const exerciseList = sessionDef.muscles.flatMap(muscle => {
       const isPriority = params.priorityMuscles.includes(muscle)
@@ -601,10 +601,35 @@ export function generatePlan(questionnaire, exercises) {
 
     const finalList = [...guaranteed, ...overflow].slice(0, maxExercises)
 
+    // Max serie per sesja — based on experience not time
+    const maxSetsPerSession = {
+      beginner:     16,
+      intermediate: 22,
+      advanced:     28,
+    }[params.experience] || 22
+
+    let totalSets = 0
+    const cappedList = []
+
+    for (const ex of finalList) {
+      const exSets = ex.sets || 3
+      if (totalSets + exSets <= maxSetsPerSession) {
+        cappedList.push(ex)
+        totalSets += exSets
+      } else if (cappedList.filter(e => e.muscle_group === ex.muscle_group).length === 0) {
+        // Musi być przynajmniej 1 ćwiczenie na partię — zredukuj serie
+        const reduced = Math.max(2, maxSetsPerSession - totalSets)
+        if (reduced >= 2) {
+          cappedList.push({ ...ex, sets: reduced })
+          totalSets += reduced
+        }
+      }
+    }
+
     sessions[sessionKey] = {
       label:     sessionKey,
       name:      sessionDef.name,
-      exercises: finalList,
+      exercises: cappedList,
     }
   })
 
