@@ -293,16 +293,18 @@ function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, 
 
   let weeklyTarget
   if (isAvoid)         weeklyTarget = Math.max(4, Math.round(L.mev * 0.5))
-  else if (isPriority) weeklyTarget = Math.round(L.mav)
+  else if (isPriority) weeklyTarget = Math.round((L.mav + L.mrv) / 2)
   else                 weeklyTarget = Math.round((L.mev + L.mav) / 2)
 
-  weeklyTarget = Math.round(weeklyTarget * recoveryModifier)
+  // Recovery modifier obcina target ale nie poniżej MEV tygodniowego
+  const weeklyMin = L.mev
+  weeklyTarget = Math.max(weeklyMin, Math.round(weeklyTarget * recoveryModifier))
 
   if (['quads','hamstrings','glutes','calves'].includes(muscle))
     weeklyTarget = Math.round(weeklyTarget * cardioFactor)
 
-  // Start slightly below MEV — leaves room for progression across mesocycle
-  const weeklyStart = Math.round(weeklyTarget * 0.85)
+  // Start na 95% targetu — zostawiamy miejsce na ramp ale nie za dużo
+  const weeklyStart = Math.round(weeklyTarget * 0.95)
   const perSession  = Math.max(2, Math.round(weeklyStart / Math.max(1, frequency)))
 
   // Floor at MEV per session — never drop below regardless of recovery modifier
@@ -505,10 +507,10 @@ export function generatePlan(questionnaire, exercises) {
       const musclesInSession = sessionDef.muscles.length
       const densityFactor = musclesInSession <= 2 ? 1.0
         : musclesInSession === 3
-          ? (sessionMinutes >= 75 ? 1.0 : 0.90)
+          ? (sessionMinutes >= 75 ? 0.95 : 0.90)
         : musclesInSession === 4
-          ? (sessionMinutes >= 90 ? 0.90 : sessionMinutes >= 75 ? 0.82 : 0.75)
-        : (sessionMinutes >= 90 ? 0.80 : 0.70)
+          ? (sessionMinutes >= 90 ? 0.90 : sessionMinutes >= 75 ? 0.85 : 0.80)
+        : (sessionMinutes >= 90 ? 0.85 : sessionMinutes >= 75 ? 0.80 : 0.75)
 
       const rawSets = computeSessionSets(
         muscle, params.experience, isPriority, isAvoid,
