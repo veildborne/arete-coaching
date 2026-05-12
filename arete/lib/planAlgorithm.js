@@ -602,11 +602,12 @@ export function generatePlan(questionnaire, exercises) {
     const finalList = [...guaranteed, ...overflow].slice(0, maxExercises)
 
     // Max serie per sesja — based on experience not time
+    const musclesInThisSession = sessionDef.muscles.length
     const maxSetsPerSession = {
-      beginner:     16,
-      intermediate: 22,
-      advanced:     28,
-    }[params.experience] || 22
+      beginner:     Math.min(14, musclesInThisSession * 3),
+      intermediate: Math.min(20, musclesInThisSession * 4),
+      advanced:     Math.min(24, musclesInThisSession * 5),
+    }[params.experience] || 20
 
     let totalSets = 0
     const cappedList = []
