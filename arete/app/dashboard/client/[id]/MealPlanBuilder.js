@@ -64,7 +64,29 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
   const suggested = findBestTemplates(questionnaire, nutritionTargets)
   const defaultTemplate = suggested[0] || MEAL_TEMPLATES[0]
 
-  const [meals, setMeals] = useState(initialPlan?.meals || defaultTemplate?.meals || [])
+  function scaleTemplateToCalories(template, targetKcal) {
+    if (!template || !targetKcal) return template
+    const currentMacro = calcTemplateMacros(template)
+    if (currentMacro.kcal === 0) return template
+    const scale = targetKcal / currentMacro.kcal
+
+    return {
+      ...template,
+      meals: template.meals.map(meal => ({
+        ...meal,
+        items: meal.items.map(item => ({
+          ...item,
+          grams: Math.round(item.grams * scale),
+        }))
+      }))
+    }
+  }
+
+  const scaledDefault = nutritionTargets?.calories && defaultTemplate
+    ? scaleTemplateToCalories(defaultTemplate, nutritionTargets.calories)
+    : defaultTemplate
+
+  const [meals, setMeals] = useState(initialPlan?.meals || scaledDefault?.meals || [])
   const [planName, setPlanName] = useState(initialPlan?.name || defaultTemplate?.name || 'Plan żywieniowy')
   const [selectedTemplate, setSelectedTemplate] = useState(suggested[0]?.id || defaultTemplate?.id || null)
   const [swapTarget, setSwapTarget] = useState(null)
@@ -72,8 +94,10 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
   const [saved, setSaved] = useState(false)
 
   function applyTemplate(template) {
-    setMeals(template.meals)
-    setPlanName(template.name)
+    const targetKcal = nutritionTargets?.calories
+    const scaled = targetKcal ? scaleTemplateToCalories(template, targetKcal) : template
+    setMeals(scaled.meals)
+    setPlanName(scaled.name)
     setSelectedTemplate(template.id)
   }
 
