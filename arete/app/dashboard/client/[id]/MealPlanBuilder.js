@@ -62,9 +62,11 @@ function SwapModal({ item, food, onSelect, onClose }) {
 
 export default function MealPlanBuilder({ clientId, questionnaire, nutritionTargets, initialPlan }) {
   const suggested = findBestTemplates(questionnaire, nutritionTargets)
-  const [meals, setMeals] = useState(initialPlan?.meals || suggested[0]?.meals || [])
-  const [planName, setPlanName] = useState(initialPlan?.name || suggested[0]?.name || '')
-  const [selectedTemplate, setSelectedTemplate] = useState(suggested[0]?.id || null)
+  const defaultTemplate = suggested[0] || MEAL_TEMPLATES[0]
+
+  const [meals, setMeals] = useState(initialPlan?.meals || defaultTemplate?.meals || [])
+  const [planName, setPlanName] = useState(initialPlan?.name || defaultTemplate?.name || 'Plan żywieniowy')
+  const [selectedTemplate, setSelectedTemplate] = useState(suggested[0]?.id || defaultTemplate?.id || null)
   const [swapTarget, setSwapTarget] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -124,7 +126,11 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
   const kcalDiff   = totalKcal - targetKcal
 
   async function handleSave() {
-    if (!planName.trim() || meals.length === 0) return
+    if (!planName.trim()) return
+    if (meals.length === 0) {
+      alert('Wybierz szablon planu żywieniowego')
+      return
+    }
     setSaving(true)
     const res = await fetch('/api/nutrition/meal-plan', {
       method: 'POST',
