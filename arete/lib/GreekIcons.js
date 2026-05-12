@@ -1,3 +1,4 @@
+// v2.1 — force cache bust
 import { LayoutDashboard, Users, Dumbbell, ClipboardList, ClipboardCheck, TrendingUp, TriangleAlert, Settings, ScrollText, Trophy, ShieldCheck, Moon, Flame, Target, ChartNoAxesCombined, LogOut, Plus, ArrowLeftRight, BookOpen, Apple } from 'lucide-react'
 
 const GOLD = '#D4B570'
