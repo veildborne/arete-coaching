@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase-browser'
-import { IconClients, IconAttention, IconAdd, IconLogout, IconProgress, IconReport, IconKnowledge } from '@/lib/GreekIcons'
+import { IconClients, IconAttention, IconAdd, IconLogout, IconProgress, IconReport, IconKnowledge, IconPlan } from '@/lib/GreekIcons'
 
 const ZeusWidget = dynamic(() => import('../client/ZeusWidget'), { ssr: false })
 
