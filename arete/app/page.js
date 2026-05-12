@@ -303,7 +303,7 @@ const t = {
       title1: 'Trening prowadzony ',
       titleAccent: 'jak system.',
       title2: 'Progres oparty na danych',
-      desc: 'Nie sprzedajemy PDF-a. Prowadzi Cię system — plan treningowy, analiza danych, feedback trenera, korekta co tydzień. Metodologia evidence-based, real-time dane, prawdziwy coach.',
+      desc: 'Nie oferuję PDF-a. Prowadzi Cię system — plan treningowy, analiza danych, mój feedback, korekta co tydzień. Metodologia evidence-based, real-time dane, ja jako Twój coach.',
       cta: 'Zacznij proces',
       secondary: 'Zobacz system',
       features: [
@@ -397,7 +397,7 @@ const t = {
       title1: 'Training led ',
       titleAccent: 'like a system.',
       title2: 'Progress built on data',
-      desc: 'We don\'t sell PDFs. A system guides you — training plan, data analysis, coach feedback, weekly adjustments. Evidence-based methodology, real-time data, real coach.',
+      desc: 'I don\'t sell PDFs. A system guides you — training plan, data analysis, my feedback, weekly adjustments. Evidence-based methodology, real-time data, me as your coach.',
       cta: 'Start the process',
       secondary: 'See the system',
       features: [
