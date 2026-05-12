@@ -563,7 +563,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
       { label: 'Cel', value: data.cel || '—' },
       { label: 'Staż', value: data.staz || '—' },
       { label: 'Dni/tydzień', value: data.dni_tydzien || '—' },
-      { label: 'Czas sesji', value: data.czas_sesji ? `${data.czas_sesji} min` : '—' },
+      { label: 'Czas sesji', value: data.czas_sesji ? (String(data.czas_sesji).includes('min') ? data.czas_sesji : `${data.czas_sesji} min`) : '—' },
     ]
   }
 
