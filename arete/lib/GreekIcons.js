@@ -3,51 +3,51 @@ import { LayoutDashboard, Users, Dumbbell, ClipboardList, ClipboardCheck, Trendi
 const GOLD = '#D4B570'
 const MUTED = '#8F9AAF'
 
-// Lucide wrapper z gold/muted styling
-export function IconHome({ size = 20, active = false }) {
-  return <LayoutDashboard size={size} color={active ? GOLD : MUTED} strokeWidth={1.75}/>
+// Lucide wrapper — always colored
+export function IconHome({ size = 20 }) {
+  return <LayoutDashboard size={size} color="#D4B570" strokeWidth={1.75}/>
 }
-export function IconClients({ size = 20, active = false, color }) {
-  return <Users size={size} color={color || (active ? GOLD : MUTED)} strokeWidth={1.75}/>
+export function IconClients({ size = 20, color = '#D4B570' }) {
+  return <Users size={size} color={color} strokeWidth={1.75}/>
 }
-export function IconTraining({ size = 20, active = false }) {
-  return <Dumbbell size={size} color={active ? GOLD : MUTED} strokeWidth={1.75}/>
+export function IconTraining({ size = 20 }) {
+  return <Dumbbell size={size} color="#FF8C00" strokeWidth={1.75}/>
 }
-export function IconPlan({ size = 20, active = false }) {
-  return <ClipboardList size={size} color={active ? GOLD : MUTED} strokeWidth={1.75}/>
+export function IconPlan({ size = 20 }) {
+  return <ClipboardList size={size} color="#40D0E0" strokeWidth={1.75}/>
 }
-export function IconReport({ size = 20, active = false, color }) {
-  return <ClipboardCheck size={size} color={color || (active ? GOLD : MUTED)} strokeWidth={1.75}/>
+export function IconReport({ size = 20, color = '#47D18C' }) {
+  return <ClipboardCheck size={size} color={color} strokeWidth={1.75}/>
 }
-export function IconProgress({ size = 20, active = false }) {
-  return <TrendingUp size={size} color={active ? GOLD : MUTED} strokeWidth={1.75}/>
+export function IconProgress({ size = 20 }) {
+  return <TrendingUp size={size} color="#B088F0" strokeWidth={1.75}/>
 }
-export function IconAttention({ size = 20, color }) {
-  return <TriangleAlert size={size} color={color || '#EF6B73'} strokeWidth={1.75}/>
+export function IconAttention({ size = 20, color = '#EF6B73' }) {
+  return <TriangleAlert size={size} color={color} strokeWidth={1.75}/>
 }
-export function IconKnowledge({ size = 20, active = false }) {
-  return <ScrollText size={size} color={active ? GOLD : MUTED} strokeWidth={1.75}/>
+export function IconKnowledge({ size = 20 }) {
+  return <ScrollText size={size} color="#A0C8FF" strokeWidth={1.75}/>
 }
 export function IconAchievement({ size = 20 }) {
-  return <Trophy size={size} color={GOLD} strokeWidth={1.75}/>
+  return <Trophy size={size} color="#FFD700" strokeWidth={1.75}/>
 }
 export function IconLogout({ size = 20 }) {
-  return <LogOut size={size} color='#EF6B73' strokeWidth={1.75}/>
+  return <LogOut size={size} color="#EF6B73" strokeWidth={1.75}/>
 }
 export function IconAdd({ size = 20 }) {
-  return <Plus size={size} color={GOLD} strokeWidth={2}/>
+  return <Plus size={size} color="#47D18C" strokeWidth={2.5}/>
 }
 export function IconSwap({ size = 20 }) {
-  return <ArrowLeftRight size={size} color='#5B8DB8' strokeWidth={1.75}/>
+  return <ArrowLeftRight size={size} color="#40D0E0" strokeWidth={1.75}/>
 }
-export function IconNutrition({ size = 20, active = false }) {
-  return <Apple size={size} color={active ? GOLD : MUTED} strokeWidth={1.75}/>
+export function IconNutrition({ size = 20 }) {
+  return <Apple size={size} color="#FFA040" strokeWidth={1.75}/>
 }
 export function IconSettings({ size = 20 }) {
-  return <Settings size={size} color={MUTED} strokeWidth={1.75}/>
+  return <Settings size={size} color="#D4B570" strokeWidth={1.75}/>
 }
 export function IconTarget({ size = 20 }) {
-  return <Target size={size} color={GOLD} strokeWidth={1.75}/>
+  return <Target size={size} color="#D4B570" strokeWidth={1.75}/>
 }
 
 // ─── CUSTOM GREEK SVG (brand layer) ──────────────────────────────────────────
