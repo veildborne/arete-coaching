@@ -553,6 +553,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
         const weekRir = weekData?.rir ?? activePlan.plan_data.rir_start ?? 2
         return {
           exercise: found,
+          targetRir: weekRir,
           sets: Array.from({ length: Math.min(setsCount, 6) }, () => ({
             weight: '', reps: String(repRange), rir: String(weekRir), logged: false,
           })),
@@ -593,7 +594,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
   const addExercise = (exercise) => {
     setSessionExercises(prev => [...prev, {
       exercise,
-      sets: [{ weight: '', reps: '', rir: '2', logged: false }],
+      sets: [{ weight: '', reps: '', rir: String(targetRir ?? 2), logged: false }],
     }])
     setShowPicker(false)
   }
@@ -644,7 +645,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
     let totalVolume = 0
     let topSet = null
 
-    const exercisesData = sessionExercises.map(({ exercise, sets }) => {
+    const exercisesData = sessionExercises.map(({ exercise, sets, targetRir: exTargetRir }) => {
       sets.forEach(s => {
         const w = parseFloat(s.weight) || 0
         const r = parseInt(s.reps) || 0
@@ -662,6 +663,7 @@ export default function WorkoutLogger({ profile, exercises = [], activePlan, cli
           weight_kg: parseFloat(s.weight) || 0,
           reps: parseInt(s.reps) || 0,
           rir_actual: parseInt(s.rir),
+          rir_target: exTargetRir ?? targetRir ?? null,
           estimated_1rm: epley(parseFloat(s.weight), parseInt(s.reps)),
           volume_load: (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0),
         })),
