@@ -831,3 +831,9 @@ img { max-width: 100%; display: block; }
 .card-border {
   border: 2px solid rgba(212,181,112,0.3) !important;
 }
+
+/* Dark dropdown options */
+select option {
+  background: #1a1a1a;
+  color: #e8e8e8;
+}

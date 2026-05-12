@@ -695,6 +695,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                             <select
                               value={editForm.cel || ''}
                               onChange={e => setEditForm({ ...editForm, cel: e.target.value })}
+                              style={{background:'#1a1a1a', color:'#e8e8e8'}}
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="">Cel...</option>
@@ -707,6 +708,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                             <select
                               value={editForm.staz || ''}
                               onChange={e => setEditForm({ ...editForm, staz: e.target.value })}
+                              style={{background:'#1a1a1a', color:'#e8e8e8'}}
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="">Staż...</option>
@@ -741,6 +743,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                             <select
                               value={editForm.sen || ''}
                               onChange={e => setEditForm({ ...editForm, sen: e.target.value })}
+                              style={{background:'#1a1a1a', color:'#e8e8e8'}}
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="">Sen...</option>
@@ -752,6 +755,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                             <select
                               value={editForm.stress_level || ''}
                               onChange={e => setEditForm({ ...editForm, stress_level: parseInt(e.target.value) })}
+                              style={{background:'#1a1a1a', color:'#e8e8e8'}}
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="">Stres...</option>
@@ -764,6 +768,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                             <select
                               value={editForm.praca || ''}
                               onChange={e => setEditForm({ ...editForm, praca: e.target.value })}
+                              style={{background:'#1a1a1a', color:'#e8e8e8'}}
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="">Typ pracy...</option>
@@ -793,6 +798,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
                             <select
                               value={editForm.knows_rir ? 'true' : 'false'}
                               onChange={e => setEditForm({ ...editForm, knows_rir: e.target.value === 'true' })}
+                              style={{background:'#1a1a1a', color:'#e8e8e8'}}
                               className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
                             >
                               <option value="false">Nie zna RIR</option>
