@@ -126,6 +126,36 @@ function getPhaseTransitionHint(questionnaire, currentTargets) {
     })
   }
 
+  // Pokazuj wskazówki też dla aktywnej fazy (nie tylko przejścia)
+  if (isCurrentlyCutting && currentGoal === 'Redukcja tkanki tłuszczowej') {
+    hints.push({
+      type: 'info',
+      title: 'Aktywna redukcja',
+      steps: [
+        `Tempo: 0.5-1.0% masy ciała/tydzień = ${Math.round(waga * 0.005)}-${Math.round(waga * 0.01)} kg/tydzień.`,
+        `Białko: min ${Math.round(waga * 2.2)}g — chroni masę mięśniową w deficycie (McDonald).`,
+        `7-dniowa średnia wagi — nie oceniaj po jednym pomiarze.`,
+        `Jeśli waga stoi 2 tyg + adherencja dobra → obetnij 100-150 kcal.`,
+        `Jeśli energia spada mocno → rozważ diet break 1-2 tyg na ${Math.round(waga * 30)} kcal.`,
+      ],
+      source: 'Helms / McDonald / Israetel'
+    })
+  }
+
+  if (isCurrentlyBulking && currentGoal === 'Budowa masy mięśniowej') {
+    hints.push({
+      type: 'info',
+      title: 'Aktywna masa',
+      steps: [
+        `Tempo: 0.25-0.5% masy/tydzień = ${Math.round(waga * 0.0025)}-${Math.round(waga * 0.005)} kg/tydzień.`,
+        `Białko: ${Math.round(waga * 2.0)}g — w surplus można zejść do 2.0g/kg (Helms).`,
+        `Jeśli tyjesz szybciej niż ${Math.round(waga * 0.005)} kg/tydzień → obetnij 100 kcal.`,
+        `Siła powinna rosnąć — brak progresu przy nadwadze = za dużo tłuszczu.`,
+      ],
+      source: 'Israetel / Helms'
+    })
+  }
+
   return hints.length > 0 ? hints[0] : null
 }
 
