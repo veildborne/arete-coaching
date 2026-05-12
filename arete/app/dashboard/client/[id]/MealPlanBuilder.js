@@ -182,7 +182,9 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
           <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Sugerowane szablony</p>
           <div className="space-y-2">
             {suggested.map(t => {
-              const macro = calcTemplateMacros(t)
+              const targetKcal = nutritionTargets?.calories
+              const scaled = targetKcal ? scaleTemplateToCalories(t, targetKcal) : t
+              const macro = calcTemplateMacros(scaled)
               return (
                 <button
                   key={t.id}
