@@ -498,9 +498,10 @@ export function generatePlan(questionnaire, exercises) {
   Object.entries(splitDef.sessions).forEach(([sessionKey, sessionDef]) => {
     const usedExercises = new Set()
     const sessionMinutes = params.sessionMinutes || 60
+    const muscleCount = sessionDef.muscles.length
 
-    // Max exercises in this session based on time
-    const maxExercises = sessionMinutes >= 90 ? 8 : sessionMinutes >= 75 ? 6 : 5
+    // Max exercises based on muscle count and training style, not time
+    const maxExercises = muscleCount + (params.trainingStyle === 'varied' ? 2 : params.trainingStyle === 'simple' ? 0 : 1)
 
     const exerciseList = sessionDef.muscles.flatMap(muscle => {
       const isPriority = params.priorityMuscles.includes(muscle)
@@ -607,8 +608,26 @@ export function generatePlan(questionnaire, exercises) {
     }
   })
 
+  // Estimate session time as guidance (not a hard limit)
+  Object.entries(sessions).forEach(([key, session]) => {
+    const estimatedMin = session.exercises.reduce((t, ex) => {
+      return t + (ex.sets || 3) * (ex.compound ? 4.5 : 3.5)
+    }, 5)
+    session.estimated_minutes = Math.round(estimatedMin)
+  })
+
   // Validate before returning
   const validation = validatePlan(sessions, splitDef)
+
+  // Add time guidance warnings (not errors)
+  Object.entries(sessions).forEach(([key, session]) => {
+    const estimatedMin = session.estimated_minutes
+    if (estimatedMin > params.sessionMinutes + 15) {
+      validation.warnings.push(
+        `Sesja ${key}: szacowany czas ${Math.round(estimatedMin)} min — plan zakłada pełną objętość. Czas sesji to cel, nie limit.`
+      )
+    }
+  })
   if (!validation.valid) {
     throw new Error(
       `Plan generation failed:\n${validation.errors.join('\n')}`
