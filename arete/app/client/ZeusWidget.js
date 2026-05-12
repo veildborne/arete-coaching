@@ -105,15 +105,26 @@ export default function ZeusWidget({ recentLogs = [], checkins = [] }) {
         title={tooltip}
       >
         <div style={{
-          width: SPRITE_W,
-          height: SPRITE_H,
-          backgroundImage: 'url(/mascot/mascot-small.png)',
-          backgroundPosition: `${bgX}px ${bgY}px`,
-          backgroundSize: `${SPRITE_W * SPRITE_COLS}px ${SPRITE_H * SPRITE_ROWS}px`,
+          width: displaySize,
+          height: displaySize,
+          overflow: 'hidden',
           imageRendering: 'pixelated',
-          transform: `scale(${displaySize / SPRITE_W})`,
-          transformOrigin: 'top left',
-        }}/>
+          position: 'relative',
+        }}>
+          <img
+            src="/mascot/mascot-small.png"
+            style={{
+              position: 'absolute',
+              imageRendering: 'pixelated',
+              width: `${SPRITE_W * SPRITE_COLS}px`,
+              height: `${SPRITE_H * SPRITE_ROWS}px`,
+              left: `${-(currentFrame * SPRITE_W) * (displaySize / SPRITE_W)}px`,
+              top: `${-(s.row * SPRITE_H) * (displaySize / SPRITE_H)}px`,
+              transform: `scale(${displaySize / SPRITE_W})`,
+              transformOrigin: 'top left',
+            }}
+          />
+        </div>
       </div>
 
       {/* Close */}
