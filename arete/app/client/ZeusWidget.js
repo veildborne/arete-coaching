@@ -1,18 +1,18 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-const SPRITE_COLS = 4
-const SPRITE_ROWS = 4
-const SPRITE_W = 275  // 1100px / 4 cols
-const SPRITE_H = 275  // 1100px / 4 rows
+const SPRITE_COLS = 7
+const SPRITE_ROWS = 11
+const SPRITE_W = 179  // 1254px / 7 cols
+const SPRITE_H = 114  // 1254px / 11 rows
 
 const STATES = {
-  idle:      { row: 0, frames: [0,1,2,3], fps: 4 },
-  walk:      { row: 1, frames: [0,1,2,3], fps: 8 },
-  celebrate: { row: 2, frames: [0,1],     fps: 4 },
-  alert:     { row: 2, frames: [2,3],     fps: 6 },
-  sleep:     { row: 3, frames: [0,1],     fps: 2 },
-  warrior:   { row: 3, frames: [2,3],     fps: 6 },
+  idle:      { row: 0, frames: [0,1,2,3,4,5,6], fps: 6 },
+  walk:      { row: 1, frames: [0,1,2,3,4,5,6], fps: 8 },
+  celebrate: { row: 5, frames: [0,1,2,3],       fps: 6 },
+  alert:     { row: 5, frames: [4,5],            fps: 4 },
+  sleep:     { row: 6, frames: [2,3],            fps: 2 },
+  warrior:   { row: 6, frames: [4,5],            fps: 6 },
 }
 
 export default function ZeusWidget({ recentLogs = [], checkins = [] }) {
