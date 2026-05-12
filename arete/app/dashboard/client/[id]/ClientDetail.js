@@ -549,13 +549,17 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
   }
 
   async function saveEdits(qId) {
-    const supabase = createClient()
-    await supabase
-      .from('questionnaires')
-      .update({ data: editForm })
-      .eq('id', qId)
-    setEditingIdx(null)
-    window.location.reload()
+    const res = await fetch('/api/questionnaire/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ questionnaireId: qId, data: editForm }),
+    })
+    if (res.ok) {
+      setEditingIdx(null)
+      window.location.reload()
+    } else {
+      alert('Błąd zapisu — sprawdź konsolę')
+    }
   }
 
   function getQuickStats(data) {
