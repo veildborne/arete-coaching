@@ -13,48 +13,131 @@ function MacroChip({ label, value, color }) {
 }
 
 function SwapModal({ item, food, onSelect, onClose }) {
+  const [search, setSearch] = useState('')
   const swaps = findSwaps(item.food_id, item.grams)
+  const allFoods = FOODS.filter(f => f.id !== item.food_id)
+  const searchResults = search.length >= 2
+    ? allFoods.filter(f => f.name.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
+    : swaps.map(s => ({ food: s.food, grams: s.grams, macro: s.macro, delta: s.delta }))
+
   return (
     <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-[#1a1a1a] border border-gold/20 rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-[#1a1a1a] border-2 border-gold/20 rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-[10px] text-muted uppercase tracking-widest">Zamień produkt</p>
             <p className="text-sm font-medium text-warm">{food?.name}</p>
           </div>
           <button onClick={onClose} className="text-muted hover:text-warm transition text-lg">✕</button>
         </div>
-        {swaps.length === 0 && <p className="text-muted text-sm text-center py-4">Brak zamienników w tej grupie</p>}
-        {swaps.map(({ food: f, grams, macro, delta }) => (
-          <button
-            key={f.id}
-            onClick={() => { onSelect(f.id, grams); onClose() }}
-            className="w-full text-left p-3 rounded-lg border border-white/[0.06] hover:border-gold/30 mb-2 transition"
-          >
-            <div className="flex justify-between mb-1">
+        <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Szukaj dowolnego produktu..."
+          className="w-full py-2 px-3 rounded-lg bg-white/[0.04] border border-gold/20 text-warm text-sm font-body outline-none mb-3"/>
+        {!search && <p className="text-[10px] text-muted uppercase tracking-widest mb-2">Zamienniki tej samej grupy</p>}
+        {searchResults.length === 0 && <p className="text-muted text-sm text-center py-4">Brak wyników</p>}
+        {search.length >= 2
+          ? searchResults.map(f => {
+              const gramsNeeded = Math.round((item.grams * food?.kcal) / (f.kcal || 1))
+              const macro = {
+                kcal: Math.round((f.kcal * gramsNeeded) / 100),
+                protein: Math.round((f.protein * gramsNeeded) / 100 * 10) / 10,
+              }
+              return (
+                <button key={f.id} onClick={() => { onSelect(f.id, gramsNeeded); onClose() }}
+                  className="w-full text-left p-3 rounded-lg border border-white/[0.06] hover:border-gold/30 mb-2 transition">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-warm">{f.name}</span>
+                    <span className="text-xs text-muted">{gramsNeeded}g</span>
+                  </div>
+                  <div className="flex gap-2 text-[10px] text-muted">
+                    <span>{macro.kcal} kcal</span>
+                    <span style={{ color: MACRO_COLORS.protein }}>B:{macro.protein}g</span>
+                  </div>
+                </button>
+              )
+            })
+          : swaps.map(({ food: f, grams, macro, delta }) => (
+              <button key={f.id} onClick={() => { onSelect(f.id, grams); onClose() }}
+                className="w-full text-left p-3 rounded-lg border border-white/[0.06] hover:border-gold/30 mb-2 transition">
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-warm">{f.name}</span>
+                  <span className="text-xs text-muted">{grams}g</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="text-[10px] text-muted">{macro.kcal} kcal</span>
+                  {delta.protein !== 0 && <span className="text-[10px]" style={{ color: Math.abs(delta.protein) <= 2 ? '#47D18C' : '#E8A020' }}>B {delta.protein > 0 ? '+' : ''}{delta.protein}g</span>}
+                  {delta.fat !== 0 && <span className="text-[10px]" style={{ color: Math.abs(delta.fat) <= 2 ? '#47D18C' : '#E8A020' }}>T {delta.fat > 0 ? '+' : ''}{delta.fat}g</span>}
+                  {delta.carbs !== 0 && <span className="text-[10px]" style={{ color: Math.abs(delta.carbs) <= 2 ? '#47D18C' : '#E8A020' }}>W {delta.carbs > 0 ? '+' : ''}{delta.carbs}g</span>}
+                </div>
+              </button>
+            ))
+        }
+      </div>
+    </div>
+  )
+}
+
+function AddItemModal({ mealIdx, onAdd, onClose, existingIds }) {
+  const [search, setSearch] = useState('')
+  const [grams, setGrams] = useState('100')
+  const [selected, setSelected] = useState(null)
+
+  const results = search.length >= 2
+    ? FOODS.filter(f => f.name.toLowerCase().includes(search.toLowerCase()) && !existingIds.has(f.id)).slice(0, 8)
+    : []
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
+      <div className="bg-[#1a1a1a] border-2 border-gold/20 rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-warm">Dodaj produkt do posiłku</p>
+          <button onClick={onClose} className="text-muted hover:text-warm text-lg">✕</button>
+        </div>
+        <input type="text" value={search} onChange={e => { setSearch(e.target.value); setSelected(null) }}
+          placeholder="Szukaj produktu..."
+          autoFocus
+          className="w-full py-2 px-3 rounded-lg bg-white/[0.04] border border-gold/20 text-warm text-sm font-body outline-none mb-2"/>
+        {!selected && results.map(f => (
+          <button key={f.id} onClick={() => setSelected(f)}
+            className="w-full text-left p-2.5 rounded-lg hover:bg-gold/[0.05] border-b border-white/[0.04] transition">
+            <div className="flex justify-between">
               <span className="text-sm text-warm">{f.name}</span>
-              <span className="text-xs text-muted">{grams}g</span>
+              <span className="text-[10px] text-muted">{f.kcal} kcal/100g</span>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <span className="text-[10px] text-muted">{macro.kcal} kcal</span>
-              {delta.protein !== 0 && (
-                <span className="text-[10px]" style={{ color: Math.abs(delta.protein) <= 2 ? '#47D18C' : '#E8A020' }}>
-                  B {delta.protein > 0 ? '+' : ''}{delta.protein}g
-                </span>
-              )}
-              {delta.fat !== 0 && (
-                <span className="text-[10px]" style={{ color: Math.abs(delta.fat) <= 2 ? '#47D18C' : '#E8A020' }}>
-                  T {delta.fat > 0 ? '+' : ''}{delta.fat}g
-                </span>
-              )}
-              {delta.carbs !== 0 && (
-                <span className="text-[10px]" style={{ color: Math.abs(delta.carbs) <= 2 ? '#47D18C' : '#E8A020' }}>
-                  W {delta.carbs > 0 ? '+' : ''}{delta.carbs}g
-                </span>
-              )}
+            <div className="flex gap-2 text-[10px] mt-0.5">
+              <span style={{ color: MACRO_COLORS.protein }}>B:{f.protein}g</span>
+              <span style={{ color: MACRO_COLORS.fat }}>T:{f.fat}g</span>
+              <span style={{ color: MACRO_COLORS.carbs }}>W:{f.carbs}g</span>
             </div>
           </button>
         ))}
+        {selected && (
+          <div className="mt-2">
+            <p className="text-sm text-gold mb-2">{selected.name}</p>
+            <div className="flex gap-2 mb-3">
+              <input type="number" value={grams} onChange={e => setGrams(e.target.value)}
+                placeholder="Ilość (g)"
+                className="flex-1 py-2 px-3 rounded-lg bg-white/[0.04] border border-gold/20 text-warm text-sm font-body outline-none"/>
+              <span className="text-muted self-center">g</span>
+            </div>
+            {grams && (
+              <div className="flex gap-2 text-xs mb-3">
+                <span className="text-warm">{Math.round((selected.kcal * parseInt(grams)) / 100)} kcal</span>
+                <span style={{ color: MACRO_COLORS.protein }}>B:{Math.round((selected.protein * parseInt(grams)) / 100)}g</span>
+                <span style={{ color: MACRO_COLORS.fat }}>T:{Math.round((selected.fat * parseInt(grams)) / 100)}g</span>
+                <span style={{ color: MACRO_COLORS.carbs }}>W:{Math.round((selected.carbs * parseInt(grams)) / 100)}g</span>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button onClick={() => setSelected(null)} className="flex-1 py-2 rounded-lg border border-white/[0.1] text-muted text-sm">← Wróć</button>
+              <button onClick={() => { onAdd(mealIdx, selected.id, parseInt(grams) || 100); onClose() }}
+                className="flex-1 py-2 rounded-lg text-sm font-semibold"
+                style={{ background: 'rgba(212,181,112,0.15)', color: '#D4B570', border: '1px solid rgba(212,181,112,0.3)' }}>
+                Dodaj
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -69,15 +152,11 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
     const currentMacro = calcTemplateMacros(template)
     if (currentMacro.kcal === 0) return template
     const scale = targetKcal / currentMacro.kcal
-
     return {
       ...template,
       meals: template.meals.map(meal => ({
         ...meal,
-        items: meal.items.map(item => ({
-          ...item,
-          grams: Math.round(item.grams * scale),
-        }))
+        items: meal.items.map(item => ({ ...item, grams: Math.round(item.grams * scale) }))
       }))
     }
   }
@@ -87,9 +166,10 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
     : defaultTemplate
 
   const [meals, setMeals] = useState(initialPlan?.meals || scaledDefault?.meals || [])
-  const [planName, setPlanName] = useState(initialPlan?.name || defaultTemplate?.name || 'Plan żywieniowy')
+  const [planName, setPlanName] = useState(initialPlan?.name || `${defaultTemplate?.name || 'Plan'} — ${nutritionTargets?.calories || ''}kcal`)
   const [selectedTemplate, setSelectedTemplate] = useState(suggested[0]?.id || defaultTemplate?.id || null)
   const [swapTarget, setSwapTarget] = useState(null)
+  const [addTarget, setAddTarget] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -97,7 +177,7 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
     const targetKcal = nutritionTargets?.calories
     const scaled = targetKcal ? scaleTemplateToCalories(template, targetKcal) : template
     setMeals(scaled.meals)
-    setPlanName(scaled.name)
+    setPlanName(`${template.name} — ${targetKcal || ''}kcal`)
     setSelectedTemplate(template.id)
   }
 
@@ -126,6 +206,12 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
   function removeItem(mealIdx, itemIdx) {
     setMeals(prev => prev.map((meal, mi) =>
       mi !== mealIdx ? meal : { ...meal, items: meal.items.filter((_, ii) => ii !== itemIdx) }
+    ).filter(meal => meal.items.length > 0))
+  }
+
+  function addItem(mealIdx, foodId, grams) {
+    setMeals(prev => prev.map((meal, mi) =>
+      mi !== mealIdx ? meal : { ...meal, items: [...meal.items, { food_id: foodId, grams }] }
     ))
   }
 
@@ -150,11 +236,7 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
   const kcalDiff   = totalKcal - targetKcal
 
   async function handleSave() {
-    if (!planName.trim()) return
-    if (meals.length === 0) {
-      alert('Wybierz szablon planu żywieniowego')
-      return
-    }
+    if (!planName.trim() || meals.length === 0) return
     setSaving(true)
     const res = await fetch('/api/nutrition/meal-plan', {
       method: 'POST',
@@ -176,30 +258,35 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
         />
       )}
 
+      {addTarget !== null && (
+        <AddItemModal
+          mealIdx={addTarget}
+          existingIds={new Set(meals[addTarget]?.items.map(i => i.food_id) || [])}
+          onAdd={addItem}
+          onClose={() => setAddTarget(null)}
+        />
+      )}
+
       {/* Suggested templates */}
       {suggested.length > 0 && (
         <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
           <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Sugerowane szablony</p>
           <div className="space-y-2">
             {suggested.map(t => {
-              const targetKcal = nutritionTargets?.calories
-              const scaled = targetKcal ? scaleTemplateToCalories(t, targetKcal) : t
+              const scaled = nutritionTargets?.calories ? scaleTemplateToCalories(t, nutritionTargets.calories) : t
               const macro = calcTemplateMacros(scaled)
               return (
-                <button
-                  key={t.id}
-                  onClick={() => applyTemplate(t)}
+                <button key={t.id} onClick={() => applyTemplate(t)}
                   className="w-full text-left p-3 rounded-lg border transition"
-                  style={{ borderColor: selectedTemplate === t.id ? 'rgba(212,181,112,0.4)' : 'rgba(255,255,255,0.06)', background: selectedTemplate === t.id ? 'rgba(212,181,112,0.05)' : 'transparent' }}
-                >
+                  style={{ borderColor: selectedTemplate === t.id ? 'rgba(212,181,112,0.4)' : 'rgba(255,255,255,0.06)', background: selectedTemplate === t.id ? 'rgba(212,181,112,0.05)' : 'transparent' }}>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-warm">{t.name}</span>
                     <span className="text-xs text-gold">{macro.kcal} kcal</span>
                   </div>
                   <div className="flex gap-2">
-                    <MacroChip label="B" value={macro.protein} color={MACRO_COLORS.protein} />
-                    <MacroChip label="T" value={macro.fat}     color={MACRO_COLORS.fat} />
-                    <MacroChip label="W" value={macro.carbs}   color={MACRO_COLORS.carbs} />
+                    <MacroChip label="B" value={macro.protein} color={MACRO_COLORS.protein}/>
+                    <MacroChip label="T" value={macro.fat} color={MACRO_COLORS.fat}/>
+                    <MacroChip label="W" value={macro.carbs} color={MACRO_COLORS.carbs}/>
                   </div>
                 </button>
               )
@@ -209,12 +296,9 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
       )}
 
       {/* Plan name */}
-      <input
-        value={planName}
-        onChange={e => setPlanName(e.target.value)}
+      <input value={planName} onChange={e => setPlanName(e.target.value)}
         placeholder="Nazwa planu żywieniowego..."
-        className="w-full py-2.5 px-3.5 rounded-lg bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] text-warm text-sm font-body outline-none focus:border-gold/40"
-      />
+        className="w-full py-2.5 px-3.5 rounded-lg bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] text-warm text-sm font-body outline-none focus:border-gold/40"/>
 
       {/* Live macro summary */}
       {meals.length > 0 && (
@@ -222,64 +306,73 @@ export default function MealPlanBuilder({ clientId, questionnaire, nutritionTarg
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] text-muted uppercase tracking-widest">Łączne makro</span>
             {targetKcal > 0 && (
-              <span className="text-[11px]" style={{ color: Math.abs(kcalDiff) <= 100 ? '#47D18C' : '#E8A020' }}>
+              <span className="text-[11px]" style={{ color: Math.abs(kcalDiff) <= 50 ? '#47D18C' : Math.abs(kcalDiff) <= 150 ? '#E8A020' : '#EF6B73' }}>
                 {kcalDiff > 0 ? '+' : ''}{kcalDiff} kcal vs cel
               </span>
             )}
           </div>
           <div className="flex gap-3 flex-wrap">
             <span className="text-warm font-semibold">{totalKcal} kcal</span>
-            <MacroChip label="B" value={totalProtein} color={MACRO_COLORS.protein} />
-            <MacroChip label="T" value={totalFat}     color={MACRO_COLORS.fat} />
-            <MacroChip label="W" value={totalCarbs}   color={MACRO_COLORS.carbs} />
+            <MacroChip label="B" value={totalProtein} color={MACRO_COLORS.protein}/>
+            <MacroChip label="T" value={totalFat} color={MACRO_COLORS.fat}/>
+            <MacroChip label="W" value={totalCarbs} color={MACRO_COLORS.carbs}/>
           </div>
+          {Math.abs(kcalDiff) > 150 && (
+            <p className="text-[10px] text-[#E8A020] mt-2">
+              ⚠ Makro różni się od celu o {Math.abs(kcalDiff)} kcal — dostosuj gramaturę produktów
+            </p>
+          )}
         </div>
       )}
 
       {/* Meals */}
-      {meals.map((meal, mealIdx) => (
-        <div key={mealIdx} className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
-          <p className="text-[11px] text-gold uppercase tracking-widest mb-3">{meal.name}</p>
-          <div className="space-y-2">
-            {meal.items.map((item, itemIdx) => {
-              const food = FOODS.find(f => f.id === item.food_id)
-              if (!food) return null
-              const itemKcal = Math.round((food.kcal * item.grams) / 100)
-              const itemProt = Math.round((food.protein * item.grams) / 100)
-              return (
-                <div key={itemIdx} className="flex items-center gap-2 bg-white/[0.02] rounded-lg px-3 py-2">
-                  <span className="flex-1 text-sm text-warm">{food.name}</span>
-                  <input
-                    type="number"
-                    value={item.grams}
-                    onChange={e => updateItemGrams(mealIdx, itemIdx, e.target.value)}
-                    className="w-14 py-1 px-2 rounded bg-white/[0.04] border border-gold/15 text-warm text-xs text-center font-body outline-none"
-                  />
-                  <span className="text-[10px] text-muted w-6">g</span>
-                  <span className="text-[10px] text-muted w-16">{itemKcal} kcal</span>
-                  <span className="text-[10px] w-12" style={{ color: MACRO_COLORS.protein }}>B:{itemProt}g</span>
-                  <button
-                    onClick={() => setSwapTarget({ mealIdx, itemIdx, item })}
-                    className="text-[10px] px-2 py-1 rounded border border-[rgba(100,181,246,0.25)] text-[#64B5F6]"
-                  >⇄</button>
-                  <button
-                    onClick={() => removeItem(mealIdx, itemIdx)}
-                    className="text-[10px] px-2 py-1 rounded border border-danger/20 text-danger"
-                  >✕</button>
-                </div>
-              )
-            })}
+      {meals.map((meal, mealIdx) => {
+        let mealKcal = 0
+        meal.items.forEach(item => {
+          const food = FOODS.find(f => f.id === item.food_id)
+          if (food) mealKcal += (food.kcal * item.grams) / 100
+        })
+        return (
+          <div key={mealIdx} className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] text-gold uppercase tracking-widest">{meal.name}</p>
+              <span className="text-[10px] text-muted">{Math.round(mealKcal)} kcal</span>
+            </div>
+            <div className="space-y-2">
+              {meal.items.map((item, itemIdx) => {
+                const food = FOODS.find(f => f.id === item.food_id)
+                if (!food) return null
+                const itemKcal = Math.round((food.kcal * item.grams) / 100)
+                const itemProt = Math.round((food.protein * item.grams) / 100)
+                return (
+                  <div key={itemIdx} className="flex items-center gap-2 bg-white/[0.02] rounded-lg px-3 py-2">
+                    <span className="flex-1 text-sm text-warm min-w-0 truncate">{food.name}</span>
+                    <input type="number" value={item.grams}
+                      onChange={e => updateItemGrams(mealIdx, itemIdx, e.target.value)}
+                      className="w-14 py-1 px-2 rounded bg-white/[0.04] border border-gold/15 text-warm text-xs text-center font-body outline-none shrink-0"/>
+                    <span className="text-[10px] text-muted shrink-0">g</span>
+                    <span className="text-[10px] text-muted shrink-0 hidden sm:block">{itemKcal} kcal</span>
+                    <span className="text-[10px] shrink-0" style={{ color: MACRO_COLORS.protein }}>B:{itemProt}g</span>
+                    <button onClick={() => setSwapTarget({ mealIdx, itemIdx, item })}
+                      className="text-[10px] px-2 py-1 rounded border border-[rgba(100,181,246,0.25)] text-[#64B5F6] shrink-0">⇄</button>
+                    <button onClick={() => removeItem(mealIdx, itemIdx)}
+                      className="text-[10px] px-2 py-1 rounded border border-danger/20 text-danger shrink-0">✕</button>
+                  </div>
+                )
+              })}
+            </div>
+            <button onClick={() => setAddTarget(mealIdx)}
+              className="mt-2 w-full py-1.5 rounded-lg text-xs border border-dashed border-gold/20 text-gold/50 hover:border-gold/40 hover:text-gold/70 transition">
+              + Dodaj produkt do {meal.name.toLowerCase()}
+            </button>
           </div>
-        </div>
-      ))}
+        )
+      })}
 
       {/* Save */}
-      <button
-        onClick={handleSave}
-        disabled={saving || meals.length === 0}
+      <button onClick={handleSave} disabled={saving || meals.length === 0}
         className="w-full py-3 rounded-xl text-sm font-bold font-body tracking-wider disabled:opacity-40"
-        style={{ background: 'linear-gradient(135deg,#b8a677,#d4c494)', color: '#0f1a2e' }}
-      >
+        style={{ background: 'linear-gradient(135deg,#b8a677,#d4c494)', color: '#0f1a2e' }}>
         {saving ? 'Zapisuję...' : saved ? '✓ Zapisano!' : 'Zapisz plan żywieniowy'}
       </button>
     </div>
