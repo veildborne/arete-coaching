@@ -8,6 +8,7 @@ import NutritionPanel from './NutritionPanel'
 import MealPlanBuilder from './MealPlanBuilder'
 import dynamic from 'next/dynamic'
 const ClientReport = dynamic(() => import('./ClientReport'), { ssr: false })
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 const TIER_COLORS = {
   paideia: { color: '#a07850', bg: 'rgba(160,120,80,0.12)', border: 'rgba(160,120,80,0.3)' },
@@ -182,6 +183,51 @@ function calculateWeeklyVolume(logs) {
     .map(([muscle, sets]) => ({ muscle, sets }))
     .sort((a, b) => b.sets - a.sets)
     .slice(0, 8)
+}
+
+function buildWeeklyVolumeChart(logs) {
+  const COLORS = {
+    chest: '#C05000', back: '#D4AF37', quads: '#52B788',
+    glutes: '#8B9DB5', shoulders_lateral: '#b8a677', hamstrings: '#ef4444',
+    biceps: '#4a9eff', triceps: '#a78bfa',
+  }
+  const now = new Date()
+  const weeks = Array.from({ length: 6 }, (_, i) => {
+    const weekStart = new Date(now)
+    weekStart.setDate(now.getDate() - ((5 - i) * 7))
+    weekStart.setHours(0, 0, 0, 0)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 7)
+    const d = weekStart
+    const label = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`
+    return { label, start: weekStart, end: weekEnd }
+  })
+
+  const muscleCount = {}
+  logs.forEach(log => {
+    (log.exercises || []).forEach(ex => {
+      if (ex.muscle_group) muscleCount[ex.muscle_group] = (muscleCount[ex.muscle_group] || 0) + (ex.sets || []).length
+    })
+  })
+  const topMuscles = Object.entries(muscleCount).sort((a,b) => b[1]-a[1]).slice(0,4).map(([m]) => m)
+
+  const data = weeks.map(({ label, start, end }) => {
+    const row = { week: label }
+    topMuscles.forEach(m => {
+      row[m] = 0
+      logs.forEach(log => {
+        const d = new Date(log.session_date)
+        if (d >= start && d < end) {
+          (log.exercises || []).forEach(ex => {
+            if (ex.muscle_group === m) row[m] += (ex.sets || []).length
+          })
+        }
+      })
+    })
+    return row
+  })
+
+  return { data, topMuscles, COLORS }
 }
 
 function Pill({ children, color, bg, border }) {
@@ -1326,6 +1372,33 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
                   </div>
                 </div>
               )}
+
+              {logs.length >= 3 && (() => {
+                const { data, topMuscles, COLORS } = buildWeeklyVolumeChart(logs)
+                const hasData = data.some(row => topMuscles.some(m => row[m] > 0))
+                if (!hasData) return null
+                return (
+                  <div className="bg-[#1a1a1a] border-2 border-[rgba(212,181,112,0.35)] rounded-[10px] p-4 mb-6">
+                    <div className="text-[10px] text-muted uppercase tracking-widest mb-4">Objętość tygodniowa — serie per partia</div>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={data} barGap={2} barCategoryGap="28%">
+                        <XAxis dataKey="week" tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                        <Tooltip
+                          contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(212,181,112,0.3)', borderRadius: 8, fontSize: 12 }}
+                          labelStyle={{ color: '#D4B570', marginBottom: 4 }}
+                          itemStyle={{ color: '#e8e8e8' }}
+                          formatter={(value, name) => [value + ' serii', name]}
+                        />
+                        <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                        {topMuscles.map(m => (
+                          <Bar key={m} dataKey={m} fill={COLORS[m] || '#666'} radius={[3,3,0,0]} maxBarSize={32} />
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )
+              })()}
             </div>
 
             {/* Volume Tracking */}
