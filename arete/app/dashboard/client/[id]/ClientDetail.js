@@ -997,6 +997,7 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
   const router = useRouter()
   const [tab, setTab] = useState('plans')
   const [checkins, setCheckins] = useState(initialCheckins)
+  const [currentNutritionTargets, setCurrentNutritionTargets] = useState(nutritionTargets)
   const [managing, setManaging] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -1531,13 +1532,18 @@ export default function ClientDetail({ client, plans, logs, checkins: initialChe
 
         {tab === 'nutrition' && (
           <Section title="Cele żywieniowe">
-            <NutritionPanel clientId={client.id} initialTargets={nutritionTargets} questionnaire={questionnaire} />
+            <NutritionPanel
+              clientId={client.id}
+              initialTargets={currentNutritionTargets}
+              questionnaire={questionnaire}
+              onSaved={(newTargets) => setCurrentNutritionTargets(newTargets)}
+            />
             <div className="mt-4">
               <p className="text-[10px] text-muted uppercase tracking-widest mb-3">Plan żywieniowy</p>
               <MealPlanBuilder
                 clientId={client.id}
                 questionnaire={questionnaire}
-                nutritionTargets={nutritionTargets}
+                nutritionTargets={currentNutritionTargets}
                 initialPlan={mealPlan}
               />
             </div>

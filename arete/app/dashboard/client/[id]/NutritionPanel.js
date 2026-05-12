@@ -112,7 +112,7 @@ function MacroBar({ label, value, total, color }) {
   )
 }
 
-export default function NutritionPanel({ clientId, initialTargets, questionnaire }) {
+export default function NutritionPanel({ clientId, initialTargets, questionnaire, onSaved = null }) {
   const suggested = calculateNutritionFromQuestionnaire(questionnaire?.data)
 
   const [targets, setTargets]   = useState(initialTargets || null)
@@ -182,15 +182,17 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
     })
     setSaving(false)
     if (res.ok) {
-      setTargets({
+      const newTargets = {
         calories:  parseInt(calories),
         protein_g: parseInt(protein_g),
         fat_g:     parseInt(fat_g),
         carbs_g:   parseInt(carbs_g),
         notes:     form.notes,
-      })
+      }
+      setTargets(newTargets)
       setEditing(false)
       setSaved(true)
+      onSaved?.(newTargets)
       setTimeout(() => setSaved(false), 2000)
     }
   }
