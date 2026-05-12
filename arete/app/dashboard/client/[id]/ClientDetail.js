@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { IconPlan, IconReport, IconAttention, IconKnowledge } from '@/lib/GreekIcons'
 import NutritionPanel from './NutritionPanel'
 import MealPlanBuilder from './MealPlanBuilder'
 import dynamic from 'next/dynamic'
