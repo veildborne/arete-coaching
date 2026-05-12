@@ -201,6 +201,19 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
     }))
   }
 
+  function applyWithCustomKcal(targetKcal) {
+    if (!questionnaire?.data) return
+    const q = questionnaire.data
+    const waga = parseFloat(q.waga_kg) || 0
+    const cel = q.cel || ''
+    const proteinMulti = cel === 'Redukcja tkanki tłuszczowej' ? 2.2 : 2.0
+    const protein_g = Math.round(waga * proteinMulti)
+    const fat_g = Math.max(Math.round((waga * 0.8) / 5) * 5, 54)
+    const carbsKcal = Math.max(0, targetKcal - protein_g * 4 - fat_g * 9)
+    const carbs_g = Math.round(carbsKcal / 4)
+    setForm(p => ({ ...p, protein_g, fat_g, carbs_g }))
+  }
+
   const totalMacroKcal = targets
     ? (targets.protein_g * 4) + (targets.fat_g * 9) + (targets.carbs_g * 4)
     : 0
@@ -260,7 +273,7 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
       </div>
 
       {/* Suggested banner */}
-      {suggested && !initialTargets && !editing && (
+      {suggested && !editing && (
         <div className="mb-4 p-3 rounded-lg border border-[rgba(82,183,136,0.2)] bg-[rgba(82,183,136,0.05)]">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[11px] text-success">✦ Sugestia algorytmu</span>
@@ -328,8 +341,20 @@ export default function NutritionPanel({ clientId, initialTargets, questionnaire
           )}
 
           <div className="grid grid-cols-2 gap-2">
+            <div>
+              <div className="text-[10px] mb-1 uppercase tracking-widest" style={{ color: '#D4B570' }}>Kalorie (kcal)</div>
+              <input
+                type="number"
+                value={form.calories}
+                onChange={e => setForm(p => ({ ...p, calories: e.target.value }))}
+                className="w-full py-2 px-3 rounded-lg bg-white/[0.04] border border-gold/20 text-[#e8e8e8] text-sm font-body outline-none focus:border-gold/40"
+              />
+              <button onClick={() => applyWithCustomKcal(parseInt(form.calories))}
+                className="text-[10px] px-2.5 py-1.5 rounded-lg border border-gold/20 text-gold/60 hover:text-gold transition w-full mt-1">
+                ↻ Przelicz makro dla {form.calories} kcal
+              </button>
+            </div>
             {[
-              { key: 'calories',  label: 'Kalorie (kcal)', color: '#D4B570' },
               { key: 'protein_g', label: 'Białko (g)',      color: MACRO_COLORS.protein },
               { key: 'fat_g',     label: 'Tłuszcz (g)',     color: MACRO_COLORS.fat },
               { key: 'carbs_g',   label: 'Węglowodany (g)', color: MACRO_COLORS.carbs },
