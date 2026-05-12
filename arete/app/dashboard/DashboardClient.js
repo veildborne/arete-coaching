@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
-import { IconClients, IconAttention, IconAdd, IconLogout, IconProgress, IconReport } from '@/lib/GreekIcons'
+import { IconClients, IconAttention, IconAdd, IconLogout, IconProgress, IconReport, IconKnowledge } from '@/lib/GreekIcons'
 
 function getInitials(name, email) {
   const source = name || email || 'AR'
@@ -234,12 +234,14 @@ export default function DashboardClient({ profile, clients }) {
             <IconAdd size={14} color="#0f0f0f"/> Dodaj
           </button>
           <a href="/dashboard/knowledge"
-            style={{background:'rgba(212,181,112,0.1)',color:'#D4B570',border:'2px solid rgba(212,181,112,0.3)',borderRadius:'8px',padding:'5px 10px',fontSize:'11px',fontWeight:'600',textDecoration:'none',whiteSpace:'nowrap'}}>
-            Baza wiedzy
+            style={{background:'rgba(212,181,112,0.1)',color:'#D4B570',border:'2px solid rgba(212,181,112,0.3)',borderRadius:'8px',padding:'5px 10px',fontSize:'11px',fontWeight:'600',textDecoration:'none',whiteSpace:'nowrap',display:'flex',alignItems:'center',gap:'4px'}}>
+            <IconKnowledge size={16}/> Baza wiedzy
           </a>
           <div style={{width:'26px',height:'26px',borderRadius:'50%',background:'rgba(212,181,112,0.15)',border:'1px solid rgba(212,181,112,0.3)',display:'flex',alignItems:'center',justifyContent:'center',color:'#D4B570',fontSize:'10px',fontWeight:'bold'}}>{getInitials(profile?.full_name,profile?.email)}</div>
-          <button onClick={async()=>{const s=createClient();await s.auth.signOut();window.location.href='/'}} style={{background:'none',border:'none',cursor:'pointer',padding:'4px',display:'flex',alignItems:'center'}}>
-            <IconLogout size={18}/>
+          <button onClick={async()=>{const s=createClient();await s.auth.signOut();window.location.href='/'}}
+            style={{background:'rgba(239,107,115,0.1)',border:'2px solid rgba(239,107,115,0.3)',borderRadius:'8px',padding:'6px 10px',cursor:'pointer',display:'flex',alignItems:'center',gap:'5px',color:'#EF6B73',fontSize:'11px',fontWeight:'600'}}>
+            <IconLogout size={16}/>
+            <span>Wyloguj</span>
           </button>
         </div>
       </nav>
@@ -252,11 +254,11 @@ export default function DashboardClient({ profile, clients }) {
 
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'8px',marginBottom:'20px'}}>
           {[
-            {label:'Klienci',value:stats.active,icon:<IconClients size={18}/>,color:'#D4B570',id:'clients'},
-            {label:'Uwaga',value:stats.needsAttention,icon:<IconAttention size={18} color={stats.needsAttention>0?'#EF6B73':'#47D18C'}/>,color:stats.needsAttention>0?'#EF6B73':'#47D18C',id:'attention'},
-            {label:'Bez planu',value:stats.withoutPlan,icon:<IconProgress size={18} color={stats.withoutPlan>0?'#E8A020':'#47D18C'}/>,color:stats.withoutPlan>0?'#E8A020':'#47D18C',id:null},
-            {label:'Treningi',value:stats.totalLogs,icon:<IconProgress size={18}/>,color:'#D4B570',id:null},
-            {label:'Raporty',value:stats.pendingCheckins,icon:<IconReport size={18} color={stats.pendingCheckins>0?'#EF6B73':'#47D18C'}/>,color:stats.pendingCheckins>0?'#EF6B73':'#47D18C',id:'checkins'},
+            {label:'Klienci',value:stats.active,icon:<IconClients size={28}/>,color:'#D4B570',id:'clients'},
+            {label:'Uwaga',value:stats.needsAttention,icon:<IconAttention size={28} color={stats.needsAttention>0?'#EF6B73':'#47D18C'}/>,color:stats.needsAttention>0?'#EF6B73':'#47D18C',id:'attention'},
+            {label:'Bez planu',value:stats.withoutPlan,icon:<IconProgress size={28} color={stats.withoutPlan>0?'#E8A020':'#47D18C'}/>,color:stats.withoutPlan>0?'#E8A020':'#47D18C',id:null},
+            {label:'Treningi',value:stats.totalLogs,icon:<IconProgress size={28}/>,color:'#D4B570',id:null},
+            {label:'Raporty',value:stats.pendingCheckins,icon:<IconReport size={28} color={stats.pendingCheckins>0?'#EF6B73':'#47D18C'}/>,color:stats.pendingCheckins>0?'#EF6B73':'#47D18C',id:'checkins'},
           ].map(({label,value,icon,color,id})=>(
             <div key={label} onClick={()=>id&&setActiveNav(id)} style={{background:'rgba(15,20,35,0.85)',border:'2px solid rgba(212,181,112,0.35)',borderRadius:'12px',padding:'10px 12px',cursor:id?'pointer':'default'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'4px'}}>

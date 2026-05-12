@@ -584,10 +584,10 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
         </div>
         <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:'2px'}}>
           {[
-            {href:'/client',icon:<IconHome size={16}/>,label:'Przegląd'},
-            {href:'/client/workout',icon:<IconTraining size={16}/>,label:'Trening'},
-            {href:'/client/plan',icon:<IconPlan size={16}/>,label:'Plan'},
-            {href:'/client/checkin',icon:<IconReport size={16}/>,label:'Raport'},
+            {href:'/client',icon:<IconHome size={18}/>,label:'Przegląd'},
+            {href:'/client/workout',icon:<IconTraining size={18}/>,label:'Trening'},
+            {href:'/client/plan',icon:<IconPlan size={18}/>,label:'Plan'},
+            {href:'/client/checkin',icon:<IconReport size={18}/>,label:'Raport'},
           ].map(({href,icon,label})=>{
             const active=typeof window!=='undefined'&&window.location.pathname===href
             return(
@@ -599,8 +599,11 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
         </div>
         <div style={{display:'flex',alignItems:'center',gap:'5px',flexShrink:0}}>
           <span style={{fontSize:'11px',color:'#8F9AAF'}}>{firstName}</span>
-          <button onClick={handleLogout} style={{background:'none',border:'none',cursor:'pointer',padding:'4px',display:'flex',alignItems:'center'}}>
-            <IconLogout size={18}/>
+          <button onClick={handleLogout}
+            style={{background:'rgba(239,107,115,0.1)',border:'2px solid rgba(239,107,115,0.3)',borderRadius:'8px',padding:'5px 10px',cursor:'pointer',display:'flex',alignItems:'center',gap:'4px',color:'#EF6B73',fontSize:'11px',fontWeight:'600'}}>
+            <IconLogout size={14}/>
+            <span style={{display:'none'}}>Wyloguj</span>
+            <span>↩</span>
           </button>
         </div>
       </nav>
