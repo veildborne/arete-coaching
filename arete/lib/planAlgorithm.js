@@ -167,7 +167,12 @@ function chooseSplit(days, priorityMuscles, plec, recoveryModifier, experience) 
   const isBeginner       = experience === 'beginner'
 
   if (days === 2) return 'fullbody_2'
-  if (days === 3) return (isKobieta || hasGlutePriority) && !isBeginner ? 'lower_upper_lower' : 'fullbody_3'
+  if (days === 3) {
+    if (isBeginner) return 'fullbody_3'
+    if (isKobieta && hasGlutePriority) return 'lower_upper_lower'
+    if (hasGlutePriority) return 'lower_upper_lower'
+    return 'fullbody_3'
+  }
   if (days === 4) return isKobieta && hasGlutePriority ? 'glute_upper_lower_upper' : 'upper_lower_4'
   if (days === 5) {
     if (isLowRecovery) return 'upper_lower_4'
@@ -261,8 +266,8 @@ function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, 
 
   let weeklyTarget
   if (isAvoid)         weeklyTarget = Math.max(4, Math.round(L.mev * 0.5))
-  else if (isPriority) weeklyTarget = Math.round((L.mev + L.mav) / 2)
-  else                 weeklyTarget = L.mev
+  else if (isPriority) weeklyTarget = Math.round(L.mav)
+  else                 weeklyTarget = Math.round((L.mev + L.mav) / 2)
 
   weeklyTarget = Math.round(weeklyTarget * recoveryModifier)
 
@@ -281,21 +286,23 @@ function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, 
 // ─── WEEKLY PROGRESSION (Israetel ramp + Helms RIR drop) ─────────────────────
 // v5: stopniowy ramp zamiast flat + spike
 // tydzień 1-2: baseSets
-// tydzień 3-4: baseSets + 1
-// tydzień 5:   min(cap, baseSets + 2)   ← zbliżenie do MRV
+// tydzień 3-4: baseSets + ramp
+// tydzień 5:   min(cap, baseSets + ramp*2)   ← zbliżenie do MRV
 // tydzień 6:   deload (ceil * 0.5)
-function buildWeeksProgression(baseSets, muscle, experience, goal, knowsRir) {
+function buildWeeksProgression(baseSets, muscle, experience, goal, knowsRir, isPriority = false) {
   const sizeClass = MUSCLE_SIZE_CLASS[muscle] || 'medium'
   const cap       = SESSION_CAPS[sizeClass]
   const rirBase   = RIR_BY_WEEK[experience] || RIR_BY_WEEK.intermediate
   const repRange  = getRepRange(goal, muscle)
 
+  const ramp = isPriority ? 2 : 1  // priority muscles rampa szybciej
+
   const setsPerWeek = [
     baseSets,
     baseSets,
-    Math.min(cap, baseSets + 1),
-    Math.min(cap, baseSets + 1),
-    Math.min(cap, baseSets + 2),
+    Math.min(cap, baseSets + ramp),
+    Math.min(cap, baseSets + ramp),
+    Math.min(cap, baseSets + ramp * 2),
     Math.max(2, Math.ceil(baseSets * 0.5)), // deload
   ]
 
@@ -491,7 +498,7 @@ export function generatePlan(questionnaire, exercises) {
           exCount = sets >= 4 ? 2 : 1
         } else {
           // Balanced (default): 2 exercises only when many sets and time allows
-          const exCountThreshold = sessionMinutes >= 90 ? 5 : sessionMinutes >= 75 ? 6 : 8
+          const exCountThreshold = sessionMinutes >= 90 ? 4 : sessionMinutes >= 75 ? 5 : 6
           exCount = sets >= exCountThreshold ? 2 : 1
         }
       }
@@ -505,7 +512,7 @@ export function generatePlan(questionnaire, exercises) {
 
       return picked.map((ex, idx) => {
         const exSets = idx === 0 ? sets : Math.max(2, Math.round(sets * 0.5))
-        const weeks  = buildWeeksProgression(exSets, muscle, params.experience, params.goal, params.knowsRir)
+        const weeks  = buildWeeksProgression(exSets, muscle, params.experience, params.goal, params.knowsRir, isPriority)
         const week1  = weeks[0]
 
         return {
