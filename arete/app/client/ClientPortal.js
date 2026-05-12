@@ -9,6 +9,7 @@ import { IconHome, IconTraining, IconPlan, IconReport, IconLogout } from '@/lib/
 import NutritionCard from './NutritionCard'
 import MealPlanCard from './MealPlanCard'
 import CheatMealTracker from './CheatMealTracker'
+import DailyTipCard from './DailyTipCard'
 import OceanLoader from './OceanLoader'
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -664,6 +665,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
           {/* COL 2 — Aktywność i raporty */}
           <div className="space-y-4">
             <StatGrid recentLogs={safeLogs} questionnaire={questionnaire} />
+            <DailyTipCard userId={profile?.id} />
 
             {/* Ostatnia aktywność */}
             <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
