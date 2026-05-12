@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { redirect } from 'next/navigation'
 import ClientPortal from './ClientPortal'
 import { isCoachProfile, isPendingProfile } from '@/lib/auth-roles'
+import { calculateNutritionFromQuestionnaire } from '@/lib/nutritionEngine'
 
 export default async function ClientPage() {
   const supabase = createClient() // Next.js 14: NO await
@@ -35,9 +36,19 @@ export default async function ClientPage() {
 
   const { data: questionnaire } = await supabase
     .from('questionnaires')
-    .select('id')
+    .select('*')
     .eq('client_id', user.id)
     .maybeSingle()
+
+  const { data: nutritionTargets } = await supabase
+    .from('nutrition_targets')
+    .select('*')
+    .eq('client_id', user.id)
+    .maybeSingle()
+
+  const nutritionSummary = questionnaire?.data
+    ? calculateNutritionFromQuestionnaire(questionnaire.data, nutritionTargets?.calories || null)
+    : null
 
   const { data: checkins } = await supabase
     .from('check_ins')
@@ -66,12 +77,6 @@ export default async function ClientPage() {
     .select('achievement_id, unlocked_at')
     .eq('client_id', user.id)
 
-  const { data: nutritionTargets } = await supabase
-    .from('nutrition_targets')
-    .select('*')
-    .eq('client_id', user.id)
-    .maybeSingle()
-
   const { data: mealPlan } = await supabase
     .from('meal_plans')
     .select('*')
@@ -90,6 +95,7 @@ export default async function ClientPage() {
       totalXP={xpEvents ? xpEvents.reduce((s, e) => s + e.xp, 0) : 0}
       clientAchievements={clientAchievements || []}
       nutritionTargets={nutritionTargets || null}
+      nutritionSummary={nutritionSummary}
       mealPlan={mealPlan || null}
       coachNote={profile?.coach_profile_note || null}
     />

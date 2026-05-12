@@ -536,7 +536,7 @@ function ZeusWidget({ recentLogs, checkins }) {
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins, totalXP = 0, clientAchievements = [], nutritionTargets = null, mealPlan = null, coachNote = null }) {
+export default function ClientPortal({ profile, activePlan, recentLogs, questionnaire, coachName, checkins, totalXP = 0, clientAchievements = [], nutritionTargets = null, nutritionSummary = null, mealPlan = null, coachNote = null }) {
   const router   = useRouter()
   const [entered, setEntered] = useState(false)
   useEffect(() => { const t = setTimeout(() => setEntered(true), 800); return () => clearTimeout(t) }, [])
@@ -653,6 +653,21 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
           </div>
         </div>
 
+        {nutritionSummary && nutritionTargets && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 mb-4 rounded-xl border"
+            style={{ background: 'rgba(212,181,112,0.04)', borderColor: 'rgba(212,181,112,0.12)' }}>
+            <span className="text-[10px] text-muted uppercase tracking-widest shrink-0">Żywienie:</span>
+            <span className="text-xs text-warm font-medium">{nutritionTargets.calories} kcal</span>
+            <span className="text-[11px]" style={{ color: '#52B788' }}>B: {nutritionTargets.protein_g}g</span>
+            <span className="text-[11px]" style={{ color: '#E8A020' }}>T: {nutritionTargets.fat_g}g</span>
+            <span className="text-[11px]" style={{ color: '#5B8DB8' }}>W: {nutritionTargets.carbs_g}g</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full ml-auto"
+              style={{ background: `${nutritionSummary.aggressivenessColor}15`, color: nutritionSummary.aggressivenessColor, border: `1px solid ${nutritionSummary.aggressivenessColor}30` }}>
+              {nutritionSummary.aggressivenessLabelPl} · {nutritionSummary.deficitPct > 0 ? `-${nutritionSummary.deficitPct}%` : `+${Math.abs(nutritionSummary.deficitPct)}%`}
+            </span>
+          </div>
+        )}
+
         {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
@@ -739,7 +754,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             <CoachMessageCard coachName={coachName} />
 
             {/* Żywienie */}
-            <NutritionCard nutritionTargets={nutritionTargets} />
+            <NutritionCard nutritionTargets={nutritionTargets} nutritionSummary={nutritionSummary} />
             <MealPlanCard mealPlan={mealPlan} />
             <CheatMealTracker nutritionTargets={nutritionTargets} />
             <WeightLog />
