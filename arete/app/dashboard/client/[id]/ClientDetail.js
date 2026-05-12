@@ -341,9 +341,11 @@ function AnkietaViewer({ questionnaire }) {
 
   return (
     <div>
-      <div className="text-[11px] text-[rgba(184,166,119,0.5)] mb-4 tracking-wider">
-        Wypełniono: {formatDate(questionnaire.created_at)}
-      </div>
+      <span className="text-xs text-muted">
+        Wypełniono: {questionnaire?.submitted_at || questionnaire?.created_at
+          ? new Date(questionnaire?.submitted_at || questionnaire?.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })
+          : 'Brak daty'}
+      </span>
       {BLOCKS_ORDER.map(block => {
         const entries = block.keys
           .map(k => ({ label: BLOCK_LABELS[k] || k, value: data[k] }))
@@ -551,7 +553,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
               onClick={() => setSelectedIdx(i)}
               className="text-[11px] px-3 py-1 rounded-full border transition"
               style={{
-                borderColor: selectedIdx === i ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.35)', borderWidth: '2px',
+                borderColor: selectedIdx === i ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.15)',
                 color: selectedIdx === i ? '#D4B570' : '#666',
                 background: selectedIdx === i ? 'rgba(212,181,112,0.08)' : 'transparent',
               }}

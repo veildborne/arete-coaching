@@ -49,7 +49,7 @@ export default async function ClientPage({ params }) {
 
   const { data: questionnaires } = await admin
     .from('questionnaires')
-    .select('id, submitted_at, created_at')
+    .select('id, submitted_at, created_at, data')
     .eq('client_id', params.id)
     .order('submitted_at', { ascending: false })
 
