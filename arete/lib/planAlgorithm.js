@@ -487,10 +487,20 @@ function generateRationale(params, splitDef) {
 export function generatePlan(questionnaire, exercises) {
   const q        = questionnaire?.data || {}
   const params   = buildDecisionParams(q)
-  const splitDef = SPLIT_STRUCTURES[params.splitType]
+  let splitDef = SPLIT_STRUCTURES[params.splitType]
   if (!splitDef) throw new Error(`Unknown split type: ${params.splitType}`)
 
-  // Muscle frequency per week
+  // Dynamic muscle injection — glute priority w FBW
+  if (params.splitType === 'fullbody_3' && params.priorityMuscles.includes('glutes')) {
+    if (!splitDef.sessions.A.muscles.includes('glutes')) {
+      // Nie modyfikuj oryginalnego obiektu — zrób kopię
+      const modifiedSplit = JSON.parse(JSON.stringify(splitDef))
+      modifiedSplit.sessions.A.muscles.push('glutes')
+      splitDef = modifiedSplit
+    }
+  }
+
+  // Muscle frequency per week — po ewentualnej modyfikacji splitu
   const muscleFrequency = {}
   Object.values(splitDef.sessions).forEach(session =>
     session.muscles.forEach(m => {
@@ -609,28 +619,51 @@ export function generatePlan(questionnaire, exercises) {
     // Max serie per sesja — based on experience not time
     const musclesInThisSession = sessionDef.muscles.length
     const maxSetsPerSession = {
-      beginner:     Math.min(14, musclesInThisSession * 3),
-      intermediate: Math.min(20, musclesInThisSession * 4),
-      advanced:     Math.min(24, musclesInThisSession * 5),
-    }[params.experience] || 20
+      beginner:     musclesInThisSession * 3,
+      intermediate: musclesInThisSession * 4,
+      advanced:     musclesInThisSession * 5,
+    }[params.experience] || musclesInThisSession * 4
 
     let totalSets = 0
     const cappedList = []
 
-    for (const ex of finalList) {
+    // Najpierw dodaj priority muscles — zawsze pełne serie
+    const priorityExercises = finalList.filter(ex =>
+      params.priorityMuscles.includes(ex.muscle_group)
+    )
+    const nonPriorityExercises = finalList.filter(ex =>
+      !params.priorityMuscles.includes(ex.muscle_group)
+    )
+
+    // Priority zawsze wchodzi
+    for (const ex of priorityExercises) {
+      cappedList.push(ex)
+      totalSets += (ex.sets || 3)
+    }
+
+    // Non-priority wchodzi jeśli jest miejsce
+    for (const ex of nonPriorityExercises) {
       const exSets = ex.sets || 3
       if (totalSets + exSets <= maxSetsPerSession) {
         cappedList.push(ex)
         totalSets += exSets
-      } else if (cappedList.filter(e => e.muscle_group === ex.muscle_group).length === 0) {
-        // Musi być przynajmniej 1 ćwiczenie na partię — zredukuj serie
+      } else {
+        // Dodaj z zredukowanymi seriami żeby mieć przynajmniej coverage
         const reduced = Math.max(2, maxSetsPerSession - totalSets)
-        if (reduced >= 2) {
+        if (reduced >= 2 && !cappedList.some(e => e.muscle_group === ex.muscle_group)) {
           cappedList.push({ ...ex, sets: reduced })
           totalSets += reduced
         }
       }
     }
+
+    // Zachowaj oryginalną kolejność (compound first)
+    cappedList.sort((a, b) => {
+      const aPrio = params.priorityMuscles.includes(a.muscle_group) ? 0 : 1
+      const bPrio = params.priorityMuscles.includes(b.muscle_group) ? 0 : 1
+      if (aPrio !== bPrio) return aPrio - bPrio
+      return (b.compound ? 1 : 0) - (a.compound ? 1 : 0)
+    })
 
     sessions[sessionKey] = {
       label:     sessionKey,
