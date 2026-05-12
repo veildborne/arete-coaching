@@ -31,7 +31,7 @@ export default async function ClientPage() {
     .select('*')
     .eq('client_id', user.id)
     .order('session_date', { ascending: false })
-    .limit(5)
+    .limit(30)
 
   const { data: questionnaire } = await supabase
     .from('questionnaires')

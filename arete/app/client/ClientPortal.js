@@ -86,7 +86,8 @@ function getGenderAccent(questionnaire) {
 
 function CharacterCard({ profile, recentLogs, questionnaire, totalXP = 0 }) {
   const xp = totalXP || (recentLogs?.length ?? 0) * 120
-  const nextXP    = 500
+  const archetypeIndex = ARCHETYPES.findIndex(a => xp < a.min)
+  const nextXP = archetypeIndex > 0 ? ARCHETYPES[archetypeIndex].min : (xp >= 2000 ? 2000 : 200)
   const pct       = Math.min(100, Math.round((xp / nextXP) * 100))
   const archetype = getArchetype(xp)
   const accent    = getGenderAccent(questionnaire)
@@ -294,7 +295,7 @@ function AchievementPreview({ recentLogs, clientAchievements = [] }) {
                 className="text-[9px] text-center leading-tight"
                 style={{ color: done ? '#D4B570' : '#8F9AAF55' }}
               >
-                {ach.greek}
+                {ach.label}
               </span>
             </div>
           )
