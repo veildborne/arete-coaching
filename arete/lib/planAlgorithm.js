@@ -123,7 +123,8 @@ function buildDecisionParams(q) {
   else if (cardioSessions >= 2) cardioFactor = 0.90
 
   const days = parseInt(q.dni_tydzien) || 3
-  const splitType = chooseSplit(days, priorityMuscles, q.plec, recoveryModifier, experience)
+  const sessionMinutes = parseInt((q.czas_sesji || '').replace(/\D/g, '')) || 60
+  const splitType = chooseSplit(days, priorityMuscles, q.plec, recoveryModifier, experience, sessionMinutes)
 
   // Unilateral preference — triggered by dysproporcja in questionnaire
   const dysproporcja = Array.isArray(q.dysproporcja_obszar) ? q.dysproporcja_obszar : []
@@ -147,7 +148,7 @@ function buildDecisionParams(q) {
     plec: q.plec || 'Mężczyzna',
     avoidExercises: parseAvoidedExercises(q.cwiczenia_unikane),
     preferenceMachines: q.preference_machines || 'mixed',
-    sessionMinutes: parseInt((q.czas_sesji || '').replace(/\D/g, '')) || 60,
+    sessionMinutes,
     trainingStyle,
     preferUnilateral,
     preferUnilateralLegs,
@@ -160,25 +161,51 @@ function parseAvoidedExercises(text) {
 }
 
 // ─── SPLIT SELECTION ──────────────────────────────────────────────────────────
-function chooseSplit(days, priorityMuscles, plec, recoveryModifier, experience) {
+function chooseSplit(days, priorityMuscles, plec, recoveryModifier, experience, sessionMinutes) {
   const isLowRecovery    = recoveryModifier < 0.85
   const hasGlutePriority = priorityMuscles.includes('glutes') || priorityMuscles.includes('hamstrings')
   const isKobieta        = plec === 'Kobieta'
   const isBeginner       = experience === 'beginner'
+  const isShortSession   = sessionMinutes <= 60
+  const isMediumSession  = sessionMinutes > 60 && sessionMinutes <= 75
+  const isLongSession    = sessionMinutes > 75
 
   if (days === 2) return 'fullbody_2'
+
   if (days === 3) {
     if (isBeginner) return 'fullbody_3'
-    if (isKobieta && hasGlutePriority) return 'lower_upper_lower'
-    if (hasGlutePriority) return 'lower_upper_lower'
+    // Krótka sesja (<=60 min) → zawsze FBW niezależnie od płci/priorytetu
+    if (isShortSession) return 'fullbody_3'
+    // Średnia sesja (60-75 min) → LUL tylko gdy glute priority + kobieta
+    if (isMediumSession) {
+      if (isKobieta && hasGlutePriority) return 'lower_upper_lower'
+      return 'fullbody_3'
+    }
+    // Długa sesja (>75 min) → LUL gdy glute priority
+    if (isLongSession) {
+      if (hasGlutePriority) return 'lower_upper_lower'
+      return 'fullbody_3'
+    }
     return 'fullbody_3'
   }
-  if (days === 4) return isKobieta && hasGlutePriority ? 'glute_upper_lower_upper' : 'upper_lower_4'
+
+  if (days === 4) {
+    if (isShortSession && isBeginner) return 'fullbody_3'
+    if (isKobieta && hasGlutePriority) return 'glute_upper_lower_upper'
+    return 'upper_lower_4'
+  }
+
   if (days === 5) {
     if (isLowRecovery) return 'upper_lower_4'
+    if (isShortSession) return 'upper_lower_4'
     return isKobieta && hasGlutePriority ? 'ppl_glute_5' : 'ppl_5'
   }
-  if (days >= 6) return (isLowRecovery || isBeginner) ? 'ppl_5' : 'ppl_6'
+
+  if (days >= 6) {
+    if (isLowRecovery || isBeginner || isShortSession) return 'ppl_5'
+    return 'ppl_6'
+  }
+
   return 'fullbody_3'
 }
 
@@ -424,7 +451,13 @@ function validatePlan(sessions, splitDef) {
 
 // ─── RATIONALE ────────────────────────────────────────────────────────────────
 function generateRationale(params, splitDef) {
-  const lines = [`Split: ${splitDef.name} — ${params.days} dni treningowych.`]
+  const sessionMin = params.sessionMinutes || 60
+  const splitReason = sessionMin <= 60
+    ? `${sessionMin} min sesje — Full Body dla maksymalnej częstotliwości.`
+    : sessionMin <= 75
+      ? `${sessionMin} min sesje — optymalny balans objętości.`
+      : `${sessionMin} min sesje — wystarczający czas na split.`
+  const lines = [`Split: ${splitDef.name} — ${params.days} dni treningowych. ${splitReason}`]
   if (params.recoveryModifier < 0.85) lines.push('Niska regeneracja — objętość utrzymana na MEV mimo redukcji.')
   else if (params.recoveryModifier > 1.0) lines.push('Dobra regeneracja — objętość lekko zwiększona.')
   if (params.priorityMuscles.length > 0) lines.push(`Priorytet: ${params.priorityMuscles.join(', ')} — wyższy target volume.`)
