@@ -272,7 +272,10 @@ function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, 
   // Start slightly below MEV — leaves room for progression across mesocycle
   const weeklyStart = Math.round(weeklyTarget * 0.85)
   const perSession  = Math.max(2, Math.round(weeklyStart / Math.max(1, frequency)))
-  return Math.min(perSession, cap)
+
+  // Floor at MEV per session — never drop below regardless of recovery modifier
+  const mevPerSession = Math.max(2, Math.round(L.mev / Math.max(1, frequency)))
+  return Math.min(Math.max(perSession, mevPerSession), cap)
 }
 
 // ─── WEEKLY PROGRESSION (Israetel ramp + Helms RIR drop) ─────────────────────
@@ -415,7 +418,7 @@ function validatePlan(sessions, splitDef) {
 // ─── RATIONALE ────────────────────────────────────────────────────────────────
 function generateRationale(params, splitDef) {
   const lines = [`Split: ${splitDef.name} — ${params.days} dni treningowych.`]
-  if (params.recoveryModifier < 0.85) lines.push('Objętość zredukowana — ograniczona regeneracja (sen/stres/praca).')
+  if (params.recoveryModifier < 0.85) lines.push('Niska regeneracja — objętość utrzymana na MEV mimo redukcji.')
   else if (params.recoveryModifier > 1.0) lines.push('Dobra regeneracja — objętość lekko zwiększona.')
   if (params.priorityMuscles.length > 0) lines.push(`Priorytet: ${params.priorityMuscles.join(', ')} — wyższy target volume.`)
   if (params.avoidMuscles.length > 0) lines.push(`Maintenance: ${params.avoidMuscles.join(', ')} — objętość minimalna.`)
