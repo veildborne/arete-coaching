@@ -233,6 +233,10 @@ export default function DashboardClient({ profile, clients }) {
           <button onClick={()=>setInviteOpen(true)} style={{background:'#D4B570',color:'#0f0f0f',border:'none',borderRadius:'8px',padding:'5px 10px',fontSize:'11px',fontWeight:'700',cursor:'pointer',display:'flex',alignItems:'center',gap:'4px'}}>
             <IconAdd size={14} color="#0f0f0f"/> Dodaj
           </button>
+          <a href="/dashboard/knowledge"
+            style={{background:'rgba(212,181,112,0.1)',color:'#D4B570',border:'2px solid rgba(212,181,112,0.3)',borderRadius:'8px',padding:'5px 10px',fontSize:'11px',fontWeight:'600',textDecoration:'none',whiteSpace:'nowrap'}}>
+            Baza wiedzy
+          </a>
           <div style={{width:'26px',height:'26px',borderRadius:'50%',background:'rgba(212,181,112,0.15)',border:'1px solid rgba(212,181,112,0.3)',display:'flex',alignItems:'center',justifyContent:'center',color:'#D4B570',fontSize:'10px',fontWeight:'bold'}}>{getInitials(profile?.full_name,profile?.email)}</div>
           <button onClick={async()=>{const s=createClient();await s.auth.signOut();window.location.href='/'}} style={{background:'none',border:'none',cursor:'pointer',padding:'4px',display:'flex',alignItems:'center'}}>
             <IconLogout size={18}/>
