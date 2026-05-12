@@ -523,12 +523,13 @@ function CheckinCard({ ci, onFeedbackSaved }) {
 // ─── Questionnaire Tab Component ──────────────────────────────────────────────
 
 function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
-  const [selectedIdx, setSelectedIdx] = useState(0)
+  const [expandedIdx, setExpandedIdx] = useState(0)
+  const [editingIdx, setEditingIdx] = useState(null)
   const [requesting, setRequesting] = useState(false)
   const [requested, setRequested] = useState(false)
+  const [editForm, setEditForm] = useState({})
 
   const allQ = questionnaires && questionnaires.length > 0 ? questionnaires : questionnaire ? [questionnaire] : []
-  const selected = allQ[selectedIdx] || null
 
   async function requestNewQuestionnaire() {
     setRequesting(true)
@@ -542,29 +543,35 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
     setTimeout(() => setRequested(false), 3000)
   }
 
+  function startEditing(idx, q) {
+    setEditingIdx(idx)
+    setEditForm(q.data || {})
+  }
+
+  async function saveEdits(qId) {
+    const supabase = createClient()
+    await supabase
+      .from('questionnaires')
+      .update({ data: editForm })
+      .eq('id', qId)
+    setEditingIdx(null)
+    window.location.reload()
+  }
+
+  function getQuickStats(data) {
+    return [
+      { label: 'Cel', value: data.cel || '—' },
+      { label: 'Staż', value: data.staz || '—' },
+      { label: 'Dni/tydzień', value: data.dni_tydzien || '—' },
+      { label: 'Czas sesji', value: data.czas_sesji ? `${data.czas_sesji} min` : '—' },
+    ]
+  }
+
   return (
     <Section title="Ankieta onboardingowa">
-      {/* Historia + akcje */}
+      {/* Akcja: Poproś o nową */}
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
-        <div className="flex gap-2 flex-wrap flex-1">
-          {allQ.length > 1 && allQ.map((q, i) => (
-            <button
-              key={q.id}
-              onClick={() => setSelectedIdx(i)}
-              className="text-[11px] px-3 py-1 rounded-full border transition"
-              style={{
-                borderColor: selectedIdx === i ? 'rgba(212,181,112,0.5)' : 'rgba(212,181,112,0.15)',
-                color: selectedIdx === i ? '#D4B570' : '#666',
-                background: selectedIdx === i ? 'rgba(212,181,112,0.08)' : 'transparent',
-              }}
-            >
-              {i === 0 ? '★ Aktualna' : `Wersja ${allQ.length - i}`} — {new Date(q.submitted_at || q.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
-            </button>
-          ))}
-          {allQ.length === 0 && (
-            <span className="text-xs text-muted">Brak ankiety</span>
-          )}
-        </div>
+        <div className="flex-1" />
         <button
           onClick={requestNewQuestionnaire}
           disabled={requesting || requested}
@@ -578,7 +585,236 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
         </button>
       </div>
 
-      <AnkietaViewer questionnaire={selected} />
+      {/* Historia ankiet — accordion */}
+      {allQ.length === 0 ? (
+        <div className="py-8 px-5 text-center border border-dashed border-white/[0.08] rounded-[10px]">
+          <div className="text-2xl mb-2 opacity-30">∅</div>
+          <div className="text-[#444] text-[13px]">Brak ankiety</div>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {allQ.map((q, i) => {
+            const isExpanded = expandedIdx === i
+            const isEditing = editingIdx === i
+            const isCurrent = i === 0
+            const data = q.data || {}
+            const quickStats = getQuickStats(data)
+
+            return (
+              <div
+                key={q.id}
+                className="bg-[#1a1a1a] rounded-[10px] border-2 transition-all overflow-hidden"
+                style={{
+                  borderColor: isCurrent ? 'rgba(212,181,112,0.4)' : 'rgba(212,181,112,0.15)',
+                }}
+              >
+                {/* Header — zawsze widoczny */}
+                <div
+                  className="p-4 cursor-pointer hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-3"
+                  onClick={() => setExpandedIdx(isExpanded ? null : i)}
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    {isCurrent && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 border border-gold/30 text-gold tracking-wider shrink-0">
+                        ★ Aktualna
+                      </span>
+                    )}
+                    {!isCurrent && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/10 text-[#555] tracking-wider shrink-0">
+                        Wersja {allQ.length - i}
+                      </span>
+                    )}
+                    <span className="text-[11px] text-[#666]">
+                      {new Date(q.submitted_at || q.created_at).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                    <span className="text-[11px] text-muted">·</span>
+                    <span className="text-[11px] text-warm">{data.cel || 'Brak celu'}</span>
+                    <span className="text-[11px] text-muted">·</span>
+                    <span className="text-[11px] text-warm">{data.staz || 'Brak stażu'}</span>
+                  </div>
+                  <div className="text-[#555] text-sm shrink-0">
+                    {isExpanded ? '▲' : '▼'}
+                  </div>
+                </div>
+
+                {/* Expanded content */}
+                {isExpanded && (
+                  <div className="px-4 pb-4 border-t border-white/[0.05]">
+                    {/* Quick stats grid */}
+                    <div className="grid grid-cols-4 gap-2 mb-4 mt-4">
+                      {quickStats.map(stat => (
+                        <div key={stat.label} className="bg-white/[0.03] rounded-md p-2">
+                          <div className="text-[10px] text-[#555] mb-1 uppercase tracking-widest">{stat.label}</div>
+                          <div className="text-[13px] text-[#e8e8e8]">{stat.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Viewer lub editor */}
+                    {isEditing ? (
+                      <div className="space-y-3">
+                        {/* Dane podstawowe */}
+                        <div className="bg-white/[0.03] rounded-lg p-3">
+                          <div className="text-[10px] text-gold uppercase tracking-widest mb-2">Dane podstawowe</div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              placeholder="Imię"
+                              value={editForm.imie || ''}
+                              onChange={e => setEditForm({ ...editForm, imie: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Wiek"
+                              value={editForm.wiek || ''}
+                              onChange={e => setEditForm({ ...editForm, wiek: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Wzrost (cm)"
+                              value={editForm.wzrost_cm || ''}
+                              onChange={e => setEditForm({ ...editForm, wzrost_cm: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Waga (kg)"
+                              value={editForm.waga_kg || ''}
+                              onChange={e => setEditForm({ ...editForm, waga_kg: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Cel i doświadczenie */}
+                        <div className="bg-white/[0.03] rounded-lg p-3">
+                          <div className="text-[10px] text-gold uppercase tracking-widest mb-2">Cel i doświadczenie</div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <select
+                              value={editForm.cel || ''}
+                              onChange={e => setEditForm({ ...editForm, cel: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            >
+                              <option value="">Cel...</option>
+                              <option value="hipertrofia">Hipertrofia</option>
+                              <option value="recomp">Recomp</option>
+                              <option value="redukcja">Redukcja</option>
+                              <option value="siła">Siła</option>
+                            </select>
+                            <select
+                              value={editForm.staz || ''}
+                              onChange={e => setEditForm({ ...editForm, staz: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            >
+                              <option value="">Staż...</option>
+                              <option value="0-6 miesięcy">0-6 miesięcy</option>
+                              <option value="6-12 miesięcy">6-12 miesięcy</option>
+                              <option value="1-2 lata">1-2 lata</option>
+                              <option value="2-3 lata">2-3 lata</option>
+                              <option value="3-5 lat">3-5 lat</option>
+                              <option value="5+ lat">5+ lat</option>
+                            </select>
+                            <input
+                              type="number"
+                              placeholder="Dni/tydzień"
+                              value={editForm.dni_tydzien || ''}
+                              onChange={e => setEditForm({ ...editForm, dni_tydzien: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Czas sesji (min)"
+                              value={editForm.czas_sesji || ''}
+                              onChange={e => setEditForm({ ...editForm, czas_sesji: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Regeneracja */}
+                        <div className="bg-white/[0.03] rounded-lg p-3">
+                          <div className="text-[10px] text-gold uppercase tracking-widest mb-2">Regeneracja</div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <input
+                              type="number"
+                              placeholder="Sen (h)"
+                              value={editForm.sen || ''}
+                              onChange={e => setEditForm({ ...editForm, sen: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            />
+                            <select
+                              value={editForm.stress_level || ''}
+                              onChange={e => setEditForm({ ...editForm, stress_level: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            >
+                              <option value="">Stres...</option>
+                              <option value="niski">Niski</option>
+                              <option value="umiarkowany">Umiarkowany</option>
+                              <option value="wysoki">Wysoki</option>
+                            </select>
+                            <select
+                              value={editForm.praca || ''}
+                              onChange={e => setEditForm({ ...editForm, praca: e.target.value })}
+                              className="py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none focus:border-gold/40"
+                            >
+                              <option value="">Typ pracy...</option>
+                              <option value="siedzaca">Siedząca</option>
+                              <option value="lekka">Lekka</option>
+                              <option value="fizyczna">Fizyczna</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Priorytety */}
+                        <div className="bg-white/[0.03] rounded-lg p-3">
+                          <div className="text-[10px] text-gold uppercase tracking-widest mb-2">Priorytety</div>
+                          <textarea
+                            placeholder="Priorytetowe partie (oddziel przecinkami)"
+                            value={Array.isArray(editForm.priority_muscles) ? editForm.priority_muscles.join(', ') : editForm.priority_muscles || ''}
+                            onChange={e => setEditForm({ ...editForm, priority_muscles: e.target.value.split(',').map(s => s.trim()) })}
+                            rows={2}
+                            className="w-full py-1.5 px-2 rounded bg-white/[0.05] border border-white/10 text-[#e8e8e8] text-xs outline-none resize-none focus:border-gold/40"
+                          />
+                        </div>
+
+                        {/* Akcje */}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveEdits(q.id)}
+                            className="flex-1 py-2 rounded-lg bg-gradient-to-br from-[#b8a677] to-[#d4c494] text-[#0f1a2e] text-xs font-bold font-body tracking-widest"
+                          >
+                            Zapisz zmiany
+                          </button>
+                          <button
+                            onClick={() => setEditingIdx(null)}
+                            className="py-2 px-4 rounded-lg bg-transparent border border-white/10 text-[#666] text-xs cursor-pointer font-body"
+                          >
+                            Anuluj
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <AnkietaViewer questionnaire={q} />
+                        {isCurrent && (
+                          <button
+                            onClick={() => startEditing(i, q)}
+                            className="w-full mt-3 py-2 rounded-lg bg-transparent border border-gold/20 text-gold text-xs cursor-pointer font-body tracking-widest hover:bg-gold/[0.06] transition"
+                          >
+                            ✎ Edytuj ankietę
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </Section>
   )
 }
