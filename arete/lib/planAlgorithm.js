@@ -57,9 +57,12 @@ function getRepRange(goal, muscle) {
 // ─── DECISION ENGINE ──────────────────────────────────────────────────────────
 function buildDecisionParams(q) {
   const expMap = {
-    '0-6 miesięcy':'beginner','6-12 miesięcy':'beginner',
-    '1-2 lata':'intermediate','2-3 lata':'intermediate',
-    '3-5 lat':'advanced','5+ lat':'advanced',
+    '0-6 miesięcy': 'beginner',
+    '6-12 miesięcy': 'beginner',
+    '1-2 lata':     'intermediate',
+    '2-3 lata':     'advanced',
+    '3-5 lat':      'advanced',
+    '5+ lat':       'advanced',
   }
   const experience = expMap[q.staz] || 'intermediate'
 
