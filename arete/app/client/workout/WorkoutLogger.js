@@ -335,6 +335,14 @@ function ExerciseBlock({ exercise, sets, prevPerf, targetRir, repRange, onUpdate
         </div>
       )}
 
+      {exercise.coaching_note && (
+        <div className="mb-3 px-3 py-2 rounded-lg text-[11px] flex items-start gap-2"
+          style={{ background: 'rgba(212,181,112,0.06)', borderLeft: '2px solid rgba(212,181,112,0.3)' }}>
+          <span className="text-gold/40 shrink-0">💬</span>
+          <span className="text-gold/70 italic leading-relaxed">{exercise.coaching_note}</span>
+        </div>
+      )}
+
       {/* Progression suggestion */}
       {prevBestSet && sets.some(s => s.logged) && (() => {
         const [repMin, repMax] = (repRange || '8-12').split('-').map(Number)
