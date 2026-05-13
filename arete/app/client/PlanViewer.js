@@ -87,18 +87,26 @@ export default function PlanViewer() {
 
           <div className="space-y-2">
             {(session.exercises || []).map((ex, i) => (
-              <div key={i} className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.04] rounded-xl px-4 py-3">
-                <div className="w-1 h-full min-h-[32px] rounded-full shrink-0"
-                  style={{ background: ex.stretch_position ? '#52B788' : 'rgba(212,181,112,0.3)' }}/>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-warm truncate">{ex.name_pl || ex.name}</p>
-                  <p className="text-[11px] text-muted">{MUSCLE_PL[ex.muscle_group] || ex.muscle_group}</p>
+              <div key={i} className="bg-white/[0.02] border border-white/[0.04] rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-full min-h-[32px] rounded-full shrink-0"
+                    style={{ background: ex.stretch_position ? '#52B788' : 'rgba(212,181,112,0.3)' }}/>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-warm truncate">{ex.name_pl || ex.name}</p>
+                    <p className="text-[11px] text-muted">{MUSCLE_PL[ex.muscle_group] || ex.muscle_group}</p>
+                  </div>
+                  <div className="flex gap-3 text-xs text-muted shrink-0">
+                    <span>{ex.sets} serii</span>
+                    <span>{ex.rep_range}</span>
+                    <span>RIR {ex.rir_target}</span>
+                  </div>
                 </div>
-                <div className="flex gap-3 text-xs text-muted shrink-0">
-                  <span>{ex.sets} serii</span>
-                  <span>{ex.rep_range}</span>
-                  <span>RIR {ex.rir_target}</span>
-                </div>
+                {ex.coaching_note && (
+                  <div className="mt-2 ml-4 flex items-start gap-1.5">
+                    <span className="text-[10px] text-gold/40 shrink-0 mt-0.5">💬</span>
+                    <span className="text-[11px] text-gold/70 leading-relaxed italic">{ex.coaching_note}</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
