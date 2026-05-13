@@ -168,6 +168,12 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap, onReor
           <span>{ex.rep_range} powt.</span>
           <span>RIR {ex.rir_target}</span>
         </div>
+        {ex.coaching_note && !editing && (
+          <div className="mt-1.5 flex items-start gap-1.5">
+            <span className="text-[10px] text-gold/40 shrink-0 mt-0.5">💬</span>
+            <span className="text-[11px] text-gold/60 leading-relaxed italic">{ex.coaching_note}</span>
+          </div>
+        )}
         {editing && (
           <div className="mt-2.5 flex gap-2 flex-wrap">
             {[
@@ -182,6 +188,16 @@ function ExerciseRow({ ex, sessionKey, exIdx, onUpdate, onRemove, onSwap, onReor
                   className={`${f.w} py-1 px-2 rounded bg-white/[0.05] border border-gold/20 text-[#e8e8e8] text-[13px] font-body`}/>
               </div>
             ))}
+          </div>
+          <div className="mt-2 w-full">
+            <div className="text-[9px] text-[#555] mb-0.5 uppercase tracking-widest">Wskazówka dla klienta</div>
+            <textarea
+              value={ex.coaching_note || ''}
+              onChange={e => onUpdate(sessionKey, exIdx, 'coaching_note', e.target.value)}
+              placeholder="np. deadstop, pause 2 sek, kontroluj ekscentryczną, łokcie blisko tułowia..."
+              rows={2}
+              className="w-full py-1.5 px-2 rounded bg-white/[0.05] border border-gold/20 text-[#e8e8e8] text-[12px] font-body resize-none outline-none focus:border-gold/40"
+            />
           </div>
         )}
       </div>
