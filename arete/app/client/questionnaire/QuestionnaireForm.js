@@ -191,6 +191,22 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
     food_exclusions: [],
     food_exclusions_other: '',
     ilosc_posilkow: '4',
+    srednie_kroki: '',
+    work_fatigue_level: 3,
+    sleep_consistency: '',
+    wake_up_fatigue: 3,
+    motivation_level: 3,
+    soreness_lower: '',
+    soreness_upper: '',
+    performance_drop: '',
+    current_calories_known: false,
+    current_avg_calories: '',
+    current_avg_protein: '',
+    current_weight_trend: '',
+    hunger_control: 3,
+    weekend_adherence: 3,
+    menstrual_cycle_regular: '',
+    pms_hunger_effect: '',
   })
 
   useEffect(() => {
@@ -639,6 +655,40 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
             ]} />
           </div>
           <div>
+            <Label>Zmęczenie po pracy (jak wchodzisz na trening)</Label>
+            <RangeField name="work_fatigue_level" value={form.work_fatigue_level} onChange={set}
+              min={1} max={5} lowLabel="1 — świeży/a" highLabel="5 — bardzo zmęczony/a" />
+            <Hint>Praca fizyczna lub stresująca wpływa na objętość planu.</Hint>
+          </div>
+          <div>
+            <Label>Średnia liczba kroków dziennie</Label>
+            <SelectField name="srednie_kroki" value={form.srednie_kroki} onChange={set} options={[
+              { value: '3000', label: 'Mniej niż 4000 — siedzący tryb życia' },
+              { value: '5500', label: '4000–7000 — umiarkowanie aktywny/a' },
+              { value: '8500', label: '7000–10000 — aktywny/a' },
+              { value: '12000', label: 'Powyżej 10000 — bardzo aktywny/a' },
+            ]} />
+            <Hint>Kroki wpływają na TDEE i dobór kalorii.</Hint>
+          </div>
+          <div>
+            <Label>Regularność snu</Label>
+            <SelectField name="sleep_consistency" value={form.sleep_consistency} onChange={set} options={[
+              { value: 'poor', label: 'Nieregularny — różne godziny, weekendy rozregulowane' },
+              { value: 'moderate', label: 'Średnio regularny' },
+              { value: 'good', label: 'Regularny — kładę się i wstaję o podobnych godzinach' },
+            ]} />
+          </div>
+          <div>
+            <Label>Poziom energii rano po przebudzeniu</Label>
+            <RangeField name="wake_up_fatigue" value={form.wake_up_fatigue} onChange={set}
+              min={1} max={5} lowLabel="1 — bardzo zmęczony/a" highLabel="5 — wypoczęty/a" />
+          </div>
+          <div>
+            <Label>Motywacja do treningów (ogólnie)</Label>
+            <RangeField name="motivation_level" value={form.motivation_level} onChange={set}
+              min={1} max={5} lowLabel="1 — znikoma" highLabel="5 — wysoka" />
+          </div>
+          <div>
             <Label>Cardio (opcjonalnie)</Label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <SelectField name="cardio_typ" value={form.cardio_typ} onChange={set} options={[
@@ -647,6 +697,61 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
               <input type="text" placeholder="Ile razy / tydzień? np. 2x30min"
                 value={form.cardio_ile || ''} onChange={e => set('cardio_ile', e.target.value)} style={inputStyle} />
             </div>
+          </div>
+          {form.plec === 'Kobieta' && (
+            <>
+              <div>
+                <Label>Regularność cyklu miesiączkowego</Label>
+                <SelectField name="menstrual_cycle_regular" value={form.menstrual_cycle_regular} onChange={set} options={[
+                  { value: 'yes', label: 'Regularny' },
+                  { value: 'no', label: 'Nieregularny' },
+                  { value: 'prefer_not', label: 'Wolę nie odpowiadać' },
+                  { value: 'not_applicable', label: 'Nie dotyczy' },
+                ]} />
+                <Hint>Retencja wody przed miesiączką może wpływać na odczyt wagi — ważne przy analizie trendu.</Hint>
+              </div>
+              {form.menstrual_cycle_regular === 'yes' && (
+                <div>
+                  <Label>Wpływ PMS na głód</Label>
+                  <SelectField name="pms_hunger_effect" value={form.pms_hunger_effect} onChange={set} options={[
+                    { value: 'none', label: 'Brak wpływu' },
+                    { value: 'mild', label: 'Lekki — trochę więcej apetytu' },
+                    { value: 'moderate', label: 'Umiarkowany' },
+                    { value: 'high', label: 'Silny — bardzo trudno kontrolować apetyt' },
+                  ]} />
+                </div>
+              )}
+            </>
+          )}
+        </Block>
+
+        {/* BLOK 9b — Tolerancja wysiłku */}
+        <Block title="Tolerancja wysiłku" subtitle="Pomaga dobrać właściwą objętość startową.">
+          <div>
+            <Label>Jak długo boli Cię po treningu nóg / pośladków?</Label>
+            <SelectField name="soreness_lower" value={form.soreness_lower} onChange={set} options={[
+              { value: 'none', label: 'Prawie nie czuję zakwasów' },
+              { value: '1_day', label: '1 dzień — szybko mijają' },
+              { value: '2_days', label: '2 dni — standardowo' },
+              { value: '3_plus', label: '3+ dni — długo czuję' },
+            ]} />
+          </div>
+          <div>
+            <Label>Jak długo boli Cię po treningu górnej partii (klatka, plecy, barki)?</Label>
+            <SelectField name="soreness_upper" value={form.soreness_upper} onChange={set} options={[
+              { value: 'none', label: 'Prawie nie czuję zakwasów' },
+              { value: '1_day', label: '1 dzień' },
+              { value: '2_days', label: '2 dni' },
+              { value: '3_plus', label: '3+ dni' },
+            ]} />
+          </div>
+          <div>
+            <Label>Jak szybko wracasz do formy między sesjami?</Label>
+            <SelectField name="performance_drop" value={form.performance_drop} onChange={set} options={[
+              { value: 'good', label: 'Dobrze — następny trening jest równie mocny lub mocniejszy' },
+              { value: 'moderate', label: 'Średnio — czasem trochę słabiej' },
+              { value: 'poor', label: 'Słabo — często czuję się gorzej na kolejnym treningu' },
+            ]} />
           </div>
         </Block>
 
@@ -660,6 +765,66 @@ export default function QuestionnaireForm({ clientId, existing, allQuestionnaire
               'Nieregularnie — jem co popadnie',
               'Dieta specjalna (keto/wege/inne)',
             ]} />
+          </div>
+          <div>
+            <Label>Czy znasz swoje aktualne kalorie / makro?</Label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[
+                { value: true, label: 'Tak, liczę' },
+                { value: false, label: 'Nie' },
+              ].map(opt => (
+                <button key={String(opt.value)} type="button"
+                  onClick={() => set('current_calories_known', opt.value)}
+                  style={{
+                    padding: '8px 16px', borderRadius: 99, fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'Outfit', sans-serif", transition: 'all 0.15s',
+                    background: form.current_calories_known === opt.value ? 'rgba(184,166,119,0.2)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${form.current_calories_known === opt.value ? '#b8a677' : 'rgba(184,166,119,0.2)'}`,
+                    color: form.current_calories_known === opt.value ? '#d4c494' : 'rgba(184,166,119,0.5)',
+                  }}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {form.current_calories_known && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <Label>Aktualne kalorie (kcal/dzień)</Label>
+                <input type="number" placeholder="np. 2000"
+                  value={form.current_avg_calories || ''}
+                  onChange={e => set('current_avg_calories', e.target.value)}
+                  style={inputStyle} />
+              </div>
+              <div>
+                <Label>Aktualne białko (g/dzień)</Label>
+                <input type="number" placeholder="np. 140"
+                  value={form.current_avg_protein || ''}
+                  onChange={e => set('current_avg_protein', e.target.value)}
+                  style={inputStyle} />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <Label>Aktualny trend wagi (ostatnie 4 tygodnie)</Label>
+            <SelectField name="current_weight_trend" value={form.current_weight_trend} onChange={set} options={[
+              { value: 'losing', label: 'Chudnę' },
+              { value: 'stable', label: 'Waga stoi' },
+              { value: 'gaining', label: 'Przybieram' },
+              { value: 'unknown', label: 'Nie ważę się regularnie' },
+            ]} />
+          </div>
+          <div>
+            <Label>Kontrola głodu na diecie</Label>
+            <RangeField name="hunger_control" value={form.hunger_control} onChange={set}
+              min={1} max={5} lowLabel="1 — ciągle głodny/a" highLabel="5 — bez problemu" />
+          </div>
+          <div>
+            <Label>Jak trzymasz dietę w weekendy?</Label>
+            <RangeField name="weekend_adherence" value={form.weekend_adherence} onChange={set}
+              min={1} max={5} lowLabel="1 — totalny luz" highLabel="5 — tak samo jak w tygodniu" />
           </div>
           <div>
             <Label>Alergie / nietolerancje pokarmowe</Label>
