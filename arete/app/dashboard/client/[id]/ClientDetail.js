@@ -9,6 +9,7 @@ import MealPlanBuilder from './MealPlanBuilder'
 import dynamic from 'next/dynamic'
 const ClientReport = dynamic(() => import('./ClientReport'), { ssr: false })
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { calculateAssessmentScores } from '@/lib/assessmentEngine'
 
 const TIER_COLORS = {
   paideia: { color: '#a07850', bg: 'rgba(160,120,80,0.12)', border: 'rgba(160,120,80,0.3)' },
@@ -571,6 +572,8 @@ function CheckinCard({ ci, onFeedbackSaved }) {
 function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
   const [expandedIdx, setExpandedIdx] = useState(0)
   const [editingIdx, setEditingIdx] = useState(null)
+  const latestData = questionnaires?.[0]?.data || null
+  const scores = latestData ? calculateAssessmentScores(latestData) : null
   const [requesting, setRequesting] = useState(false)
   const [requested, setRequested] = useState(false)
   const [editForm, setEditForm] = useState({})
@@ -619,6 +622,65 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
 
   return (
     <Section title="Ankieta onboardingowa">
+      {scores && (
+        <div className="mb-6 p-4 rounded-xl border border-gold/20 bg-white/[0.02]">
+          <div className="text-[10px] text-gold uppercase tracking-widest mb-4">Assessment — scoring klienta</div>
+
+          {/* Readiness score */}
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs text-muted">Readiness Score</span>
+              <span className="text-sm font-semibold" style={{
+                color: scores.readiness_score >= 75 ? '#47D18C' : scores.readiness_score >= 55 ? '#E8A020' : '#EF6B73'
+              }}>{scores.readiness_score}/100</span>
+            </div>
+            <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+              <div className="h-full rounded-full transition-all" style={{
+                width: `${scores.readiness_score}%`,
+                background: scores.readiness_score >= 75 ? '#47D18C' : scores.readiness_score >= 55 ? '#E8A020' : '#EF6B73'
+              }}/>
+            </div>
+          </div>
+
+          {/* Grid scores */}
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {[
+              { label: 'Poziom zaawansowania', value: scores.experience_label },
+              { label: 'Regeneracja', value: scores.recovery_label },
+              { label: 'Tolerancja objętości', value: scores.volume_tolerance === 'high' ? 'Wysoka' : scores.volume_tolerance === 'moderate' ? 'Umiarkowana' : 'Niska' },
+              { label: 'Ryzyko adherencji', value: scores.adherence_risk === 'low' ? 'Niskie' : scores.adherence_risk === 'moderate' ? 'Umiarkowane' : 'Wysokie',
+                color: scores.adherence_risk === 'low' ? '#47D18C' : scores.adherence_risk === 'moderate' ? '#E8A020' : '#EF6B73' },
+              { label: 'Agresywność treningu', value: scores.training_aggressiveness === 'conservative' ? 'Ostrożna' : scores.training_aggressiveness === 'moderate' ? 'Umiarkowana' : 'Agresywna' },
+              { label: 'Agresywność diety', value: scores.nutrition_aggressiveness === 'conservative' ? 'Ostrożna' : scores.nutrition_aggressiveness === 'moderate' ? 'Umiarkowana' : 'Agresywna' },
+            ].map(item => (
+              <div key={item.label} className="bg-white/[0.03] rounded-lg p-2.5">
+                <div className="text-[9px] text-muted uppercase tracking-widest mb-1">{item.label}</div>
+                <div className="text-xs font-medium" style={{ color: item.color || '#e8e8e8' }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Strategy profile */}
+          <div className="flex items-center justify-between mb-3 p-2.5 rounded-lg bg-gold/[0.06] border border-gold/20">
+            <span className="text-[10px] text-muted uppercase tracking-widest">Rekomendowana strategia</span>
+            <span className="text-xs font-semibold text-gold">{scores.strategy_label}</span>
+          </div>
+
+          {/* Fatigue risk flags */}
+          {scores.fatigue_risk_flags.length > 0 && (
+            <div>
+              <div className="text-[9px] text-muted uppercase tracking-widest mb-2">Flagi ryzyka</div>
+              <div className="flex flex-wrap gap-1.5">
+                {scores.fatigue_risk_flags.map(flag => (
+                  <span key={flag} className="text-[10px] px-2 py-0.5 rounded-full bg-danger/[0.08] border border-danger/20 text-danger/80">
+                    {flag.replace(/_/g, ' ')}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {/* Akcja: Poproś o nową */}
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div className="flex-1" />
