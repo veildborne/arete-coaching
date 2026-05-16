@@ -29,15 +29,14 @@ export function calculateRecoveryStatus(q) {
 
   // Jakość snu
   const sleepQ = parseInt(q.sleep_quality) || 3
+  const workFatigue = parseInt(q.work_fatigue_level) || 2
+  const wakeUp = parseInt(q.wake_up_fatigue) || 3
+  const motivation = parseInt(q.motivation_level) || 3
   score += sleepQ - 1 // 0-4
 
   // Regularność snu
   if (q.sleep_consistency === 'good') score += 2
   else if (q.sleep_consistency === 'moderate') score += 1
-
-  // Energia rano
-  const wakeUp = parseInt(q.wake_up_fatigue) || 3
-  score += wakeUp - 1 // 0-4
 
   // Stres
   const stress = parseInt(q.stress_level) || 3
@@ -48,13 +47,9 @@ export function calculateRecoveryStatus(q) {
   else if (q.praca === 'mixed') score += 1
   else score += 0 // physical
 
-  // Zmęczenie po pracy
-  const workFatigue = parseInt(q.work_fatigue_level) || 3
-  score += (5 - workFatigue) // odwrócone
-
-  // Motywacja
-  const motivation = parseInt(q.motivation_level) || 3
-  score += motivation - 1 // 0-4
+  score += (5 - workFatigue)
+  score += motivation - 1
+  score += wakeUp - 1
 
   // Max możliwy score: 3+4+2+4+4+2+4+4 = 27
   const pct = score / 27
@@ -68,19 +63,21 @@ export function calculateRecoveryStatus(q) {
 // ─── VOLUME TOLERANCE ────────────────────────────────────────────────────────
 
 export function calculateVolumeTolerance(q) {
-  let score = 0
+  let score = 4 // default moderate gdy brak danych
 
   // Zakwasy dół
   if (q.soreness_lower === 'none') score += 3
   else if (q.soreness_lower === '1_day') score += 2
   else if (q.soreness_lower === '2_days') score += 1
-  else score += 0 // 3_plus
+  else if (q.soreness_lower === '3_plus') score += 0
+  // undefined = brak danych, zostaw default
 
   // Zakwasy góra
-  if (q.soreness_upper === 'none') score += 3
-  else if (q.soreness_upper === '1_day') score += 2
-  else if (q.soreness_upper === '2_days') score += 1
-  else score += 0
+  if (q.soreness_upper === 'none') score += 2
+  else if (q.soreness_upper === '1_day') score += 1
+  else if (q.soreness_upper === '2_days') score += 0
+  else if (q.soreness_upper === '3_plus') score -= 1
+  // undefined = brak danych, zostaw default
 
   // Regeneracja między sesjami
   if (q.performance_drop === 'good') score += 3
@@ -102,7 +99,7 @@ export function calculateAdherenceRisk(q) {
   if (stress >= 4) riskScore += 2
   else if (stress === 3) riskScore += 1
 
-  const workFatigue = parseInt(q.work_fatigue_level) || 3
+  const workFatigue = parseInt(q.work_fatigue_level) || 2
   if (workFatigue >= 4) riskScore += 2
   else if (workFatigue === 3) riskScore += 1
 

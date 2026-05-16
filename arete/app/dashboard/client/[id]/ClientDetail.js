@@ -573,7 +573,9 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
   const [expandedIdx, setExpandedIdx] = useState(0)
   const [editingIdx, setEditingIdx] = useState(null)
   const latestData = questionnaires?.[0]?.data || null
-  const scores = latestData ? calculateAssessmentScores(latestData) : null
+  const scores = latestData && (latestData.cel || latestData.staz)
+    ? calculateAssessmentScores(latestData)
+    : null
   const [requesting, setRequesting] = useState(false)
   const [requested, setRequested] = useState(false)
   const [editForm, setEditForm] = useState({})
