@@ -573,9 +573,14 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
   const [expandedIdx, setExpandedIdx] = useState(0)
   const [editingIdx, setEditingIdx] = useState(null)
   const latestData = questionnaires?.[0]?.data || null
-  const scores = latestData && (latestData.cel || latestData.staz)
-    ? calculateAssessmentScores(latestData)
-    : null
+  let scores = null
+  try {
+    scores = latestData && (latestData.cel || latestData.staz)
+      ? calculateAssessmentScores(latestData)
+      : null
+  } catch(e) {
+    console.error('[QuestionnaireTab] Assessment error:', e)
+  }
   const [requesting, setRequesting] = useState(false)
   const [requested, setRequested] = useState(false)
   const [editForm, setEditForm] = useState({})

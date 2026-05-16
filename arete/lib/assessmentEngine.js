@@ -221,53 +221,58 @@ export function calculateNutritionAggressiveness(q, readinessScore) {
 // ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
 
 export function calculateAssessmentScores(q) {
-  if (!q) return null
+  try {
+    if (!q) return null
 
-  const experience_level = calculateExperienceLevel(q)
-  const recovery_status = calculateRecoveryStatus(q)
-  const volume_tolerance = calculateVolumeTolerance(q)
-  const adherence_risk = calculateAdherenceRisk(q)
-  const readiness_score = calculateReadinessScore(q)
-  const strategy_profile = selectStrategyProfile(q, readiness_score)
-  const fatigue_risk_flags = generateFatigueRiskFlags(q)
-  const training_aggressiveness = calculateTrainingAggressiveness(readiness_score, volume_tolerance)
-  const nutrition_aggressiveness = calculateNutritionAggressiveness(q, readiness_score)
+    const experience_level = calculateExperienceLevel(q)
+    const recovery_status = calculateRecoveryStatus(q)
+    const volume_tolerance = calculateVolumeTolerance(q)
+    const adherence_risk = calculateAdherenceRisk(q)
+    const readiness_score = calculateReadinessScore(q)
+    const strategy_profile = selectStrategyProfile(q, readiness_score)
+    const fatigue_risk_flags = generateFatigueRiskFlags(q)
+    const training_aggressiveness = calculateTrainingAggressiveness(readiness_score, volume_tolerance)
+    const nutrition_aggressiveness = calculateNutritionAggressiveness(q, readiness_score)
 
-  const STRATEGY_LABELS = {
-    standard_fat_loss: 'Standardowa redukcja',
-    conservative_fat_loss: 'Ostrożna redukcja',
-    aggressive_mini_cut: 'Agresywna redukcja',
-    recomp: 'Rekompozycja',
-    lean_gain: 'Budowa masy',
-    health_first: 'Priorytet zdrowia',
-  }
+    const STRATEGY_LABELS = {
+      standard_fat_loss: 'Standardowa redukcja',
+      conservative_fat_loss: 'Ostrożna redukcja',
+      aggressive_mini_cut: 'Agresywna redukcja',
+      recomp: 'Rekompozycja',
+      lean_gain: 'Budowa masy',
+      health_first: 'Priorytet zdrowia',
+    }
 
-  const EXPERIENCE_LABELS = {
-    beginner: 'Początkujący',
-    novice: 'Nowicjusz',
-    intermediate: 'Średniozaawansowany',
-    advanced: 'Zaawansowany',
-  }
+    const EXPERIENCE_LABELS = {
+      beginner: 'Początkujący',
+      novice: 'Nowicjusz',
+      intermediate: 'Średniozaawansowany',
+      advanced: 'Zaawansowany',
+    }
 
-  const RECOVERY_LABELS = {
-    high: 'Dobra',
-    moderate: 'Umiarkowana',
-    low: 'Niska',
-    very_low: 'Bardzo niska',
-  }
+    const RECOVERY_LABELS = {
+      high: 'Dobra',
+      moderate: 'Umiarkowana',
+      low: 'Niska',
+      very_low: 'Bardzo niska',
+    }
 
-  return {
-    experience_level,
-    experience_label: EXPERIENCE_LABELS[experience_level],
-    recovery_status,
-    recovery_label: RECOVERY_LABELS[recovery_status],
-    volume_tolerance,
-    adherence_risk,
-    readiness_score,
-    strategy_profile,
-    strategy_label: STRATEGY_LABELS[strategy_profile] || strategy_profile,
-    fatigue_risk_flags,
-    training_aggressiveness,
-    nutrition_aggressiveness,
+    return {
+      experience_level,
+      experience_label: EXPERIENCE_LABELS[experience_level],
+      recovery_status,
+      recovery_label: RECOVERY_LABELS[recovery_status],
+      volume_tolerance,
+      adherence_risk,
+      readiness_score,
+      strategy_profile,
+      strategy_label: STRATEGY_LABELS[strategy_profile] || strategy_profile,
+      fatigue_risk_flags,
+      training_aggressiveness,
+      nutrition_aggressiveness,
+    }
+  } catch (e) {
+    console.error('[AssessmentEngine] Error:', e)
+    return null
   }
 }
