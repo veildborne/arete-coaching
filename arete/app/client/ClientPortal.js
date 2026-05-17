@@ -704,7 +704,10 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
             </div>
 
             {/* Historia raportów */}
-            {safeCheckins.length > 0 && (
+            {safeCheckins.length > 0 && (() => {
+              const [showAll, setShowAll] = React.useState(false)
+              const visibleCheckins = showAll ? safeCheckins : safeCheckins.slice(0, 3)
+              return (
               <div className="bg-[rgba(15,20,35,0.85)] backdrop-blur-sm border-2 border-[rgba(212,181,112,0.35)] rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-[10px] text-muted uppercase tracking-widest">Raporty tygodniowe</p>
@@ -712,7 +715,7 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
                     className="text-[10px] text-gold/60 hover:text-gold transition">Nowy →</button>
                 </div>
                 <div className="space-y-3">
-                  {safeCheckins.slice(0, 3).map(ci => (
+                  {visibleCheckins.map(ci => (
                     <div key={ci.id} className="bg-bg-deep rounded-xl p-3 border border-[rgba(212,181,112,0.06)]">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-gold">Tydzień {ci.week_number}</span>
@@ -741,8 +744,17 @@ export default function ClientPortal({ profile, activePlan, recentLogs, question
                     </div>
                   ))}
                 </div>
+                {safeCheckins.length > 3 && (
+                  <button
+                    onClick={() => setShowAll(s => !s)}
+                    className="w-full mt-3 text-[10px] text-gold/50 hover:text-gold transition text-center py-1"
+                  >
+                    {showAll ? '↑ Pokaż mniej' : `↓ Zobacz wszystkie (${safeCheckins.length})`}
+                  </button>
+                )}
               </div>
-            )}
+              )
+            })()}
           </div>
 
           {/* COL 3 — Coach + Żywienie */}
