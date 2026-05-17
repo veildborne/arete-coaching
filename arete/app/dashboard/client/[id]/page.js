@@ -47,11 +47,14 @@ export default async function ClientPage({ params }) {
     .order('created_at', { ascending: false })
     .limit(10)
 
-  const { data: questionnaires } = await admin
+  const { data: questionnaires, error: qError } = await admin
     .from('questionnaires')
     .select('id, submitted_at, created_at, data')
     .eq('client_id', params.id)
-    .order('submitted_at', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (qError) console.error('[page.js] questionnaires error:', qError)
+  console.log('[page.js] questionnaires:', questionnaires?.length, 'clientId:', params.id)
 
   const { data: questionnaire } = await admin
     .from('questionnaires')
