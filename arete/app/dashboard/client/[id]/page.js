@@ -52,7 +52,6 @@ export default async function ClientPage({ params }) {
     .select('id, submitted_at, created_at, data')
     .eq('client_id', params.id)
     .order('submitted_at', { ascending: false })
-  console.log('[page.js] questionnaires fetched:', questionnaires?.length, 'for client:', params.id)
 
   const { data: questionnaire } = await admin
     .from('questionnaires')
@@ -61,7 +60,6 @@ export default async function ClientPage({ params }) {
     .order('submitted_at', { ascending: false })
     .limit(1)
     .maybeSingle()
-  console.log('[page.js] questionnaire single:', questionnaire?.id)
 
   const { data: weightLogs } = await admin
     .from('weight_logs')
