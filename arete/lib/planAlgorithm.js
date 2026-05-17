@@ -9,6 +9,8 @@
 //   Zourdos  — RPE/RIR in practice
 // ============================================================
 
+import { calculateAssessmentScores } from '@/lib/assessmentEngine'
+
 // ─── VOLUME LANDMARKS (weekly sets per muscle) ────────────────────────────────
 const VOLUME_LANDMARKS = {
   chest:          { beginner:{mev:8, mav:14,mrv:18}, intermediate:{mev:10,mav:16,mrv:20}, advanced:{mev:12,mav:18,mrv:22} },
@@ -141,6 +143,22 @@ function buildDecisionParams(q) {
   // Training style — affects exercise count per muscle
   const trainingStyle = q.training_style || 'balanced' // 'simple' | 'balanced' | 'varied'
 
+  // Assessment scores integration
+  let assessmentScores = null
+  try {
+    assessmentScores = calculateAssessmentScores(q)
+  } catch(e) {}
+
+  // Volume tolerance modifier from assessment
+  let volumeToleranceModifier = 1.0
+  if (assessmentScores) {
+    if (assessmentScores.volume_tolerance === 'low') volumeToleranceModifier = 0.85
+    else if (assessmentScores.volume_tolerance === 'high') volumeToleranceModifier = 1.10
+    // Integrate readiness into recovery modifier
+    if (assessmentScores.readiness_score < 40) recoveryModifier = Math.min(recoveryModifier, 0.75)
+    else if (assessmentScores.readiness_score < 55) recoveryModifier = Math.min(recoveryModifier, 0.85)
+  }
+
   return {
     experience, recoveryModifier, priorityMuscles, avoidMuscles,
     equipment, painAreas, painLevel, excludedMovements, cardioFactor,
@@ -155,6 +173,8 @@ function buildDecisionParams(q) {
     trainingStyle,
     preferUnilateral,
     preferUnilateralLegs,
+    volumeToleranceModifier,
+    assessmentScores,
   }
 }
 
@@ -289,7 +309,7 @@ const SPLIT_STRUCTURES = {
 }
 
 // ─── VOLUME CALCULATION ───────────────────────────────────────────────────────
-function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, recoveryModifier, cardioFactor) {
+function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, recoveryModifier, cardioFactor, volumeToleranceModifier = 1.0) {
   const L        = VOLUME_LANDMARKS[muscle]?.[experience] || { mev:8, mav:14, mrv:18 }
   const sizeClass = MUSCLE_SIZE_CLASS[muscle] || 'medium'
   const cap       = SESSION_CAPS[sizeClass]
@@ -307,7 +327,7 @@ function computeSessionSets(muscle, experience, isPriority, isAvoid, frequency, 
     // Neutral — recovery modifier uderza tutaj
     const neutralTarget = Math.round((L.mev + L.mav) / 2)
     // Przy niskiej regeneracji → schodzi do MEV
-    weeklyTarget = Math.max(L.mev, Math.round(neutralTarget * recoveryModifier))
+    weeklyTarget = Math.max(L.mev, Math.round(neutralTarget * recoveryModifier * volumeToleranceModifier))
   }
 
   // Cardio interference — tylko nogi, tylko neutral
@@ -533,7 +553,7 @@ export function generatePlan(questionnaire, exercises) {
 
       const rawSets = computeSessionSets(
         muscle, params.experience, isPriority, isAvoid,
-        freq, params.recoveryModifier, params.cardioFactor
+        freq, params.recoveryModifier, params.cardioFactor, params.volumeToleranceModifier || 1.0
       )
 
       const sets = Math.max(2, isPriority
@@ -725,6 +745,9 @@ export function generatePlan(questionnaire, exercises) {
     weekly_progression: weeklyProgression,
     equipment_used:     [...params.equipment],
     cardio_factor:      params.cardioFactor,
+    readiness_score:    params.assessmentScores?.readiness_score || null,
+    strategy_profile:   params.assessmentScores?.strategy_profile || null,
+    volume_tolerance:   params.assessmentScores?.volume_tolerance || null,
     rationale:          generateRationale(params, splitDef),
     validation_warnings: validation.warnings,
     generated_at:       new Date().toISOString(),
