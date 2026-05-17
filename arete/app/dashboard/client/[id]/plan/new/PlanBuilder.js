@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import { generatePlan } from '@/lib/planAlgorithm'
+import { calculateAssessmentScores } from '@/lib/assessmentEngine'
 
 const MUSCLE_PL = {
   chest: 'Klatka piersiowa', back: 'Plecy', shoulders_lat: 'Barki boczne',
@@ -369,6 +370,10 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
   const [swapTarget, setSwapTarget] = useState(null)
   const [addTarget, setAddTarget] = useState(null)
 
+  const assessmentScores = questionnaire?.data
+    ? (() => { try { return calculateAssessmentScores(questionnaire.data) } catch(e) { return null } })()
+    : null
+
   useEffect(() => {
     if (existingPlan) {
       setPlan(existingPlan.plan_data)
@@ -569,6 +574,55 @@ export default function PlanBuilder({ client, questionnaire, exercises = [], cli
             <div className="text-[13px] text-[rgba(229,115,115,0.7)]">
               Klient nie wypełnił jeszcze ankiety. Plan zostanie wygenerowany z domyślnymi parametrami.
             </div>
+          </div>
+        )}
+
+        {assessmentScores && (
+          <div className="bg-[#1a1a1a] border border-[rgba(212,181,112,0.2)] rounded-xl p-4 mb-4">
+            <p className="text-[10px] text-gold uppercase tracking-widest mb-3">Assessment klienta</p>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
+                <span className="text-[10px] text-muted">Readiness</span>
+                <span className="text-sm font-semibold" style={{
+                  color: assessmentScores.readiness_score >= 75 ? '#47D18C'
+                       : assessmentScores.readiness_score >= 55 ? '#E8A020' : '#EF6B73'
+                }}>{assessmentScores.readiness_score}/100</span>
+              </div>
+              <div className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
+                <span className="text-[10px] text-muted">Regeneracja</span>
+                <span className="text-xs text-warm">{assessmentScores.recovery_label}</span>
+              </div>
+              <div className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
+                <span className="text-[10px] text-muted">Tolerancja obj.</span>
+                <span className="text-xs text-warm">
+                  {assessmentScores.volume_tolerance === 'high' ? 'Wysoka'
+                 : assessmentScores.volume_tolerance === 'moderate' ? 'Umiarkowana' : 'Niska'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
+                <span className="text-[10px] text-muted">Adherencja</span>
+                <span className="text-xs font-medium" style={{
+                  color: assessmentScores.adherence_risk === 'low' ? '#47D18C'
+                       : assessmentScores.adherence_risk === 'moderate' ? '#E8A020' : '#EF6B73'
+                }}>
+                  {assessmentScores.adherence_risk === 'low' ? 'Niskie ryzyko'
+                 : assessmentScores.adherence_risk === 'moderate' ? 'Umiarkowane' : 'Wysokie ryzyko'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-gold/[0.05] border border-gold/15 mb-2">
+              <span className="text-[10px] text-muted uppercase tracking-widest">Strategia</span>
+              <span className="text-xs font-semibold text-gold">{assessmentScores.strategy_label}</span>
+            </div>
+            {assessmentScores.fatigue_risk_flags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {assessmentScores.fatigue_risk_flags.map(flag => (
+                  <span key={flag} className="text-[10px] px-2 py-0.5 rounded-full bg-danger/[0.08] border border-danger/20 text-danger/70">
+                    {flag.replace(/_/g, ' ')}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
