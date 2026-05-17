@@ -7,9 +7,9 @@ import { IconPlan, IconReport, IconAttention, IconKnowledge, IconTraining, IconC
 import NutritionPanel from './NutritionPanel'
 import MealPlanBuilder from './MealPlanBuilder'
 import dynamic from 'next/dynamic'
-const ClientReport = dynamic(() => import('./ClientReport'), { ssr: false })
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { calculateAssessmentScores } from '@/lib/assessmentEngine'
+const ClientReport = dynamic(() => import('./ClientReport'), { ssr: false })
 
 const TIER_COLORS = {
   paideia: { color: '#a07850', bg: 'rgba(160,120,80,0.12)', border: 'rgba(160,120,80,0.3)' },
