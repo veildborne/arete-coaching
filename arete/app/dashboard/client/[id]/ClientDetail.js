@@ -573,6 +573,9 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
   const [expandedIdx, setExpandedIdx] = useState(0)
   const [editingIdx, setEditingIdx] = useState(null)
   const latestData = questionnaires?.[0]?.data || null
+  console.log('[QTab] questionnaires count:', questionnaires?.length)
+  console.log('[QTab] latestData:', JSON.stringify(latestData)?.slice(0, 200))
+  console.log('[QTab] scores:', scores)
   let scores = null
   try {
     scores = latestData && (latestData.cel || latestData.staz)
