@@ -572,7 +572,10 @@ function CheckinCard({ ci, onFeedbackSaved }) {
 function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
   const [expandedIdx, setExpandedIdx] = useState(0)
   const [editingIdx, setEditingIdx] = useState(null)
-  const latestData = questionnaires?.[0]?.data || null
+  const allQuestionnaires = (questionnaires && questionnaires.length > 0)
+    ? questionnaires
+    : questionnaire ? [questionnaire] : []
+  const latestData = allQuestionnaires?.[0]?.data || null
   let scores = null
   try {
     scores = latestData && (latestData.cel || latestData.staz)
@@ -585,7 +588,7 @@ function QuestionnaireTab({ questionnaire, questionnaires, clientId }) {
   const [requested, setRequested] = useState(false)
   const [editForm, setEditForm] = useState({})
 
-  const allQ = questionnaires && questionnaires.length > 0 ? questionnaires : questionnaire ? [questionnaire] : []
+  const allQ = allQuestionnaires
 
   async function requestNewQuestionnaire() {
     setRequesting(true)
