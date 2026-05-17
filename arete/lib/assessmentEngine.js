@@ -51,6 +51,12 @@ export function calculateRecoveryStatus(q) {
   score += motivation - 1
   score += wakeUp - 1
 
+  // Kroki / NEAT
+  const steps = parseInt(q.srednie_kroki) || 5500
+  if (steps >= 10000) score += 2
+  else if (steps >= 7000) score += 1
+  else if (steps < 4000) score -= 1
+
   // Max możliwy score: 3+4+2+4+4+2+4+4 = 27
   const pct = score / 27
 
@@ -195,6 +201,8 @@ export function generateFatigueRiskFlags(q) {
   if (q.pms_hunger_effect === 'high') flags.push('pms_hunger_high')
   if (parseInt(q.hunger_control) <= 2) flags.push('poor_hunger_control')
   if (parseInt(q.weekend_adherence) <= 2) flags.push('weekend_adherence_risk')
+  const steps = parseInt(q.srednie_kroki) || 5500
+  if (steps < 4000) flags.push('low_neat_risk')
 
   return flags
 }
@@ -212,6 +220,8 @@ export function calculateTrainingAggressiveness(readinessScore, volumeTolerance)
 export function calculateNutritionAggressiveness(q, readinessScore) {
   const recovery = calculateRecoveryStatus(q)
   const hungerControl = parseInt(q.hunger_control) || 3
+  const steps = parseInt(q.srednie_kroki) || 5500
+  if (steps < 4000 && readinessScore < 65) return 'conservative'
 
   if (readinessScore >= 75 && recovery === 'high' && hungerControl >= 4) return 'aggressive'
   if (readinessScore >= 55 && hungerControl >= 3) return 'moderate'
