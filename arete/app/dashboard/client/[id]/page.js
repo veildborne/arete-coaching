@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { redirect, notFound } from 'next/navigation'
-import ClientDetail from './ClientDetail'
+import dynamic from 'next/dynamic'
 import { isCoachProfile } from '@/lib/auth-roles'
+
+const ClientDetail = dynamic(() => import('./ClientDetail'), { ssr: false })
 
 export default async function ClientPage({ params }) {
   const supabase = createClient()
