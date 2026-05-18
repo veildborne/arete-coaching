@@ -124,21 +124,23 @@ const cues = atlasExercise.cues; // ← z pliku .js
 
 ---
 
-## SFR Rating — skala 5-9
+## SFR Rating — skala 4-10
 
-**UWAGA:** Skala 5-9 jest produkcyjnym standardem, NIE 1-5 jak w 
-literaturze RP. Powód: istniejące 82 ćwiczenia w bazie używają 5-9,
-a algorytm może mieć hardcoded thresholdy typu `if sfr >= 8`.
+**UWAGA:** Skala 4-10 jest produkcyjnym standardem (7-stopniowa rozdzielczość).
+Powód użycia tej skali: zachowanie zgodności z istniejącymi 82 ćwiczeniami w bazie,
+oraz większa rozdzielczość niż klasyczna 1-5 z literatury RP.
 
 **Mapowanie semantyczne:**
 
 | SFR | Znaczenie |
 |---|---|
-| 9 | Excellent — top-tier dla hipertrofii (cable fly, RDL, lat pulldown) |
-| 8 | Bardzo dobre (chest supported row, machine lateral raise) |
-| 7 | Dobre, sytuacyjne (dumbbell bench, machine chest press) |
-| 6 | Słabsze ale użyteczne (barbell bench press dla hypertrofii) |
-| 5 | Niskie (conventional deadlift jako hypertrophy tool) |
+| 10 | Top-tier, must-include w planie dla docelowej partii |
+| 9 | Excellent — first-choice dla hipertrofii |
+| 8 | Bardzo dobre, dobrze tolerowane przez większość |
+| 7 | Dobre, sytuacyjne (zależy od klienta/sprzętu) |
+| 6 | Słabsze ale użyteczne w specyficznych kontekstach |
+| 5 | Niskie — głównie różnorodność lub specyfika |
+| 4 | Bardzo niskie — rzadko używać |
 
 ---
 

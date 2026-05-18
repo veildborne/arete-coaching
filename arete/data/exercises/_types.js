@@ -67,10 +67,16 @@
  * @property {string} [variant_type] - Wariant w obrębie rodziny (np. "romanian",
  *   "conventional", "sumo" dla family="deadlift"). NULL jeśli single-variant.
  * 
- * @property {number} sfr_rating - Stimulus-to-Fatigue Ratio, skala 5-9.
- *   PRODUKCYJNY STANDARD (nie 1-5!). Zachowane z istniejącej bazy żeby 
- *   nie rozwalić algorytmu który może mieć hardcoded thresholdy.
- *   Mapowanie: 5=słabe, 6=słabe-średnie, 7=dobre, 8=bardzo dobre, 9=excellent.
+ * @property {number} sfr_rating - Stimulus-to-Fatigue Ratio, skala 4-10.
+ *   PRODUKCYJNY STANDARD. Zachowane z istniejącej bazy 82 ćwiczeń.
+ *   Mapowanie semantyczne:
+ *     10 = top-tier, must-include (np. cable lateral raise dla bocznych)
+ *      9 = excellent (np. lat pulldown, RDL, chest supported row)
+ *      8 = bardzo dobre (np. machine chest press, DB shoulder press)
+ *      7 = dobre, sytuacyjne (np. dumbbell bench press, BB curl)
+ *      6 = słabsze ale użyteczne (np. heavy barbell row dla hipertrofii)
+ *      5 = niskie (np. conventional deadlift jako narzędzie hipertrofii)
+ *      4 = bardzo niskie (rzadko używać, kontekstowo)
  * 
  * @property {boolean} stretch_position - Czy ćwiczenie obciąża mięsień w 
  *   pozycji rozciągniętej (lengthened bias). Kluczowy parametr dla hipertrofii

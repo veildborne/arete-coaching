@@ -39,8 +39,8 @@ const VALID_PROGRESSION_TYPES = [
   'tempo_control', 'static_hold',
 ];
 
-const SFR_MIN = 5;
-const SFR_MAX = 9;
+const SFR_MIN = 4;
+const SFR_MAX = 10;
 
 const REQUIRED_FIELDS = [
   'id', 'name', 'name_pl', 'muscle_group', 'primary_muscles',
